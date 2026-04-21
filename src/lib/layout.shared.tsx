@@ -1,7 +1,7 @@
 import { BookOpenText, Braces, MonitorSmartphone, SquareCode } from 'lucide-react';
 import type { BaseLayoutProps, LayoutTab } from 'fumadocs-ui/layouts/shared';
 import { Leap0Brand } from '@/components/leap0-brand';
-import { appName, gitConfig } from './shared';
+import { githubOrgUrl } from './shared';
 
 function BrandTitle({ href = '/', className }: { href?: string; className?: string }) {
   return (
@@ -68,6 +68,6 @@ export function baseOptions(): BaseLayoutProps {
     nav: {
       title: BrandTitle,
     },
-    githubUrl: `https://github.com/${gitConfig.user}/${gitConfig.repo}`,
+    githubUrl: githubOrgUrl,
   };
 }
