@@ -1,0 +1,247 @@
+---
+title: Language Server Protocol
+description: Start and interact with language servers for code intelligence inside a sandbox.
+slug: lsp
+---
+
+import { Tabs, TabItem } from '@/components/mdx-compat';
+import { CodeSnippet } from '@/components/code-snippet';
+export const lspJsStart = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+
+console.log(await sandbox.lsp.start("python", "/home/user/project"))
+await client.close()`;
+
+export const lspJsDidOpen = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+
+await sandbox.lsp.didOpenPath(
+  "python",
+  "/home/user/project",
+  "/home/user/project/main.py",
+  "import os\nos.path.",
+  1,
+)
+
+await client.close()`;
+
+export const lspJsCompletions = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const response = await sandbox.lsp.completionsPath(
+  "python",
+  "/home/user/project",
+  "/home/user/project/main.py",
+  1,
+  8,
+)
+
+const items = response.result ?? []
+items.slice(0, 5).forEach((item) => console.log(item.label))
+await client.close()`;
+
+export const lspJsDocumentSymbols = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const response = await sandbox.lsp.documentSymbolsPath(
+  "python",
+  "/home/user/project",
+  "/home/user/project/main.py",
+)
+
+for (const symbol of response.result ?? []) {
+  console.log(symbol.name, symbol.kind)
+}
+
+await client.close()`;
+
+export const lspJsDidClose = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+
+await sandbox.lsp.didClosePath(
+  "python",
+  "/home/user/project",
+  "/home/user/project/main.py",
+)
+
+await client.close()`;
+
+export const lspJsStop = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+
+await sandbox.lsp.stop("python", "/home/user/project")
+await client.close()`;
+
+
+LSP endpoints let you start language servers inside a sandbox and interact with them for code completions, document symbols, and document lifecycle notifications. Supported languages: **Python** (pyright) and **TypeScript/JavaScript** (typescript-language-server).
+
+## Start a language server
+
+Start the LSP server for a language and project. This spawns the server process and sends the LSP `initialize` handshake automatically.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+print(
+    sandbox.lsp.start(
+        language_id="python",
+        path_to_project="/home/user/project",
+    )
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={lspJsStart} />
+  </TabItem>
+</Tabs>
+
+## Open a document
+
+Notify the language server that a document was opened. This must be called before requesting completions or symbols.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.lsp.did_open_path(
+    language_id="python",
+    path_to_project="/home/user/project",
+    path="/home/user/project/main.py",
+    text="import os\nos.path.",
+    version=1,
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={lspJsDidOpen} />
+  </TabItem>
+</Tabs>
+
+## Get completions
+
+Request code completions at a cursor position.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+response = sandbox.lsp.completions_path(
+    language_id="python",
+    path_to_project="/home/user/project",
+    path="/home/user/project/main.py",
+    line=1,
+    character=8,
+)
+
+items = response.result or []
+for item in items[:5]:
+    print(item["label"])
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={lspJsCompletions} />
+  </TabItem>
+</Tabs>
+
+## Get document symbols
+
+Request all symbols (functions, classes, variables) in a document.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+response = sandbox.lsp.document_symbols_path(
+    language_id="python",
+    path_to_project="/home/user/project",
+    path="/home/user/project/main.py",
+)
+
+for symbol in response.result or []:
+    print(symbol["name"], symbol["kind"])
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={lspJsDocumentSymbols} />
+  </TabItem>
+</Tabs>
+
+## Close a document
+
+Notify the language server that a document was closed.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.lsp.did_close_path(
+    language_id="python",
+    path_to_project="/home/user/project",
+    path="/home/user/project/main.py",
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={lspJsDidClose} />
+  </TabItem>
+</Tabs>
+
+## Stop the language server
+
+Send `shutdown` and `exit` to the language server and terminate the process.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.lsp.stop(
+    language_id="python",
+    path_to_project="/home/user/project",
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={lspJsStop} />
+  </TabItem>
+</Tabs>

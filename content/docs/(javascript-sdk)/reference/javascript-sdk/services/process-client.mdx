@@ -1,0 +1,50 @@
+---
+title: ProcessClient
+description: Auto-generated reference for ProcessClient.
+---
+
+Source: [`src/services/process.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/process.ts)
+
+## Signature
+
+```ts
+ProcessClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Executes one-shot commands inside a sandbox.
+
+#### Throws
+
+- `Leap0Error`: If the process request or response validation fails.
+
+## Methods
+
+### `execute`
+
+```ts
+async execute(sandbox: SandboxRef, params: ExecuteProcessParams, options: RequestOptions = {}): Promise<ProcessResult>
+```
+
+Executes a one-shot command inside the sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Command execution parameters.
+- `params.command`: Command line to execute.
+- `params.cwd`: Optional working directory.
+- `params.timeout`: Optional command timeout in seconds.
+- `params.env`: Optional environment variables applied to the spawned process.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The process exit code and collected stdout/stderr output.
+
+#### Examples
+
+```ts
+const result = await sandbox.process.execute({ command: "node --version" });
+```

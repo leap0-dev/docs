@@ -1,0 +1,20 @@
+{
+  "root": true,
+  "title": "Core",
+  "description": "Guides and product documentation",
+  "icon": "BookOpenText",
+  "pages": [
+    "---Introduction---",
+    "...introduction",
+    "---Agent Tools---",
+    "...agent-tools",
+    "---Human Tools---",
+    "...human-tools",
+    "---System Tools---",
+    "...system-tools",
+    "---Account Management---",
+    "...account-management",
+    "---Status & Roadmap---",
+    "...status-and-roadmap"
+  ]
+}

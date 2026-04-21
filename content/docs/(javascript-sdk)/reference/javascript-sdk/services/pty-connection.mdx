@@ -1,0 +1,58 @@
+---
+title: PtyConnection
+description: Auto-generated reference for PtyConnection.
+---
+
+Source: [`src/services/pty.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/pty.ts)
+
+## Signature
+
+```ts
+PtyConnection(socket: WebSocket)
+```
+
+## Overview
+
+Thin wrapper around an interactive PTY websocket connection.
+
+#### Throws
+
+- `Leap0WebSocketError`: If the websocket errors or closes while receiving data.
+
+## Methods
+
+### `send`
+
+```ts
+send(data: string | ArrayBufferLike | Blob | ArrayBufferView): void
+```
+
+Sends raw data to the PTY websocket.
+
+#### Parameters
+
+- `data`: Raw payload to send.
+
+### `recv`
+
+```ts
+recv(): Promise<Uint8Array>
+```
+
+Waits for the next websocket message.
+
+#### Returns
+
+- The next websocket payload as bytes.
+
+#### Throws
+
+- `Leap0WebSocketError`: If the websocket errors or closes before a message arrives.
+
+### `close`
+
+```ts
+close(): void
+```
+
+Closes the websocket connection.

@@ -1,0 +1,15 @@
+{
+  "root": true,
+  "title": "Python SDK",
+  "description": "Sync and async client reference",
+  "icon": "SquareCode",
+  "pages": [
+    "reference/python-sdk/index",
+    "---Common---",
+    "...reference/python-sdk/common",
+    "---Sync---",
+    "...reference/python-sdk/sync",
+    "---Async---",
+    "...reference/python-sdk/async"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "root": true,
+  "title": "JavaScript SDK",
+  "description": "Core and services reference",
+  "icon": "Braces",
+  "pages": [
+    "reference/javascript-sdk/index",
+    "---Common---",
+    "...reference/javascript-sdk/common",
+    "---Core---",
+    "...reference/javascript-sdk/core",
+    "---Services---",
+    "...reference/javascript-sdk/services"
+  ]
+}

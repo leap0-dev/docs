@@ -1,0 +1,185 @@
+---
+title: Quickstart
+description: Create a sandbox, run a shell command, and delete it.
+slug: /
+---
+
+import { Tabs, TabItem } from '@/components/mdx-compat';
+import { env } from '@/lib/content';
+
+## What is Leap0?
+
+Leap0 is secure infrastructure for running AI-generated code. You start a sandbox from a template, run shell commands, call your running app over HTTP/SSE/WebSocket, interact with files and git, and delete the sandbox when done.
+
+## Create an account
+
+Open <a href={env.LEAP0_APP_URL}>the Leap0 app</a>, create an account (or sign in).
+
+## Create an API key
+
+Generate an API key in the dashboard to authenticate requests to Leap0, then save it securely because it is shown only once and send it in the `authorization` header.
+
+## Install the SDK
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```text
+pip install leap0
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```text
+npm install leap0
+```
+
+  </TabItem>
+</Tabs>
+
+## Code example
+
+Create a sandbox, run a shell command with process.execute, then delete the sandbox. Set `LEAP0_API_KEY` in your environment so the client can authenticate.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+
+try:
+    result = sandbox.process.execute(
+        command="echo Hello from Leap0",
+        cwd="/home/user",
+        timeout=30,
+    )
+    print(result.exit_code)
+    print(result.stdout)
+    print(result.stderr)
+finally:
+    sandbox.delete()
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+let sandbox
+
+try {
+  sandbox = await client.sandboxes.create()
+  const result = await sandbox.process.execute({
+    command: "echo Hello from Leap0",
+    cwd: "/home/user",
+    timeout: 30,
+  })
+  console.log(result.exitCode)
+  console.log(result.stdout)
+  console.log(result.stderr)
+} finally {
+  if (sandbox) await sandbox.delete()
+  await client.close()
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Full lifecycle example
+
+When your template runs an HTTP app, you can invoke it, work with git and files, then delete the sandbox.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+import os
+
+import httpx
+from leap0 import Leap0Client
+
+API_KEY = os.environ["LEAP0_API_KEY"]
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(
+    vcpu=2,
+    memory_mib=2048,
+    timeout_min=30,
+)
+
+try:
+    response = httpx.get(
+        sandbox.invoke_url("/<your-path>"),
+        headers={"authorization": API_KEY},
+    )
+    response.raise_for_status()
+    print(response.text)
+
+    cloned = sandbox.git.clone(
+        url="https://github.com/octocat/Hello-World.git",
+        path="/workspace/repo",
+        branch="main",
+    )
+    print(cloned.output)
+
+    git_status = sandbox.git.status(path="/workspace/repo")
+    print(git_status.output)
+
+    files = sandbox.filesystem.ls(path="/workspace", recursive=False)
+    print(len(files.items))
+finally:
+    sandbox.delete()
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>"
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create({
+  templateName: "<your-template-name>",
+  vcpu: 2,
+  memory: 2048,
+  timeout: 30,
+})
+
+try {
+  // 1. Invoke the sandbox
+  const invoke = await fetch(sandbox.invokeUrl("/<your-path>"), {
+    headers: { authorization: apiKey },
+  })
+  console.log(await invoke.text())
+
+  // 2. Clone a repository
+  const cloned = await sandbox.git.clone({
+    url: "https://github.com/octocat/Hello-World.git",
+    path: "/workspace/repo",
+    branch: "main",
+  })
+  console.log(cloned.output)
+
+  // 3. Check git status
+  const gitStatus = await sandbox.git.status("/workspace/repo")
+  console.log(gitStatus.output)
+
+  // 4. List files in the sandbox
+  const files = await sandbox.filesystem.ls("/workspace")
+  console.log(files.items.length)
+} finally {
+  await sandbox.delete()
+  await client.close()
+}
+```
+
+  </TabItem>
+</Tabs>

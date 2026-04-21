@@ -1,0 +1,4 @@
+{
+  "title": "Agent Tools",
+  "pages": ["code-interpreter", "filesystem", "git", "process", "pty", "lsp", "desktop"]
+}

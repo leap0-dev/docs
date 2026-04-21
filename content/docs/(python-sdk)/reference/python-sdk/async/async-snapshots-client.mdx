@@ -1,0 +1,112 @@
+---
+title: AsyncSnapshotsClient
+description: Auto-generated reference for AsyncSnapshotsClient.
+---
+
+Source: [`leap0/_async/snapshots.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_async/snapshots.py)
+
+## Signature
+
+```python
+AsyncSnapshotsClient(transport: AsyncTransport, *, sandbox_factory: SandboxFactory[Sandbox, AsyncSnapshotSandboxT] | None = None)
+```
+
+## Overview
+
+Create, resume, and delete sandbox snapshots.
+
+    A snapshot captures the full state of a running sandbox so it can be
+    restored later.
+
+    Use snapshots when you want a reusable checkpoint of an initialized
+    sandbox environment.
+    
+Attributes:
+    None.
+
+## Methods
+
+### `list`
+
+```python
+async list(*, query: str = '', sort: str = 'created_at', order_by: str = 'desc', page: int = 1, page_size: int = 20, http_timeout: float | None = None) -> SnapshotListResponse
+```
+
+List snapshots for the authenticated organization.
+
+### `create`
+
+```python
+async create(sandbox: SandboxRef, *, name: str | None = None, http_timeout: float | None = None) -> Snapshot
+```
+
+Create a snapshot of a running sandbox without stopping it.
+
+Args:
+    sandbox: Sandbox ID or object to snapshot.
+    name: Optional snapshot name. Auto-generated if omitted.
+
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Args:
+    sandbox: Sandbox ID or object to pause.
+    name: Optional snapshot name. Auto-generated if omitted.
+
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Returns:
+    Snapshot: Created snapshot metadata.
+
+Returns:
+    Snapshot: Snapshot metadata including ID and optional name.
+
+### `pause`
+
+```python
+async pause(sandbox: SandboxRef, *, name: str | None = None, http_timeout: float | None = None) -> Snapshot
+```
+
+Pause a running sandbox and create a snapshot in one step.
+
+        The sandbox is stopped after the snapshot is taken.
+
+Args:
+    sandbox: Sandbox ID or object.
+    name: Name used by this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    object: Result returned by this operation.
+
+### `resume`
+
+```python
+async resume(*, snapshot_name: str, auto_pause: bool = False, timeout: int | None = None, network_policy: NetworkPolicyDict | None = None, http_timeout: float | None = None) -> AsyncSnapshotSandboxT | Sandbox
+```
+
+Restore a sandbox from a snapshot.
+
+Args:
+    snapshot_name: Name of the snapshot to restore.
+    auto_pause: Automatically pause the restored sandbox on timeout.
+    timeout: Sandbox timeout in seconds.
+    network_policy: Override the network policy from the snapshot.
+
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Args:
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    Sandbox: Newly resumed sandbox.
+
+### `delete`
+
+```python
+async delete(snapshot: SnapshotRef, http_timeout: float | None = None) -> None
+```
+
+Delete a snapshot.
+
+Args:
+    snapshot: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.

@@ -1,0 +1,574 @@
+---
+title: Git
+description: Run git operations inside a sandbox workspace.
+slug: git
+---
+
+import { Tabs, TabItem } from '@/components/mdx-compat';
+import { CodeSnippet } from '@/components/code-snippet';
+export const gitJsClone = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.clone({
+  url: "https://github.com/octocat/Hello-World.git",
+  path: "/workspace/repo",
+  branch: "main",
+  username: "x-access-token",
+  password: "<personal-access-token>",
+})
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsStatus = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.status("/workspace/repo")
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsBranches = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.branches({
+  path: "/workspace/repo",
+  branchType: "all",
+})
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsDiffUnstaged = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.diffUnstaged("/workspace/repo", 5)
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsDiffStaged = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.diffStaged("/workspace/repo", 5)
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsDiff = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.diff("/workspace/repo", "origin/main", 3)
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsReset = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.reset("/workspace/repo")
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsLog = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.log({
+  path: "/workspace/repo",
+  maxCount: 10,
+})
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsShow = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.show("/workspace/repo", "HEAD~1")
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsCreateBranch = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.createBranch({
+  path: "/workspace/repo",
+  name: "feature/docs",
+  checkout: true,
+  baseBranch: "main",
+})
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsCheckoutBranch = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.checkoutBranch({
+  path: "/workspace/repo",
+  branch: "main",
+})
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsDeleteBranch = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.deleteBranch("/workspace/repo", "feature/docs", true)
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsAdd = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.add("/workspace/repo", ["README.md"])
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsCommit = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const commit = await sandbox.git.commit({
+  path: "/workspace/repo",
+  message: "docs: update filesystem guide",
+  author: "Leap0 Bot",
+  email: "bot@example.com",
+})
+
+console.log(commit.sha)
+await client.close()`;
+
+export const gitJsPush = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.push({
+  path: "/workspace/repo",
+  remote: "origin",
+  branch: "main",
+  setUpstream: true,
+})
+
+console.log(result.output)
+await client.close()`;
+
+export const gitJsPull = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const result = await sandbox.git.pull({
+  path: "/workspace/repo",
+  remote: "origin",
+  branch: "main",
+  rebase: true,
+  setUpstream: true,
+})
+
+console.log(result.output)
+await client.close()`;
+
+
+Git endpoints let you clone repositories, inspect diffs and history, manage branches, stage files, commit, push, and pull inside a running sandbox.
+
+## Clone repository
+
+Clone a remote repository into the sandbox.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.clone(
+    url="https://github.com/octocat/Hello-World.git",
+    path="/workspace/repo",
+    branch="main",
+    username="x-access-token",
+    password="<personal-access-token>",
+)
+
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsClone} />
+  </TabItem>
+</Tabs>
+
+## Status
+
+Get the current repository status as raw `git status --porcelain=v2 --branch` output.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.status(path="/workspace/repo")
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsStatus} />
+  </TabItem>
+</Tabs>
+
+## List branches
+
+List branches in the repository as raw `git branch` output.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.branches(path="/workspace/repo", branch_type="all")
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsBranches} />
+  </TabItem>
+</Tabs>
+
+## Diff unstaged
+
+Show working tree changes that are not staged yet.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.diff_unstaged(path="/workspace/repo", context_lines=5)
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsDiffUnstaged} />
+  </TabItem>
+</Tabs>
+
+## Diff staged
+
+Show changes that are already staged for the next commit.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.diff_staged(path="/workspace/repo", context_lines=5)
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsDiffStaged} />
+  </TabItem>
+</Tabs>
+
+## Diff target
+
+Compare the current repository state against a branch, tag, or commit.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.diff(path="/workspace/repo", target="origin/main", context_lines=3)
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsDiff} />
+  </TabItem>
+</Tabs>
+
+## Reset staged changes
+
+Unstage all currently staged changes in the repository.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.reset(path="/workspace/repo")
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsReset} />
+  </TabItem>
+</Tabs>
+
+## Log
+
+Show commit history with optional limits and date filters.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.log(path="/workspace/repo", max_count=10)
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsLog} />
+  </TabItem>
+</Tabs>
+
+## Show revision
+
+Show the full output for a commit, branch, or tag revision.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.show(path="/workspace/repo", revision="HEAD~1")
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsShow} />
+  </TabItem>
+</Tabs>
+
+## Create branch
+
+Create a new branch. Set `checkout` to switch to it immediately, and optionally pass `base_branch` to branch from a specific revision.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.create_branch(
+    path="/workspace/repo",
+    name="feature/docs",
+    checkout=True,
+    base_branch="main",
+)
+
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsCreateBranch} />
+  </TabItem>
+</Tabs>
+
+## Checkout branch
+
+Switch to an existing branch.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.checkout_branch(path="/workspace/repo", branch="main")
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsCheckoutBranch} />
+  </TabItem>
+</Tabs>
+
+## Delete branch
+
+Delete a branch. Set `force` to delete even if unmerged.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.delete_branch(path="/workspace/repo", name="feature/docs", force=True)
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsDeleteBranch} />
+  </TabItem>
+</Tabs>
+
+## Add files
+
+Stage files for the next commit.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.add(path="/workspace/repo", files=["README.md"])
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsAdd} />
+  </TabItem>
+</Tabs>
+
+## Commit
+
+Create a commit from staged changes.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+commit = sandbox.git.commit(
+    path="/workspace/repo",
+    message="docs: update filesystem guide",
+    author="Leap0 Bot",
+    email="bot@example.com",
+)
+
+print(commit.sha)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsCommit} />
+  </TabItem>
+</Tabs>
+
+## Push
+
+Push commits to a remote.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.push(
+    path="/workspace/repo",
+    remote="origin",
+    branch="main",
+    set_upstream=True,
+)
+
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsPush} />
+  </TabItem>
+</Tabs>
+
+## Pull
+
+Pull commits from a remote. Set `rebase` to rebase instead of merge. Set `set_upstream` to set upstream tracking for the branch.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.git.pull(
+    path="/workspace/repo",
+    remote="origin",
+    branch="main",
+    rebase=True,
+    set_upstream=True,
+)
+
+print(result.output)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={gitJsPull} />
+  </TabItem>
+</Tabs>

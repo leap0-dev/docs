@@ -1,0 +1,73 @@
+---
+title: Errors
+description: Exception types exposed by the Leap0 Python SDK.
+---
+
+Source: [`leap0/models/errors.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/models/errors.py)
+
+## Exception Hierarchy
+
+### `Leap0Error`
+
+Extends `Exception`.
+
+Base error for the Leap0 SDK.
+
+Every SDK exception carries optional HTTP context so callers can
+inspect the original response without parsing strings.
+
+Attributes:
+    message: Human-readable error description.
+    status_code: HTTP status code, if the error originated from an API response.
+    headers: Response headers from the API, if available.
+    error_message: Parsed ``message`` field from a JSON response body, if present.
+
+### `Leap0NotFoundError`
+
+Extends `Leap0Error`.
+
+The requested resource does not exist (HTTP 404).
+
+Raised when a sandbox, file, directory, PTY session, LSP server,
+SSH access, or other resource cannot be found.
+
+### `Leap0PermissionError`
+
+Extends `Leap0Error`.
+
+Permission denied for the requested operation (HTTP 403).
+
+Raised when the sandbox filesystem denies access due to
+file permissions or ownership.
+
+### `Leap0ConflictError`
+
+Extends `Leap0Error`.
+
+The operation conflicts with the current resource state (HTTP 409).
+
+Raised when a resource already exists (e.g. ``mkdir`` on an existing
+directory), or when there are too many active sessions.
+
+### `Leap0RateLimitError`
+
+Extends `Leap0Error`.
+
+Rate limit exceeded (HTTP 429).
+
+Callers should back off and retry after the interval indicated
+by the ``Retry-After`` header, if present.
+
+### `Leap0TimeoutError`
+
+Extends `Leap0Error`.
+
+The operation timed out.
+
+Raised when a sandbox operation or API call exceeds its deadline.
+
+### `Leap0WebSocketError`
+
+Extends `Leap0Error`.
+
+A WebSocket connection to a sandbox failed.

@@ -1,0 +1,25 @@
+---
+title: API Reference
+description: Core, metadata service, code interpreter, and desktop OpenAPI reference
+slug: /api
+---
+
+import { env } from '@/lib/content';
+
+The Leap0 API is split across four services. Core endpoints require a Bearer token for authentication. The metadata service uses IMDSv2 inside the guest.
+
+## Core API
+
+Hosted at <code>{env.LEAP0_API_URL}</code>. Manage sandbox lifecycle, object storage mounts, filesystems, git, processes, PTY sessions, LSP, SSH, snapshots, templates, and presigned URLs.
+
+## Metadata Service API
+
+Hosted inside the sandbox at `http://169.254.169.254`. Read Leap0 metadata such as object storage mount state through the in-guest IMDSv2 metadata service.
+
+## Code Interpreter API
+
+Hosted inside the sandbox at <code>{`https://<sandbox_id>.${env.LEAP0_SANDBOX_DOMAIN}`}</code>. Execute Python and TypeScript in persistent REPL sessions, synchronously or via streaming.
+
+## Desktop API
+
+Hosted inside the sandbox at <code>{`https://<sandbox_id>.${env.LEAP0_SANDBOX_DOMAIN}`}</code>. Control a full Linux desktop: take screenshots, send mouse and keyboard input, record the screen, and manage desktop processes.

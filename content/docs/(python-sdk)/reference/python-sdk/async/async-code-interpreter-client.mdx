@@ -1,0 +1,136 @@
+---
+title: AsyncCodeInterpreterClient
+description: Auto-generated reference for AsyncCodeInterpreterClient.
+---
+
+Source: [`leap0/_async/code_interpreter.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_async/code_interpreter.py)
+
+## Signature
+
+```python
+AsyncCodeInterpreterClient(transport: AsyncTransport, *, sandbox_domain: str | None = None)
+```
+
+## Overview
+
+Execute code inside a sandbox with asynchronous APIs.
+
+Attributes:
+    None.
+
+## Methods
+
+### `health`
+
+```python
+async health(sandbox: SandboxRef, http_timeout: float | None = None) -> bool
+```
+
+Check service health.
+
+Args:
+    sandbox: Sandbox ID or object.
+
+Returns:
+    object: Result returned by this operation.
+
+### `create_context`
+
+```python
+async create_context(sandbox: SandboxRef, *, language: str = 'python', cwd: str | None = None, http_timeout: float | None = None) -> CodeContext
+```
+
+Create a new execution context.
+
+Args:
+    sandbox: Sandbox ID or object.
+    language: Language runtime (e.g. ``"python"``, ``"typescript"``).
+    cwd: Working directory (default ``"/home/user"``).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    CodeContext: Newly created persistent execution context.
+
+### `list_contexts`
+
+```python
+async list_contexts(sandbox: SandboxRef, http_timeout: float | None = None) -> list[CodeContext]
+```
+
+List execution contexts.
+
+Args:
+    sandbox: Sandbox ID or object.
+
+Returns:
+    object: Result returned by this operation.
+
+### `get_context`
+
+```python
+async get_context(sandbox: SandboxRef, context_id: str, http_timeout: float | None = None) -> CodeContext
+```
+
+Get a single execution context by ID.
+        
+                Returns:
+                    CodeContext: Matching execution context.
+
+Args:
+    sandbox: Sandbox ID or object.
+    context_id: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+### `delete_context`
+
+```python
+async delete_context(sandbox: SandboxRef, context_id: str, http_timeout: float | None = None) -> None
+```
+
+Delete an execution context.
+
+Args:
+    sandbox: Sandbox ID or object.
+    context_id: Parameter for this operation.
+
+### `execute`
+
+```python
+async execute(sandbox: SandboxRef, *, code: str, language: str = 'python', context_id: str | None = None, env_vars: dict[str, str] | None = None, timeout_ms: int | None = None, http_timeout: float | None = None) -> CodeExecutionResult
+```
+
+Execute code and wait for the full result.
+
+Args:
+    sandbox: Sandbox ID or object.
+    code: Source code to execute.
+    language: Language runtime (default ``"python"``).
+    context_id: Link to an existing context to share state. Auto-generated if omitted.
+    env_vars: Environment variables for the execution.
+    timeout_ms: Execution timeout in milliseconds (default 30000).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    CodeExecutionResult: Structured execution output, errors, and logs.
+
+### `execute_stream`
+
+```python
+async execute_stream(sandbox: SandboxRef, *, code: str, language: str = 'python', context_id: str | None = None, timeout_ms: int | None = None, http_timeout: float | None = None) -> AsyncIterator[StreamEvent]
+```
+
+Execute code and stream output events via SSE.
+        
+                Yields :class:`StreamEvent` objects with type ``"stdout"``,
+                ``"stderr"``, ``"exit"``, or ``"error"``.
+
+Args:
+    sandbox: Sandbox ID or object.
+    code: Source code to execute.
+    language: Language runtime for the operation.
+    context_id: Parameter for this operation.
+    timeout_ms: Execution timeout in milliseconds.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Yields:
+    object: Items yielded by this operation.

@@ -1,0 +1,377 @@
+---
+title: Sandboxes
+description: What a sandbox is, how it behaves, and which endpoints you use to manage and invoke it.
+slug: sandboxes
+---
+
+
+import { TabItem, Tabs } from '@/components/mdx-compat';
+import { docsBaseUrl, env } from '@/lib/content';
+import sandboxLifecycleChart from './sandbox-lifecycle.mmd?raw';
+
+A sandbox is an isolated runtime environment.
+Create one from a template, invoke it over HTTP or WebSocket, then delete it when you are done.
+
+See <a href={`${docsBaseUrl}/templates`}>Templates</a> for how to define the runtime a sandbox is created from.
+See <a href={`${docsBaseUrl}/snapshots`}>Snapshots</a> for how to save a running sandbox and restore it later.
+See <a href={`${docsBaseUrl}/object-storage`}>Object Storage</a> for how to mount S3-compatible buckets into a sandbox.
+
+## Why use sandboxes?
+
+Sandboxes exist for security. They let agents execute arbitrary code, access files, and use the network without compromising your credentials, local files, or host system. This isolation is essential when agents run autonomously.
+
+## Isolation and security
+
+Every sandbox runs in its own Firecracker microVM:
+
+- Firecracker is launched with the Jailer for additional process and filesystem isolation.
+- Sandboxes run on the Linux 6.1 LTS kernel.
+- Each sandbox gets dedicated network boundaries with egress policy enforcement. Control outbound access with `network_policy`.
+
+See <a href={`${docsBaseUrl}/firewall`}>Firewall</a> for egress configuration details.
+
+## Lifecycle
+
+A sandbox can move through seven states:
+
+<Mermaid chart={sandboxLifecycleChart} />
+
+- `snapshotting` means the sandbox VM state and memory are being captured for a snapshot.
+- `paused` means the sandbox has been checkpointed and its compute is no longer running.
+- `unpausing` means Leap0 is restoring a paused sandbox back to `running`.
+
+:::note[Auto-resume]
+Paused sandboxes automatically resume when they receive any request (invoke, filesystem, git, etc.). The caller does not need to explicitly resume the sandbox. Leap0 handles it transparently.
+:::
+
+## Create a sandbox
+
+Set `auto_pause` to `true` if you want Leap0 to pause the sandbox into a snapshot when its timeout is reached.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client, NetworkPolicyMode
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(
+    vcpu=2,
+    memory_mib=2048,
+    timeout_min=30,
+    auto_pause=True,
+    env_vars={
+        "NODE_ENV": "production",
+    },
+    network_policy={
+        "mode": NetworkPolicyMode.CUSTOM,
+        "allow_cidrs": ["1.2.3.4/32"],
+    },
+)
+
+print(sandbox.id, sandbox.state)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client, NetworkPolicyMode } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  timeout: 30,
+  autoPause: true,
+  envVars: {
+    NODE_ENV: "production",
+  },
+  networkPolicy: {
+    mode: NetworkPolicyMode.CUSTOM,
+    allowCidrs: ["1.2.3.4/32"],
+  },
+})
+
+console.log(sandbox.id, sandbox.state)
+await client.close()
+```
+
+  </TabItem>
+</Tabs>
+
+## Get a sandbox
+
+Returns the sandbox status, resource configuration, and current state.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+print(sandbox.id, sandbox.state, sandbox.vcpu, sandbox.memory_mib)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.get("<sandbox_id>")
+
+console.log(sandbox.id, sandbox.state, sandbox.vcpu, sandbox.memory)
+await client.close()
+```
+
+  </TabItem>
+</Tabs>
+
+## Invoke a sandbox
+
+Send any HTTP or WebSocket request directly to the sandbox host. Whatever your app serves inside the sandbox is reachable.
+
+By default, traffic is routed to the port defined by the template image's `PORT` environment variable.
+If your app serves on a different port, append `-<port>` to the sandbox subdomain.
+
+:::note[Port routing]
+Only one port can be reached per request. To target a specific port, append `-<port>` to the sandbox subdomain (e.g. `sbx-abc123-3000`). If no port suffix is set, traffic routes to the port from the template's `PORT` environment variable.
+:::
+
+Examples:
+
+- Default port from image metadata: <code>{`https://sbx-abc123.${env.LEAP0_SANDBOX_DOMAIN}/health`}</code>
+- Explicit port routing: <code>{`https://sbx-abc123-3000.${env.LEAP0_SANDBOX_DOMAIN}/health`}</code>
+
+### HTTP
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+import os
+
+import httpx
+from leap0 import Leap0Client
+
+API_KEY = os.environ["LEAP0_API_KEY"]
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+response = httpx.get(
+    sandbox.invoke_url("/<your-path>"),
+    headers={"authorization": API_KEY},
+)
+
+response.raise_for_status()
+print(response.text)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>"
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.get("<sandbox_id>")
+
+const res = await fetch(sandbox.invokeUrl("/<your-path>"), {
+  headers: { authorization: apiKey },
+})
+
+console.log(await res.text())
+await client.close()
+```
+
+  </TabItem>
+</Tabs>
+
+### Server-Sent Events
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+import os
+
+import httpx
+from leap0 import Leap0Client
+
+API_KEY = os.environ["LEAP0_API_KEY"]
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+with httpx.stream(
+    "GET",
+    sandbox.invoke_url("/<your-path>"),
+    headers={
+        "authorization": API_KEY,
+        "Accept": "text/event-stream",
+    },
+) as response:
+    response.raise_for_status()
+    for line in response.iter_lines():
+        if line:
+            print(line)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>"
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.get("<sandbox_id>")
+
+// EventSource does not support custom headers.
+// Use fetch + ReadableStream to send an Authorization header.
+const res = await fetch(sandbox.invokeUrl("/<your-path>"), {
+  headers: {
+    authorization: apiKey,
+    Accept: "text/event-stream",
+  },
+})
+
+const reader = res.body.getReader()
+const decoder = new TextDecoder()
+let buf = ""
+
+while (true) {
+  const { value, done } = await reader.read()
+  if (done) break
+  buf += decoder.decode(value, { stream: true })
+  const lines = buf.split("\n")
+  buf = lines.pop()
+  for (const line of lines) {
+    if (line.startsWith("data: ")) {
+      console.log(line.slice(6))
+    }
+  }
+}
+
+await client.close()
+```
+
+  </TabItem>
+</Tabs>
+
+### WebSocket
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+import asyncio
+import os
+
+import websockets
+from leap0 import Leap0Client
+
+API_KEY = os.environ["LEAP0_API_KEY"]
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+
+async def connect() -> None:
+    async with websockets.connect(
+        sandbox.websocket_url("/<your-path>"),
+        additional_headers={"authorization": API_KEY},
+    ) as ws:
+        await ws.send("hello")
+        response = await ws.recv()
+        print(response)
+
+asyncio.run(connect())
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>"
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.get("<sandbox_id>")
+
+const ws = new WebSocket(sandbox.websocketUrl("/<your-path>"), {
+  headers: { authorization: apiKey },
+})
+
+ws.on("open", () => ws.send("hello"))
+ws.on("message", (data) => console.log(data.toString()))
+
+await client.close()
+```
+
+  </TabItem>
+</Tabs>
+
+## Pause a sandbox
+
+Pause a running sandbox. The VM state, memory, and disk are captured and uploaded, the sandbox is marked as `paused`, and the VM is terminated.
+The sandbox can later be resumed automatically when it receives a request.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.pause()
+print(sandbox.state)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.get("<sandbox_id>")
+
+await sandbox.pause()
+console.log(sandbox.state)
+await client.close()
+```
+
+  </TabItem>
+</Tabs>
+
+## Delete a sandbox
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.delete()
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+await client.sandboxes.delete("<sandbox_id>")
+await client.close()
+```
+
+  </TabItem>
+</Tabs>

@@ -1,0 +1,172 @@
+---
+title: CodeInterpreterClient
+description: Auto-generated reference for CodeInterpreterClient.
+---
+
+Source: [`src/services/code-interpreter.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/code-interpreter.ts)
+
+## Signature
+
+```ts
+CodeInterpreterClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Talks to the sandbox-hosted code interpreter service.
+
+#### Throws
+
+- `Leap0Error`: If API calls, stream decoding, or response validation fail.
+
+## Methods
+
+### `health`
+
+```ts
+async health(sandbox: SandboxRef, options: RequestOptions = {}): Promise<boolean>
+```
+
+Returns whether the code interpreter service is healthy.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Whether the code interpreter reports a healthy status.
+
+### `createContext`
+
+```ts
+async createContext(sandbox: SandboxRef, language: CodeLanguage = "python" as CodeLanguage, cwd?: string, options: RequestOptions = {}): Promise<CodeContext>
+```
+
+Creates a reusable interpreter context.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `language`: Interpreter language for the context.
+- `cwd`: Optional working directory.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The created interpreter context.
+
+### `listContexts`
+
+```ts
+async listContexts(sandbox: SandboxRef, options: RequestOptions = {}): Promise<CodeContext[]>
+```
+
+Lists active interpreter contexts.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The active interpreter contexts.
+
+### `getContext`
+
+```ts
+async getContext(sandbox: SandboxRef, contextId: string, options: RequestOptions = {}): Promise<CodeContext>
+```
+
+Fetches a single interpreter context by ID.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `contextId`: Interpreter context ID.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The requested interpreter context.
+
+### `deleteContext`
+
+```ts
+async deleteContext(sandbox: SandboxRef, contextId: string, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes an interpreter context by ID.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `contextId`: Interpreter context ID.
+- `options`: Optional request settings such as timeout and query params.
+
+### `execute`
+
+```ts
+async execute(sandbox: SandboxRef, params: { code: string; language?: CodeLanguage; contextId?: string; envVars?: Record<string, string>; timeoutMs?: number; }, options: RequestOptions = {}): Promise<CodeExecutionResult>
+```
+
+Executes code and waits for the final result.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Execution parameters.
+- `params.code`: Source code to execute.
+- `params.language`: Optional interpreter language.
+- `params.contextId`: Optional existing context ID to reuse.
+- `params.envVars`: Optional environment variables for execution.
+- `params.timeoutMs`: Optional execution timeout in milliseconds.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The completed execution result.
+
+#### Examples
+
+```ts
+const result = await sandbox.codeInterpreter.execute({
+  language: "python",
+  code: "print('hello')",
+});
+```
+
+### `executeStream`
+
+```ts
+async executeStream(sandbox: SandboxRef, params: { code: string; language?: CodeLanguage; contextId?: string; timeoutMs?: number; }, options: RequestOptions = {}): AsyncIterable<StreamEvent>
+```
+
+Streams code execution events until the interpreter exits.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Stream execution parameters.
+- `params.code`: Source code to execute.
+- `params.language`: Optional interpreter language.
+- `params.contextId`: Optional existing context ID to reuse.
+- `params.timeoutMs`: Optional execution timeout in milliseconds.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Throws
+
+- `Leap0Error`: If the stream returns malformed events or reports an execution error.
+
+#### Examples
+
+```ts
+for await (const event of sandbox.codeInterpreter.executeStream({
+  language: "python",
+  code: "print('hello')",
+})) {
+  console.log(event);
+}
+```

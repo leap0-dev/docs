@@ -1,0 +1,225 @@
+---
+title: Object Storage
+description: Mount S3-compatible buckets into a sandbox without exposing credentials inside the guest.
+slug: object-storage
+---
+
+import { TabItem, Tabs } from '@/components/mdx-compat';
+import { CodeSnippet } from '@/components/code-snippet';
+import { docsBaseUrl } from '@/lib/content';
+
+export const objectStoragePythonExample = `from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(
+    mounts=[
+        {
+            "type": "object-storage",
+            "bucket": "project-assets",
+            "endpoint": "https://storage.googleapis.com",
+            "mount_path": "/data/assets",
+            "prefix": "docs/",
+            "read_only": True,
+        }
+    ],
+)
+
+print(sandbox.mounts)`;
+
+export const objectStorageTsExample = `import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  mounts: [
+    {
+      type: "object-storage",
+      bucket: "project-assets",
+      endpoint: "https://storage.googleapis.com",
+      mountPath: "/data/assets",
+      prefix: "docs/",
+      readOnly: true,
+    },
+  ],
+});
+
+console.log(sandbox.mounts);
+await client.close();`;
+
+export const addObjectStorageMountPythonExample = `from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+mount = sandbox.add_mount(
+    {
+        "type": "object-storage",
+        "bucket": "project-assets",
+        "endpoint": "https://storage.googleapis.com",
+        "mount_path": "/data/assets",
+        "prefix": "docs/",
+        "read_only": True,
+    }
+)
+
+print(mount.id, mount.bucket, mount.mount_path)`;
+
+export const addObjectStorageMountTsExample = `import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({});
+const mount = await sandbox.addMount({
+  type: "object-storage",
+  bucket: "project-assets",
+  endpoint: "https://storage.googleapis.com",
+  mountPath: "/data/assets",
+  prefix: "docs/",
+  readOnly: true,
+});
+
+console.log(mount.id, mount.bucket, mount.mountPath);
+await client.close();`;
+
+export const updateObjectStorageMountPythonExample = `from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+mount = sandbox.add_mount(
+    {
+        "type": "object-storage",
+        "bucket": "project-assets",
+        "endpoint": "https://storage.googleapis.com",
+        "mount_path": "/data/assets",
+    }
+)
+updated_mount = sandbox.update_mount(
+    mount.id,
+    {
+        "prefix": "docs/",
+        "read_only": False,
+    },
+)
+
+print(updated_mount.id, updated_mount.prefix, updated_mount.read_only)`;
+
+export const updateObjectStorageMountTsExample = `import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({});
+const mount = await sandbox.addMount({
+  type: "object-storage",
+  bucket: "project-assets",
+  endpoint: "https://storage.googleapis.com",
+  mountPath: "/data/assets",
+});
+const updatedMount = await sandbox.updateMount(mount.id, {
+  prefix: "docs/",
+  readOnly: false,
+});
+
+console.log(updatedMount.id, updatedMount.prefix, updatedMount.readOnly);
+await client.close();`;
+
+export const deleteObjectStorageMountPythonExample = `from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+mount = sandbox.add_mount(
+    {
+        "type": "object-storage",
+        "bucket": "project-assets",
+        "endpoint": "https://storage.googleapis.com",
+        "mount_path": "/data/assets",
+    }
+)
+sandbox.delete_mount(mount.id)
+
+print(f"Deleted mount {mount.id}")`;
+
+export const deleteObjectStorageMountTsExample = `import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({});
+const mount = await sandbox.addMount({
+  type: "object-storage",
+  bucket: "project-assets",
+  endpoint: "https://storage.googleapis.com",
+  mountPath: "/data/assets",
+});
+await sandbox.deleteMount(mount.id);
+
+console.log("Deleted mount", mount.id);
+await client.close();`;
+
+Object storage mounts let a sandbox access bucket contents as files.
+Leap0 mounts the bucket inside the sandbox with `s3fs` without exposing the storage credentials in the sandbox.
+
+## Configure a mount
+
+Each mount has four main fields:
+
+- `bucket`: the S3 bucket name.
+- `endpoint`: the base S3-compatible service endpoint URL.
+- `mount_path`: the absolute path inside the sandbox where the bucket appears.
+- `prefix`: optional key prefix inside the bucket.
+
+You can also set `read_only`.
+
+Credentials are optional. Omit `access_key_id` and `secret_access_key` for public buckets.
+
+## Use service endpoints, not bucket-hosted URLs
+
+Pass the base S3-compatible service endpoint directly, not a bucket-hosted URL, for example `https://storage.googleapis.com` instead of `https://project-assets.storage.googleapis.com`.
+
+## Create a sandbox with object storage
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+    <CodeSnippet lang="python" code={objectStoragePythonExample} />
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="ts" code={objectStorageTsExample} />
+  </TabItem>
+</Tabs>
+
+## Add a mount
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+    <CodeSnippet lang="python" code={addObjectStorageMountPythonExample} />
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="ts" code={addObjectStorageMountTsExample} />
+  </TabItem>
+</Tabs>
+
+## Edit a mount
+
+Use the returned mount `id` and pass only the fields you want to change.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+    <CodeSnippet lang="python" code={updateObjectStorageMountPythonExample} />
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="ts" code={updateObjectStorageMountTsExample} />
+  </TabItem>
+</Tabs>
+
+## Delete a mount
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+    <CodeSnippet lang="python" code={deleteObjectStorageMountPythonExample} />
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="ts" code={deleteObjectStorageMountTsExample} />
+  </TabItem>
+</Tabs>
+
+## Behavior and limits
+
+- Mounts can be configured as read-only or read-write.
+- Bucket contents are fetched lazily as the sandbox reads files.
+- Credentials are not returned by the API and are not exposed inside the guest.
+- A sandbox can attach up to 8 object storage mounts.
+
+See <a href={`${docsBaseUrl}/api`}>API Reference</a> for the full request and response schema.

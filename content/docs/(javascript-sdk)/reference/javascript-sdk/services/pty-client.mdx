@@ -1,0 +1,165 @@
+---
+title: PtyClient
+description: Auto-generated reference for PtyClient.
+---
+
+Source: [`src/services/pty.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/pty.ts)
+
+## Signature
+
+```ts
+PtyClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Creates and manages PTY sessions for interactive terminals.
+
+#### Throws
+
+- `Leap0Error`: If API calls or response validation fail.
+
+## Methods
+
+### `list`
+
+```ts
+async list(sandbox: SandboxRef, options: RequestOptions = {}): Promise<PtySession[]>
+```
+
+Lists PTY sessions for a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The PTY sessions in the sandbox.
+
+### `create`
+
+```ts
+async create(sandbox: SandboxRef, params: CreatePtySessionParams = {}, options: RequestOptions = {}): Promise<PtySession>
+```
+
+Creates a PTY session.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: PTY session creation parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The created PTY session.
+
+### `get`
+
+```ts
+async get(sandbox: SandboxRef, sessionId: string, options: RequestOptions = {}): Promise<PtySession>
+```
+
+Fetches a PTY session by ID.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `sessionId`: PTY session identifier.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The requested PTY session.
+
+### `delete`
+
+```ts
+async delete(sandbox: SandboxRef, sessionId: string, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes a PTY session.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `sessionId`: PTY session identifier.
+- `options`: Optional request settings such as timeout and query params.
+
+### `resize`
+
+```ts
+async resize(sandbox: SandboxRef, params: { sessionId: string; cols: number; rows: number }, options: RequestOptions = {}): Promise<PtySession>
+```
+
+Resizes an existing PTY session.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Resize parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The updated PTY session.
+
+### `websocketUrl`
+
+```ts
+websocketUrl(sandbox: SandboxRef, sessionId: string): string
+```
+
+Returns the websocket URL for a PTY session.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `sessionId`: PTY session identifier.
+
+#### Returns
+
+- The PTY websocket URL.
+
+### `websocketHeaders`
+
+```ts
+websocketHeaders(): Record<string, string>
+```
+
+Returns auth headers to use when opening the PTY websocket manually.
+
+#### Returns
+
+- Headers required for PTY websocket authentication.
+
+### `connect`
+
+```ts
+connect(sandbox: SandboxRef, sessionId: string): PtyConnection
+```
+
+Opens a websocket connection for an existing PTY session.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `sessionId`: PTY session identifier.
+
+#### Returns
+
+- The PTY websocket connection wrapper.
+
+#### Throws
+
+- `Leap0WebSocketError`: If subsequent websocket reads fail.
+
+#### Examples
+
+```ts
+const pty = sandbox.pty.connect("shell");
+pty.send("ls\n");
+const output = await pty.recv();
+```

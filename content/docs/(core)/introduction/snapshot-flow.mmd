@@ -1,0 +1,16 @@
+stateDiagram-v2
+  direction LR
+
+  state "Running sandbox" as Running
+  state "Paused sandbox" as Paused
+  state "Snapshot created" as Stored
+  state "Restored sandbox" as Restored
+
+  Running --> Paused: pause into snapshot
+  Running --> Stored: create snapshot
+  Paused --> Restored: restore snapshot
+  Stored --> Restored: restore snapshot
+
+  note right of Stored
+    Source sandbox stays running
+  end note

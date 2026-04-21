@@ -1,0 +1,69 @@
+---
+title: TemplatesClient
+description: Auto-generated reference for TemplatesClient.
+---
+
+Source: [`src/services/templates.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/templates.ts)
+
+## Signature
+
+```ts
+TemplatesClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Uploads and manages reusable container templates.
+
+#### Throws
+
+- `Leap0Error`: If request validation, API calls, or response validation fail.
+
+## Methods
+
+### `create`
+
+```ts
+async create(params: CreateTemplateParams, options: RequestOptions = {}): Promise<TemplateData>
+```
+
+Uploads a new template from a container image URI.
+
+#### Parameters
+
+- `params`: Template creation parameters.
+- `params.name`: Template name to create.
+- `params.uri`: Container image URI to import.
+- `params.credentials`: Optional private registry credentials.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The created template.
+
+### `rename`
+
+```ts
+async rename(template: TemplateRef, params: RenameTemplateParams, options: RequestOptions = {}): Promise<void>
+```
+
+Renames a template.
+
+#### Parameters
+
+- `template`: Template ID or template-like object.
+- `params`: New template name.
+- `options`: Optional request settings such as timeout and query params.
+
+### `delete`
+
+```ts
+async delete(template: TemplateRef, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes a template by ID.
+
+#### Parameters
+
+- `template`: Template ID or template-like object.
+- `options`: Optional request settings such as timeout and query params.

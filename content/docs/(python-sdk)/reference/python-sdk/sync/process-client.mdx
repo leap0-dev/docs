@@ -1,0 +1,54 @@
+---
+title: ProcessClient
+description: Auto-generated reference for ProcessClient.
+---
+
+Source: [`leap0/_sync/process.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_sync/process.py)
+
+## Signature
+
+```python
+ProcessClient(transport: Transport)
+```
+
+## Overview
+
+Execute one-shot shell commands inside a running sandbox.
+
+    Use this client for non-interactive command execution where you want the
+    full result back as a single response.
+    
+Attributes:
+    None.
+
+## Methods
+
+### `execute`
+
+```python
+execute(sandbox: SandboxRef, *, command: str, cwd: str | None = None, env: dict[str, str] | None = None, timeout: int | None = None, http_timeout: int | None = None) -> ProcessResult
+```
+
+Run a shell command and wait for the result.
+
+The command runs inside ``/bin/sh -c``.
+
+Args:
+    sandbox: Sandbox ID or object.
+    command: Shell command to execute.
+    cwd: Working directory.
+    env: Optional environment variables applied to the spawned process.
+    timeout: Timeout in seconds. If omitted, the server-side default is used.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    ProcessResult: Command result including exit code, stdout, and stderr.
+
+Example:
+    ```python
+    result = sandbox.process.execute(
+        command="ls -la /workspace",
+    )
+    print(result.stdout)
+    print(result.stderr)
+    ```

@@ -1,0 +1,229 @@
+---
+title: Pseudo Terminal (PTY)
+description: Create and manage interactive terminal sessions inside a sandbox.
+slug: pty
+---
+
+import { Tabs, TabItem } from '@/components/mdx-compat';
+import { CodeSnippet } from '@/components/code-snippet';
+export const ptyJsCreate = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const session = await sandbox.pty.create({
+  id: "my-terminal",
+  cols: 120,
+  rows: 40,
+  cwd: "/home/user",
+  envs: { TERM: "xterm-256color" },
+})
+
+console.log(session.id, session.cwd, session.cols, session.rows)
+await client.close()`;
+
+export const ptyJsLazyCreate = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const session = await sandbox.pty.create({
+  id: "lazy-terminal",
+  cwd: "/workspace",
+  cols: 120,
+  rows: 40,
+  lazyStart: true,
+})
+
+console.log(session.id, session.lazyStart)
+await client.close()`;
+
+export const ptyJsWebSocket = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const pty = sandbox.pty.connect("my-terminal")
+
+pty.send("ls -la\n")
+const output = await pty.recv()
+console.log(output)
+
+pty.close()
+await client.close()`;
+
+export const ptyJsResize = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const session = await sandbox.pty.resize("my-terminal", 200, 50)
+
+console.log(session.cols, session.rows)
+await client.close()`;
+
+export const ptyJsList = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+const sessions = await sandbox.pty.list()
+
+sessions.forEach((session) => console.log(session.id, session.active))
+await client.close()`;
+
+export const ptyJsDelete = `import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const sandbox = await client.sandboxes.create()
+
+await sandbox.pty.delete("my-terminal")
+await client.close()`;
+
+
+PTY endpoints let you create interactive terminal sessions with a persistent shell process. Connect via WebSocket for real-time bidirectional I/O, similar to SSH or a browser-based terminal.
+
+## Create a PTY session
+
+Create a terminal session with a shell process.
+
+By default, the shell starts when the PTY session is created. If you set `lazy_start: true`, Leap0 creates the PTY session first and waits to start the shell until the first WebSocket connection is opened for that session.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+session = sandbox.pty.create(
+    session_id="my-terminal",
+    cols=120,
+    rows=40,
+    cwd="/home/user",
+    envs={"TERM": "xterm-256color"},
+)
+
+print(session.id, session.cwd, session.cols, session.rows)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={ptyJsCreate} />
+  </TabItem>
+</Tabs>
+
+### Lazy start example
+
+Use `lazy_start: true` when you want to create the PTY session now but wait to start the shell until the first WebSocket connection.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+session = sandbox.pty.create(
+    session_id="lazy-terminal",
+    cwd="/workspace",
+    cols=120,
+    rows=40,
+    lazy_start=True,
+)
+
+print(session.id, session.lazy_start)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={ptyJsLazyCreate} />
+  </TabItem>
+</Tabs>
+
+## Connect via WebSocket
+
+Open a WebSocket connection for interactive terminal I/O. All messages are binary frames containing raw terminal bytes.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+session = sandbox.pty.get("my-terminal")
+connection = sandbox.pty.connect(session.id)
+try:
+    connection.send("ls -la\n")
+    print(connection.recv().decode("utf-8", errors="replace"), end="")
+finally:
+    connection.close()
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={ptyJsWebSocket} />
+  </TabItem>
+</Tabs>
+
+## Resize terminal
+
+Change the terminal dimensions while connected.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+session = sandbox.pty.resize("my-terminal", cols=200, rows=50)
+print(session.cols, session.rows)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={ptyJsResize} />
+  </TabItem>
+</Tabs>
+
+## List PTY sessions
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+for session in sandbox.pty.list():
+    print(session.id, session.active)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={ptyJsList} />
+  </TabItem>
+</Tabs>
+
+## Delete a PTY session
+
+Kill the shell process and remove the session.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.pty.delete("my-terminal")
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    <CodeSnippet lang="js" code={ptyJsDelete} />
+  </TabItem>
+</Tabs>

@@ -1,0 +1,185 @@
+---
+title: Templates
+description: Reusable runtime definitions used to create sandboxes.
+slug: templates
+---
+
+import { Tabs, TabItem } from '@/components/mdx-compat';
+import { docsBaseUrl } from '@/lib/content';
+
+A template defines the container image and startup configuration that sandboxes are created from. Create a template once, then use it to spawn any number of sandboxes.
+
+If your template provides a desktop interface, expose it through the normal sandbox HTTP/WS path, such as noVNC, and use template-local automation APIs for screenshots, input, and recordings.
+
+## System templates
+
+System templates are maintained by Leap0 and available to all accounts. Their names are prefixed with `system/` and cannot be created or modified through the API.
+
+| Template | Description |
+|---|---|
+| `system/code-interpreter:v0.1.0` | Python 3.12 and Bun runtimes with 50+ pre-installed data-science packages. Used with the <a href={`${docsBaseUrl}/code-interpreter`}>Code Interpreter</a> agent tool. |
+| `system/desktop:v0.1.0` | XFCE desktop sandbox with noVNC access, screenshots, input automation, window inspection, and screen recording. Used with the <a href={`${docsBaseUrl}/desktop`}>Computer Use (Desktop)</a> agent tool. |
+
+Use a system template the same way you use your own. Pass its name as `template_name` when creating a sandbox.
+
+## Create a template
+
+Provide a name and a container image URI.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+template = client.templates.create(
+    name="python-fastapi-hello",
+    uri="docker.io/library/python:3.12-slim",
+)
+
+print(template.id)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+const template = await client.templates.create({
+  name: "python-fastapi-hello",
+  uri: "docker.io/library/python:3.12-slim",
+})
+
+console.log(template.id)
+await client.close()
+```
+
+  </TabItem>
+</Tabs>
+
+## Rename a template
+
+Change the display name of a template.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+client.templates.rename("<template_id>", name="python-fastapi-v2")
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+await client.templates.rename("<template_id>", { name: "python-fastapi-v2" })
+await client.close()
+```
+
+  </TabItem>
+</Tabs>
+
+## Delete a template
+
+Permanently remove a template. Existing sandboxes created from the template are not affected.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+client.templates.delete("<template_id>")
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0"
+
+const client = new Leap0Client()
+await client.templates.delete("<template_id>")
+await client.close()
+```
+
+  </TabItem>
+</Tabs>
+
+## Private registries
+
+Templates can pull images from private container registries. Pass a `credentials` object with the authentication details for your registry provider.
+
+<Tabs syncKey="language">
+  <TabItem label="Basic auth">
+
+```json
+{
+  "name": "my-private-image",
+  "uri": "registry.example.com/org/app:latest",
+  "credentials": {
+    "type": "basic",
+    "username": "my-user",
+    "password": "my-password"
+  }
+}
+```
+
+  </TabItem>
+  <TabItem label="AWS ECR">
+
+```json
+{
+  "name": "my-ecr-image",
+  "uri": "123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:latest",
+  "credentials": {
+    "type": "aws",
+    "aws_access_key_id": "AKIAIOSFODNN7EXAMPLE",
+    "aws_secret_access_key": "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+    "aws_region": "us-east-1"
+  }
+}
+```
+
+  </TabItem>
+  <TabItem label="GCP Artifact Registry">
+
+```json
+{
+  "name": "my-gcp-image",
+  "uri": "us-docker.pkg.dev/my-project/my-repo/my-image:latest",
+  "credentials": {
+    "type": "gcp",
+    "gcp_service_account_json": "{ ... }"
+  }
+}
+```
+
+  </TabItem>
+  <TabItem label="Azure ACR">
+
+```json
+{
+  "name": "my-azure-image",
+  "uri": "myregistry.azurecr.io/my-image:latest",
+  "credentials": {
+    "type": "azure",
+    "azure_client_id": "00000000-0000-0000-0000-000000000000",
+    "azure_client_secret": "my-client-secret",
+    "azure_tenant_id": "00000000-0000-0000-0000-000000000000"
+  }
+}
+```
+
+  </TabItem>
+</Tabs>

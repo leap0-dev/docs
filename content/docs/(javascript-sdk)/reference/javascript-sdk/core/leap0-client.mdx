@@ -1,0 +1,41 @@
+---
+title: Leap0Client
+description: Auto-generated reference for Leap0Client.
+---
+
+Source: [`src/client/index.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/client/index.ts)
+
+## Signature
+
+```ts
+Leap0Client(config: Leap0ConfigInput = {})
+```
+
+## Overview
+
+Top-level Leap0 SDK client that exposes all service groups.
+
+#### Throws
+
+- `Leap0Error`: If config validation fails during client construction.
+
+#### Examples
+
+```ts
+const client = new Leap0Client({ apiKey: process.env.LEAP0_API_KEY! });
+const sandbox = await client.sandboxes.create({ templateName: "base" });
+```
+
+## Methods
+
+### `close`
+
+```ts
+async close(): Promise<void>
+```
+
+Closes the underlying transport.
+
+#### Throws
+
+- `Leap0Error`: If shutting down the transport fails.
