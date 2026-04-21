@@ -1,7 +1,7 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { getCookies } from '@tanstack/react-start/server';
-import browserCollections from 'collections/browser';
+import browserCollections from '@/lib/browser-collections';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import {
   DocsBody,

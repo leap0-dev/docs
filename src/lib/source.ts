@@ -1,5 +1,5 @@
 import { InferPageType, loader, multiple } from 'fumadocs-core/source';
-import { docs } from 'collections/server';
+import { docs } from './server-collections';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { openapiPlugin, openapiSource } from 'fumadocs-openapi/server';
 import { docsContentRoute, docsRoute } from './shared';
