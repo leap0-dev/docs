@@ -85,6 +85,24 @@ Pauses a running sandbox.
 
 - The updated sandbox resource.
 
+### `createSnapshot`
+
+```ts
+async createSnapshot(sandbox: SandboxRef, params: CreateSnapshotParams = {}, options: RequestOptions = {}): Promise<SnapshotData>
+```
+
+Creates a snapshot from a running sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Optional snapshot naming parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The created snapshot resource.
+
 ### `get`
 
 ```ts

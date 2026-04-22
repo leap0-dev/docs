@@ -57,6 +57,27 @@ Pauses the sandbox and updates local state.
 
 - `Leap0Error`: If pausing the sandbox fails.
 
+### `createSnapshot`
+
+```ts
+async createSnapshot(params: CreateSnapshotParams = {}, options?: { timeout?: number })
+```
+
+Creates a snapshot from this sandbox.
+
+#### Parameters
+
+- `params`: Optional snapshot naming and lifecycle parameters.
+- `options`: Optional request settings.
+
+#### Returns
+
+- The created snapshot resource.
+
+#### Throws
+
+- `Leap0Error`: If creating the snapshot fails.
+
 ### `delete`
 
 ```ts

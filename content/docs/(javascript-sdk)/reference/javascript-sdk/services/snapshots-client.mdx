@@ -13,7 +13,7 @@ SnapshotsClient(transport: Leap0Transport, sandboxFactory?: (data: SandboxData) 
 
 ## Overview
 
-Creates, restores, and deletes named snapshots.
+Lists, restores, and deletes named snapshots.
 
 #### Throws
 
@@ -38,46 +38,10 @@ Lists snapshots for the authenticated organization.
 
 - Paginated snapshot summaries.
 
-### `create`
+### `restore`
 
 ```ts
-async create(sandbox: SandboxRef, params: CreateSnapshotParams = {}, options: RequestOptions = {}): Promise<SnapshotData>
-```
-
-Creates a snapshot from a running sandbox.
-
-#### Parameters
-
-- `sandbox`: Sandbox ID or sandbox-like object.
-- `params`: Optional snapshot naming parameters.
-- `options`: Optional request settings such as timeout and query params.
-
-#### Returns
-
-- The created snapshot resource.
-
-### `pause`
-
-```ts
-async pause(sandbox: SandboxRef, params: CreateSnapshotParams = {}, options: RequestOptions = {}): Promise<SnapshotData>
-```
-
-Creates a snapshot and terminates the source sandbox.
-
-#### Parameters
-
-- `sandbox`: Sandbox ID or sandbox-like object.
-- `params`: Optional snapshot naming parameters.
-- `options`: Optional request settings such as timeout and query params.
-
-#### Returns
-
-- The created snapshot resource.
-
-### `resume`
-
-```ts
-async resume(params: ResumeSnapshotParams, options: RequestOptions = {}): Promise<T>
+async restore(params: RestoreSnapshotParams, options: RequestOptions = {}): Promise<T>
 ```
 
 Restores a sandbox from a snapshot.

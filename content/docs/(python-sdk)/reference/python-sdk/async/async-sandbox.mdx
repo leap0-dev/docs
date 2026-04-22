@@ -52,6 +52,22 @@ Args:
 Returns:
     AsyncSandbox: This sandbox object with updated metadata.
 
+### `create_snapshot`
+
+```python
+async create_snapshot(*, name: str | None = None, kill_sandbox_after: bool = False, http_timeout: float | None = None) -> Snapshot
+```
+
+Create a snapshot from this sandbox.
+
+Args:
+    name: Optional snapshot name. Auto-generated if omitted.
+    kill_sandbox_after: Terminate the source sandbox after the snapshot is stored.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    Snapshot: Created snapshot metadata.
+
 ### `delete`
 
 ```python

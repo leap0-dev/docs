@@ -79,6 +79,14 @@ Args:
 Returns:
     AsyncSandboxT | SandboxData | SandboxStatus: Updated sandbox object.
 
+### `create_snapshot`
+
+```python
+async create_snapshot(sandbox: SandboxRef, *, name: str | None = None, kill_sandbox_after: bool = False, http_timeout: float | None = None) -> Snapshot
+```
+
+Create a snapshot from a running sandbox.
+
 ### `get`
 
 ```python
