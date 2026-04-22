@@ -1,10 +1,10 @@
+import { cloudflare } from "@cloudflare/vite-plugin";
 import react from "@vitejs/plugin-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "fumadocs-mdx/vite";
-import { nitro } from "nitro/vite";
 
 export default defineConfig({
   envPrefix: ["VITE_", "LEAP0_"],
@@ -15,6 +15,7 @@ export default defineConfig({
     noExternal: ["fumadocs-core", "fumadocs-ui", "fumadocs-openapi", "@fumadocs/base-ui"],
   },
   plugins: [
+    cloudflare({ viteEnvironment: { name: "ssr" } }),
     mdx(await import("./source.config")),
     tailwindcss(),
     tanstackStart({
@@ -23,10 +24,6 @@ export default defineConfig({
       },
     }),
     react(),
-    // please see https://tanstack.com/start/latest/docs/framework/react/guide/hosting#nitro for guides on hosting
-    nitro({
-      preset: "vercel",
-    }),
   ],
   resolve: {
     tsconfigPaths: true,
