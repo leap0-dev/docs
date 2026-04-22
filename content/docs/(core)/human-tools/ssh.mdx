@@ -4,65 +4,64 @@ description: Manage SSH access to sandboxes.
 slug: ssh
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { CodeSnippet } from '@/components/code-snippet';
+import { Tabs, TabItem } from "@/components/mdx-compat";
+import { CodeSnippet } from "@/components/code-snippet";
 
 export const sshJsCreateAccess = [
   'import { Leap0Client } from "leap0"',
-  '',
-  'const client = new Leap0Client()',
-  'const sandbox = await client.sandboxes.create()',
-  '',
-  'const access = await client.ssh.createAccess(sandbox)',
-  '',
+  "",
+  "const client = new Leap0Client()",
+  "const sandbox = await client.sandboxes.create()",
+  "",
+  "const access = await client.ssh.createAccess(sandbox)",
+  "",
   'console.log("SSH username:", access.id)',
-  'console.log(access.sshCommand)',
+  "console.log(access.sshCommand)",
   'console.log("Password:", access.password)',
-  'await client.close()',
-].join('\n');
+  "await client.close()",
+].join("\n");
 
 export const sshJsValidateAccess = [
   'import { Leap0Client } from "leap0"',
-  '',
-  'const client = new Leap0Client()',
-  'const sandbox = await client.sandboxes.create()',
-  'const access = await client.ssh.createAccess(sandbox)',
-  '',
-  'const validation = await client.ssh.validateAccess(',
-  '  sandbox,',
-  '  access.id,',
-  '  access.password',
-  ')',
-  '',
+  "",
+  "const client = new Leap0Client()",
+  "const sandbox = await client.sandboxes.create()",
+  "const access = await client.ssh.createAccess(sandbox)",
+  "",
+  "const validation = await client.ssh.validateAccess(",
+  "  sandbox,",
+  "  access.id,",
+  "  access.password",
+  ")",
+  "",
   'console.log("Valid:", validation.valid)',
   'console.log("Sandbox:", validation.sandboxId)',
-  'await client.close()',
-].join('\n');
+  "await client.close()",
+].join("\n");
 
 export const sshJsRegenerateAccess = [
   'import { Leap0Client } from "leap0"',
-  '',
-  'const client = new Leap0Client()',
-  'const sandbox = await client.sandboxes.create()',
-  'const access = await client.ssh.createAccess(sandbox)',
-  '',
-  'const regenerated = await client.ssh.regenerateAccess(sandbox, access.id)',
-  '',
+  "",
+  "const client = new Leap0Client()",
+  "const sandbox = await client.sandboxes.create()",
+  "const access = await client.ssh.createAccess(sandbox)",
+  "",
+  "const regenerated = await client.ssh.regenerateAccess(sandbox, access.id)",
+  "",
   'console.log("New password:", regenerated.password)',
-  'await client.close()',
-].join('\n');
+  "await client.close()",
+].join("\n");
 
 export const sshJsDeleteAccess = [
   'import { Leap0Client } from "leap0"',
-  '',
-  'const client = new Leap0Client()',
-  'const sandbox = await client.sandboxes.create()',
-  'const access = await client.ssh.createAccess(sandbox)',
-  '',
-  'await client.ssh.deleteAccess(sandbox, access.id)',
-  'await client.close()',
-].join('\n');
-
+  "",
+  "const client = new Leap0Client()",
+  "const sandbox = await client.sandboxes.create()",
+  "const access = await client.ssh.createAccess(sandbox)",
+  "",
+  "await client.ssh.deleteAccess(sandbox, access.id)",
+  "await client.close()",
+].join("\n");
 
 SSH endpoints let you create and manage SSH access credentials for a sandbox. Generate credentials, validate them, regenerate them, or revoke access entirely.
 

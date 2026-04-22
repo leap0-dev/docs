@@ -18,9 +18,9 @@ List, read, write, move, copy, delete, and search files inside a sandbox.
     Text helpers such as :meth:`write_file` and :meth:`read_file` provide the
     most ergonomic default API. Use the ``*_bytes`` variants when you need raw
     binary access or want to avoid text decoding.
-    
+
 Attributes:
-    None.
+None.
 
 ## Methods
 
@@ -39,7 +39,7 @@ List directory entries.
             exclude: Glob patterns to exclude.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `stat`
 
@@ -50,11 +50,11 @@ stat(sandbox: SandboxRef, *, path: str) -> FileInfo
 Get metadata for a single path.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Path used by this operation.
+sandbox: Sandbox ID or object.
+path: Path used by this operation.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `mkdir`
 
@@ -62,14 +62,14 @@ Returns:
 mkdir(sandbox: SandboxRef, *, path: str, recursive: bool = False, permissions: str | None = None, http_timeout: float | None = None) -> None
 ```
 
-Create a directory. Set *recursive* to create parent directories.
+Create a directory. Set _recursive_ to create parent directories.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Directory path to create.
-    recursive: Create parents as needed.
-    permissions: Octal permission string (e.g. ``"755"``).
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+path: Directory path to create.
+recursive: Create parents as needed.
+permissions: Octal permission string (e.g. `"755"`).
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `write_bytes`
 
@@ -80,19 +80,20 @@ write_bytes(sandbox: SandboxRef, *, path: str, content: bytes, permissions: str 
 Write raw bytes to a single file path.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Destination file path.
-    content: Raw file bytes.
-    permissions: Optional octal permission string.
+sandbox: Sandbox ID or object.
+path: Destination file path.
+content: Raw file bytes.
+permissions: Optional octal permission string.
 
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
 Example:
-    ```python
+`python
     sandbox.filesystem.write_bytes(
         path="/workspace/logo.png",
         content=image_bytes,
     )
-    ```
+    `
 
 ### `write_file`
 
@@ -115,29 +116,32 @@ Write text to a single file path.
             sandbox.filesystem.write_file(
                 path="/workspace/app.py",
                 content="print('hello')
+
 ",
-            )
-            ```
+)
+
+````
 
 ### `write_files_bytes`
 
 ```python
 write_files_bytes(sandbox: SandboxRef, *, files: dict[str, bytes], http_timeout: float | None = None) -> None
-```
+````
 
 Write multiple files in a single request.
 
 Args:
-    sandbox: Sandbox ID or object.
-    files: Mapping of file path to raw bytes content.
+sandbox: Sandbox ID or object.
+files: Mapping of file path to raw bytes content.
 
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
 Example:
-    ```python
+`python
     sandbox.filesystem.write_files_bytes(
         files={"/workspace/a.bin": b"a", "/workspace/b.bin": b"b"},
     )
-    ```
+    `
 
 ### `write_files`
 
@@ -148,10 +152,10 @@ write_files(sandbox: SandboxRef, *, files: dict[str, str], encoding: str = 'utf-
 Write multiple text files in a single request.
 
 Args:
-    sandbox: Sandbox ID or object.
-    files: Mapping of file path to text content.
-    encoding: Text encoding used before upload.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+files: Mapping of file path to text content.
+encoding: Text encoding used before upload.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `read_bytes`
 
@@ -162,22 +166,22 @@ read_bytes(sandbox: SandboxRef, *, path: str, offset: int | None = None, limit: 
 Read a single file and return its raw bytes.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Path to the file.
-    offset: Byte offset to start from.
-    limit: Maximum bytes to read.
-    head: Return only the first N lines (mutually exclusive with *tail*).
-    tail: Return only the last N lines (mutually exclusive with *head*).
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+path: Path to the file.
+offset: Byte offset to start from.
+limit: Maximum bytes to read.
+head: Return only the first N lines (mutually exclusive with _tail_).
+tail: Return only the last N lines (mutually exclusive with _head_).
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    bytes: File contents as raw bytes.
+bytes: File contents as raw bytes.
 
 Example:
-    ```python
+`python
     content = sandbox.filesystem.read_bytes(path="/workspace/logo.png")
     print(content)
-    ```
+    `
 
 ### `read_file`
 
@@ -188,17 +192,17 @@ read_file(sandbox: SandboxRef, *, path: str, offset: int | None = None, limit: i
 Read a single file and return its content decoded as text.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Path used by this operation.
-    offset: Parameter for this operation.
-    limit: Parameter for this operation.
-    head: Parameter for this operation.
-    tail: Parameter for this operation.
-    encoding: Parameter for this operation.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+path: Path used by this operation.
+offset: Parameter for this operation.
+limit: Parameter for this operation.
+head: Parameter for this operation.
+tail: Parameter for this operation.
+encoding: Parameter for this operation.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `read_files_bytes`
 
@@ -209,11 +213,11 @@ read_files_bytes(sandbox: SandboxRef, *, paths: list[str], http_timeout: float |
 Read multiple files and return raw bytes keyed by path.
 
 Args:
-    sandbox: Sandbox ID or object.
-    paths: Parameter for this operation.
+sandbox: Sandbox ID or object.
+paths: Parameter for this operation.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `read_files`
 
@@ -227,7 +231,7 @@ Read multiple files and return decoded text keyed by path.
             http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `delete`
 
@@ -238,10 +242,10 @@ delete(sandbox: SandboxRef, *, path: str, recursive: bool = False, http_timeout:
 Delete a file or directory.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Path to delete.
-    recursive: Required when deleting a non-empty directory.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+path: Path to delete.
+recursive: Required when deleting a non-empty directory.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `set_permissions`
 
@@ -263,10 +267,10 @@ glob(sandbox: SandboxRef, *, path: str, pattern: str, exclude: list[str] | None 
 Find file paths matching a glob pattern.
 
 Args:
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    list[str]: Matching file paths.
+list[str]: Matching file paths.
 
 ### `grep`
 
@@ -277,19 +281,19 @@ grep(sandbox: SandboxRef, *, path: str, pattern: str, include: str | None = None
 Search for a text pattern across files in a directory.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Base directory to search from.
-    pattern: Text pattern to search for.
-    include: File pattern filter (e.g. ``"*.py"``).
-    exclude: Glob patterns to exclude.
+sandbox: Sandbox ID or object.
+path: Base directory to search from.
+pattern: Text pattern to search for.
+include: File pattern filter (e.g. `"*.py"`).
+exclude: Glob patterns to exclude.
 
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Args:
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    list[SearchMatch]: Matching lines with file and line metadata.
+list[SearchMatch]: Matching lines with file and line metadata.
 
 ### `edit_file`
 
@@ -303,10 +307,10 @@ Apply one or more find-and-replace edits to a single file.
             EditFileResult: Unified diff and replacement count.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Path used by this operation.
-    edits: Parameter for this operation.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+path: Path used by this operation.
+edits: Parameter for this operation.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `edit_files`
 
@@ -317,10 +321,10 @@ edit_files(sandbox: SandboxRef, *, paths: list[str], find: str, replace: str = '
 Replace text across multiple files at once.
 
 Args:
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    list[EditResult]: Per-file edit results.
+list[EditResult]: Per-file edit results.
 
 ### `move`
 
@@ -331,10 +335,10 @@ move(sandbox: SandboxRef, *, src_path: str, dst_path: str, overwrite: bool = Fal
 Move or rename a file or directory.
 
 Args:
-    sandbox: Sandbox ID or object.
-    src_path: Parameter for this operation.
-    dst_path: Parameter for this operation.
-    overwrite: Parameter for this operation.
+sandbox: Sandbox ID or object.
+src_path: Parameter for this operation.
+dst_path: Parameter for this operation.
+overwrite: Parameter for this operation.
 
 ### `copy`
 
@@ -345,12 +349,12 @@ copy(sandbox: SandboxRef, *, src_path: str, dst_path: str, recursive: bool = Fal
 Copy a file or directory.
 
 Args:
-    sandbox: Sandbox ID or object.
-    src_path: Source path.
-    dst_path: Destination path.
-    recursive: Required when copying a directory.
-    overwrite: Overwrite the destination if it already exists.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+src_path: Source path.
+dst_path: Destination path.
+recursive: Required when copying a directory.
+overwrite: Overwrite the destination if it already exists.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `exists`
 
@@ -361,10 +365,10 @@ exists(sandbox: SandboxRef, *, path: str, http_timeout: float | None = None) -> 
 Check whether a path exists in the sandbox.
 
 Args:
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    bool: ``True`` when the path exists.
+bool: `True` when the path exists.
 
 ### `tree`
 
@@ -375,11 +379,12 @@ tree(sandbox: SandboxRef, *, path: str, max_depth: int | None = None, exclude: l
 Get a recursive directory tree.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Root directory path.
-    max_depth: Maximum traversal depth.
-    exclude: Glob patterns to exclude.
+sandbox: Sandbox ID or object.
+path: Root directory path.
+max_depth: Maximum traversal depth.
+exclude: Glob patterns to exclude.
 
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
 Returns:
-    TreeResult: Recursive directory tree rooted at ``path``.
+TreeResult: Recursive directory tree rooted at `path`.

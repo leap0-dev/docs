@@ -4,8 +4,8 @@ description: Create a sandbox, run a shell command, and delete it.
 slug: /
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { env } from '@/lib/content';
+import { Tabs, TabItem } from "@/components/mdx-compat";
+import { env } from "@/lib/content";
 
 ## What is Leap0?
 
@@ -68,24 +68,24 @@ finally:
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
-let sandbox
+const client = new Leap0Client();
+let sandbox;
 
 try {
-  sandbox = await client.sandboxes.create()
+  sandbox = await client.sandboxes.create();
   const result = await sandbox.process.execute({
     command: "echo Hello from Leap0",
     cwd: "/home/user",
     timeout: 30,
-  })
-  console.log(result.exitCode)
-  console.log(result.stdout)
-  console.log(result.stderr)
+  });
+  console.log(result.exitCode);
+  console.log(result.stdout);
+  console.log(result.stderr);
 } finally {
-  if (sandbox) await sandbox.delete()
-  await client.close()
+  if (sandbox) await sandbox.delete();
+  await client.close();
 }
 ```
 
@@ -142,42 +142,42 @@ finally:
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>"
-const client = new Leap0Client()
+const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>";
+const client = new Leap0Client();
 const sandbox = await client.sandboxes.create({
   templateName: "<your-template-name>",
   vcpu: 2,
   memory: 2048,
   timeout: 30,
-})
+});
 
 try {
   // 1. Invoke the sandbox
   const invoke = await fetch(sandbox.invokeUrl("/<your-path>"), {
     headers: { authorization: apiKey },
-  })
-  console.log(await invoke.text())
+  });
+  console.log(await invoke.text());
 
   // 2. Clone a repository
   const cloned = await sandbox.git.clone({
     url: "https://github.com/octocat/Hello-World.git",
     path: "/workspace/repo",
     branch: "main",
-  })
-  console.log(cloned.output)
+  });
+  console.log(cloned.output);
 
   // 3. Check git status
-  const gitStatus = await sandbox.git.status("/workspace/repo")
-  console.log(gitStatus.output)
+  const gitStatus = await sandbox.git.status("/workspace/repo");
+  console.log(gitStatus.output);
 
   // 4. List files in the sandbox
-  const files = await sandbox.filesystem.ls("/workspace")
-  console.log(files.items.length)
+  const files = await sandbox.filesystem.ls("/workspace");
+  console.log(files.items.length);
 } finally {
-  await sandbox.delete()
-  await client.close()
+  await sandbox.delete();
+  await client.close();
 }
 ```
 

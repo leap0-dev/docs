@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
 type TabPreferencesContextValue = {
   preferences: Record<string, string>;
@@ -15,23 +15,29 @@ export function TabPreferencesProvider({
   children: ReactNode;
 }) {
   const [preferences, setPreferences] = useState(initialPreferences);
+  const setPreference = useCallback((syncKey: string, nextValue: string) => {
+    setPreferences((current) => ({
+      ...current,
+      [syncKey]: nextValue,
+    }));
+  }, []);
 
   const value = useMemo<TabPreferencesContextValue>(
     () => ({
       preferences,
-      setPreference: (syncKey, nextValue) => {
-        setPreferences((current) => ({
-          ...current,
-          [syncKey]: nextValue,
-        }));
-      },
+      setPreference,
     }),
-    [preferences],
+    [preferences, setPreference],
   );
 
   return <TabPreferencesContext.Provider value={value}>{children}</TabPreferencesContext.Provider>;
 }
 
 export function useTabPreferences() {
-  return useContext(TabPreferencesContext);
+  const context = useContext(TabPreferencesContext);
+  if (!context) {
+    throw new Error("useTabPreferences must be used within a TabPreferencesProvider");
+  }
+
+  return context;
 }

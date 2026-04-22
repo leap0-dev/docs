@@ -1,4 +1,4 @@
-export const TAB_PREFERENCE_COOKIE_PREFIX = 'leap0_tab_';
+export const TAB_PREFERENCE_COOKIE_PREFIX = "leap0_tab_";
 
 export function getTabPreferenceCookieName(syncKey: string) {
   return `${TAB_PREFERENCE_COOKIE_PREFIX}${encodeURIComponent(syncKey)}`;

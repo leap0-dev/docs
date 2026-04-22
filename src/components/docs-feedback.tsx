@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { ThumbsDown, ThumbsUp } from 'lucide-react';
-import { getPostHog } from '@/lib/posthog';
+import { useState } from "react";
+import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { getPostHog } from "@/lib/posthog";
 
-type FeedbackValue = 'up' | 'down';
+type FeedbackValue = "up" | "down";
 
 export function DocsFeedback({ pageTitle, pageUrl }: { pageTitle: string; pageUrl: string }) {
   const [selection, setSelection] = useState<FeedbackValue | null>(null);
@@ -11,7 +11,7 @@ export function DocsFeedback({ pageTitle, pageUrl }: { pageTitle: string; pageUr
     setSelection(value);
 
     const client = getPostHog();
-    client?.capture('docs_feedback_submitted', {
+    client?.capture("docs_feedback_submitted", {
       page_title: pageTitle,
       page_url: pageUrl,
       value,
@@ -24,8 +24,8 @@ export function DocsFeedback({ pageTitle, pageUrl }: { pageTitle: string; pageUr
       <div className="flex items-center gap-2">
         <button
           type="button"
-          onClick={() => submit('up')}
-          aria-pressed={selection === 'up'}
+          onClick={() => submit("up")}
+          aria-pressed={selection === "up"}
           className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground aria-pressed:bg-fd-primary aria-pressed:text-fd-primary-foreground"
         >
           <ThumbsUp className="size-4" />
@@ -33,8 +33,8 @@ export function DocsFeedback({ pageTitle, pageUrl }: { pageTitle: string; pageUr
         </button>
         <button
           type="button"
-          onClick={() => submit('down')}
-          aria-pressed={selection === 'down'}
+          onClick={() => submit("down")}
+          aria-pressed={selection === "down"}
           className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground aria-pressed:bg-fd-primary aria-pressed:text-fd-primary-foreground"
         >
           <ThumbsDown className="size-4" />

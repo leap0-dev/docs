@@ -4,8 +4,8 @@ description: Reusable runtime definitions used to create sandboxes.
 slug: templates
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { docsBaseUrl } from '@/lib/content';
+import { Tabs, TabItem } from "@/components/mdx-compat";
+import { docsBaseUrl } from "@/lib/content";
 
 A template defines the container image and startup configuration that sandboxes are created from. Create a template once, then use it to spawn any number of sandboxes.
 
@@ -15,11 +15,11 @@ If your template provides a desktop interface, expose it through the normal sand
 
 System templates are maintained by Leap0 and available to all accounts. Their names are prefixed with `system/` and cannot be created or modified through the API.
 
-| Template | Description |
-|---|---|
-| `system/debian:bookworm` | Debian 12 (Bookworm) base image for general-purpose Linux sandboxes. |
-| `system/code-interpreter:v0.1.0` | Python 3.12 and Bun runtimes with 50+ pre-installed data-science packages. Used with the <a href={`${docsBaseUrl}/code-interpreter`}>Code Interpreter</a> agent tool. |
-| `system/desktop:v0.1.0` | XFCE desktop sandbox with noVNC access, screenshots, input automation, window inspection, and screen recording. Used with the <a href={`${docsBaseUrl}/desktop`}>Computer Use (Desktop)</a> agent tool. |
+| Template                         | Description                                                                                                                                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `system/debian:bookworm`         | Debian 12 (Bookworm) base image for general-purpose Linux sandboxes.                                                                                                                                    |
+| `system/code-interpreter:v0.1.0` | Python 3.12 and Bun runtimes with 50+ pre-installed data-science packages. Used with the <a href={`${docsBaseUrl}/code-interpreter`}>Code Interpreter</a> agent tool.                                   |
+| `system/desktop:v0.1.0`          | XFCE desktop sandbox with noVNC access, screenshots, input automation, window inspection, and screen recording. Used with the <a href={`${docsBaseUrl}/desktop`}>Computer Use (Desktop)</a> agent tool. |
 
 Use a system template the same way you use your own. Pass its name as `template_name` when creating a sandbox.
 
@@ -46,16 +46,16 @@ print(template.id)
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
+const client = new Leap0Client();
 const template = await client.templates.create({
   name: "python-fastapi-hello",
   uri: "docker.io/library/python:3.12-slim",
-})
+});
 
-console.log(template.id)
-await client.close()
+console.log(template.id);
+await client.close();
 ```
 
   </TabItem>
@@ -79,11 +79,11 @@ client.templates.rename("<template_id>", name="python-fastapi-v2")
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
-await client.templates.rename("<template_id>", { name: "python-fastapi-v2" })
-await client.close()
+const client = new Leap0Client();
+await client.templates.rename("<template_id>", { name: "python-fastapi-v2" });
+await client.close();
 ```
 
   </TabItem>
@@ -107,11 +107,11 @@ client.templates.delete("<template_id>")
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
-await client.templates.delete("<template_id>")
-await client.close()
+const client = new Leap0Client();
+await client.templates.delete("<template_id>");
+await client.close();
 ```
 
   </TabItem>

@@ -4,24 +4,24 @@ description: Mount S3-compatible buckets into a sandbox without exposing credent
 slug: object-storage
 ---
 
-import { TabItem, Tabs } from '@/components/mdx-compat';
-import { CodeSnippet } from '@/components/code-snippet';
-import { docsBaseUrl } from '@/lib/content';
+import { TabItem, Tabs } from "@/components/mdx-compat";
+import { CodeSnippet } from "@/components/code-snippet";
+import { docsBaseUrl } from "@/lib/content";
 
 export const objectStoragePythonExample = `from leap0 import Leap0Client
 
 client = Leap0Client()
 sandbox = client.sandboxes.create(
-    mounts=[
-        {
-            "type": "object-storage",
-            "bucket": "project-assets",
-            "endpoint": "https://storage.googleapis.com",
-            "mount_path": "/data/assets",
-            "prefix": "docs/",
-            "read_only": True,
-        }
-    ],
+mounts=[
+{
+"type": "object-storage",
+"bucket": "project-assets",
+"endpoint": "https://storage.googleapis.com",
+"mount_path": "/data/assets",
+"prefix": "docs/",
+"read_only": True,
+}
+],
 )
 
 print(sandbox.mounts)`;
@@ -30,16 +30,16 @@ export const objectStorageTsExample = `import { Leap0Client } from "leap0";
 
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create({
-  mounts: [
-    {
-      type: "object-storage",
-      bucket: "project-assets",
-      endpoint: "https://storage.googleapis.com",
-      mountPath: "/data/assets",
-      prefix: "docs/",
-      readOnly: true,
-    },
-  ],
+mounts: [
+{
+type: "object-storage",
+bucket: "project-assets",
+endpoint: "https://storage.googleapis.com",
+mountPath: "/data/assets",
+prefix: "docs/",
+readOnly: true,
+},
+],
 });
 
 console.log(sandbox.mounts);
@@ -50,14 +50,14 @@ export const addObjectStorageMountPythonExample = `from leap0 import Leap0Client
 client = Leap0Client()
 sandbox = client.sandboxes.create()
 mount = sandbox.add_mount(
-    {
-        "type": "object-storage",
-        "bucket": "project-assets",
-        "endpoint": "https://storage.googleapis.com",
-        "mount_path": "/data/assets",
-        "prefix": "docs/",
-        "read_only": True,
-    }
+{
+"type": "object-storage",
+"bucket": "project-assets",
+"endpoint": "https://storage.googleapis.com",
+"mount_path": "/data/assets",
+"prefix": "docs/",
+"read_only": True,
+}
 )
 
 print(mount.id, mount.bucket, mount.mount_path)`;
@@ -67,12 +67,12 @@ export const addObjectStorageMountTsExample = `import { Leap0Client } from "leap
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create({});
 const mount = await sandbox.addMount({
-  type: "object-storage",
-  bucket: "project-assets",
-  endpoint: "https://storage.googleapis.com",
-  mountPath: "/data/assets",
-  prefix: "docs/",
-  readOnly: true,
+type: "object-storage",
+bucket: "project-assets",
+endpoint: "https://storage.googleapis.com",
+mountPath: "/data/assets",
+prefix: "docs/",
+readOnly: true,
 });
 
 console.log(mount.id, mount.bucket, mount.mountPath);
@@ -83,19 +83,19 @@ export const updateObjectStorageMountPythonExample = `from leap0 import Leap0Cli
 client = Leap0Client()
 sandbox = client.sandboxes.create()
 mount = sandbox.add_mount(
-    {
-        "type": "object-storage",
-        "bucket": "project-assets",
-        "endpoint": "https://storage.googleapis.com",
-        "mount_path": "/data/assets",
-    }
+{
+"type": "object-storage",
+"bucket": "project-assets",
+"endpoint": "https://storage.googleapis.com",
+"mount_path": "/data/assets",
+}
 )
 updated_mount = sandbox.update_mount(
-    mount.id,
-    {
-        "prefix": "docs/",
-        "read_only": False,
-    },
+mount.id,
+{
+"prefix": "docs/",
+"read_only": False,
+},
 )
 
 print(updated_mount.id, updated_mount.prefix, updated_mount.read_only)`;
@@ -105,14 +105,14 @@ export const updateObjectStorageMountTsExample = `import { Leap0Client } from "l
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create({});
 const mount = await sandbox.addMount({
-  type: "object-storage",
-  bucket: "project-assets",
-  endpoint: "https://storage.googleapis.com",
-  mountPath: "/data/assets",
+type: "object-storage",
+bucket: "project-assets",
+endpoint: "https://storage.googleapis.com",
+mountPath: "/data/assets",
 });
 const updatedMount = await sandbox.updateMount(mount.id, {
-  prefix: "docs/",
-  readOnly: false,
+prefix: "docs/",
+readOnly: false,
 });
 
 console.log(updatedMount.id, updatedMount.prefix, updatedMount.readOnly);
@@ -123,12 +123,12 @@ export const deleteObjectStorageMountPythonExample = `from leap0 import Leap0Cli
 client = Leap0Client()
 sandbox = client.sandboxes.create()
 mount = sandbox.add_mount(
-    {
-        "type": "object-storage",
-        "bucket": "project-assets",
-        "endpoint": "https://storage.googleapis.com",
-        "mount_path": "/data/assets",
-    }
+{
+"type": "object-storage",
+"bucket": "project-assets",
+"endpoint": "https://storage.googleapis.com",
+"mount_path": "/data/assets",
+}
 )
 sandbox.delete_mount(mount.id)
 
@@ -139,10 +139,10 @@ export const deleteObjectStorageMountTsExample = `import { Leap0Client } from "l
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create({});
 const mount = await sandbox.addMount({
-  type: "object-storage",
-  bucket: "project-assets",
-  endpoint: "https://storage.googleapis.com",
-  mountPath: "/data/assets",
+type: "object-storage",
+bucket: "project-assets",
+endpoint: "https://storage.googleapis.com",
+mountPath: "/data/assets",
 });
 await sandbox.deleteMount(mount.id);
 

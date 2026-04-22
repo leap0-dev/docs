@@ -1,8 +1,8 @@
-import { Children, isValidElement, useMemo, type ReactNode } from 'react';
-import { TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs';
-import { Tabs as UITabs } from 'fumadocs-ui/components/ui/tabs';
-import { getTabPreferenceCookieName } from '@/lib/tab-preferences';
-import { useTabPreferences } from './tab-preferences-provider';
+import { Children, isValidElement, useMemo, type ReactNode } from "react";
+import { TabsContent, TabsList, TabsTrigger } from "fumadocs-ui/components/tabs";
+import { Tabs as UITabs } from "fumadocs-ui/components/ui/tabs";
+import { getTabPreferenceCookieName } from "@/lib/tab-preferences";
+import { useTabPreferences } from "./tab-preferences-provider";
 
 type LegacyTabsProps = {
   syncKey?: string;
@@ -23,10 +23,11 @@ export function Tabs({ syncKey, children }: LegacyTabsProps) {
   const labels = useMemo(() => items.map((item) => item.props.label), [items]);
   const tabPreferences = useTabPreferences();
 
-  if (syncKey && tabPreferences) {
-    const value = tabPreferences.preferences[syncKey] && labels.includes(tabPreferences.preferences[syncKey])
-      ? tabPreferences.preferences[syncKey]
-      : labels[0];
+  if (syncKey) {
+    const value =
+      tabPreferences.preferences[syncKey] && labels.includes(tabPreferences.preferences[syncKey])
+        ? tabPreferences.preferences[syncKey]
+        : labels[0];
 
     return (
       <UITabs
@@ -54,7 +55,10 @@ export function Tabs({ syncKey, children }: LegacyTabsProps) {
   }
 
   return (
-    <UITabs defaultValue={labels[0]} className="flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4">
+    <UITabs
+      defaultValue={labels[0]}
+      className="flex flex-col overflow-hidden rounded-xl border bg-fd-secondary my-4"
+    >
       <TabsList>
         {labels.map((label) => (
           <TabsTrigger key={label} value={label}>

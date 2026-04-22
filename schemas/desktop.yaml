@@ -914,7 +914,7 @@ components:
           maxItems: 10
           items:
             type: string
-          description: "Keys to press simultaneously (e.g. `[\"ctrl\", \"l\"]`)."
+          description: 'Keys to press simultaneously (e.g. `["ctrl", "l"]`).'
 
     # ── Recording ──
     RecordingStatus:

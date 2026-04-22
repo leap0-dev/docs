@@ -1,8 +1,8 @@
-import { createShikiFactory } from 'fumadocs-core/highlight/shiki';
+import { createShikiFactory } from "fumadocs-core/highlight/shiki";
 
 const factory = createShikiFactory({
   async init(options) {
-    const { createHighlighter, createJavaScriptRegexEngine } = await import('shiki');
+    const { createHighlighter, createJavaScriptRegexEngine } = await import("shiki");
 
     return createHighlighter({
       langs: [],

@@ -55,7 +55,7 @@ function normalizeComment(comment) {
   if (typeof comment === "string") return comment.trim();
   if (Array.isArray(comment)) {
     return comment
-      .map((part) => (typeof part === "string" ? part : part.text ?? ""))
+      .map((part) => (typeof part === "string" ? part : (part.text ?? "")))
       .join("")
       .trim();
   }
@@ -117,7 +117,8 @@ function formatParameter(param, sourceFile) {
 
 function formatMethodSignature(node, sourceFile) {
   const isAsync = node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword);
-  const name = node.kind === ts.SyntaxKind.Constructor ? "constructor" : node.name.getText(sourceFile);
+  const name =
+    node.kind === ts.SyntaxKind.Constructor ? "constructor" : node.name.getText(sourceFile);
   const typeParams = formatTypeParameters(node.typeParameters, sourceFile);
   const params = node.parameters.map((param) => formatParameter(param, sourceFile)).join(", ");
   const returnType = node.type ? `: ${node.type.getText(sourceFile)}` : "";
@@ -127,12 +128,20 @@ function formatMethodSignature(node, sourceFile) {
 
 function parseConstants(filePath) {
   const source = readFileSync(filePath, "utf-8");
-  const sourceFile = ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
   const constants = [];
 
   for (const node of sourceFile.statements) {
     if (!ts.isVariableStatement(node)) continue;
-    const isExported = node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword);
+    const isExported = node.modifiers?.some(
+      (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword,
+    );
     if (!isExported) continue;
 
     for (const declaration of node.declarationList.declarations) {
@@ -149,7 +158,13 @@ function parseConstants(filePath) {
 
 function parseClasses(filePath, classNames) {
   const source = readFileSync(filePath, "utf-8");
-  const sourceFile = ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
   const wanted = new Set(classNames);
   const classes = new Map();
 
@@ -157,12 +172,23 @@ function parseClasses(filePath, classNames) {
     if (!ts.isClassDeclaration(node) || !node.name || !wanted.has(node.name.text)) continue;
 
     const { description, tags } = getJsDocParts(node);
-    const constructor = node.members.find((member) => ts.isConstructorDeclaration(member) && !member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.PrivateKeyword));
+    const constructor = node.members.find(
+      (member) =>
+        ts.isConstructorDeclaration(member) &&
+        !member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.PrivateKeyword),
+    );
     const methods = [];
 
     for (const member of node.members) {
       if (!ts.isMethodDeclaration(member) || !member.name) continue;
-      if (member.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.PrivateKeyword || modifier.kind === ts.SyntaxKind.ProtectedKeyword)) continue;
+      if (
+        member.modifiers?.some(
+          (modifier) =>
+            modifier.kind === ts.SyntaxKind.PrivateKeyword ||
+            modifier.kind === ts.SyntaxKind.ProtectedKeyword,
+        )
+      )
+        continue;
       const methodDoc = getJsDocParts(member);
       methods.push({
         name: member.name.getText(sourceFile),
@@ -175,8 +201,13 @@ function parseClasses(filePath, classNames) {
     classes.set(node.name.text, {
       description,
       tags,
-      constructorSignature: constructor ? formatMethodSignature(constructor, sourceFile).replace(/^constructor/, node.name.text) : "",
-      extendsName: node.heritageClauses?.find((clause) => clause.token === ts.SyntaxKind.ExtendsKeyword)?.types?.[0]?.getText(sourceFile) ?? "",
+      constructorSignature: constructor
+        ? formatMethodSignature(constructor, sourceFile).replace(/^constructor/, node.name.text)
+        : "",
+      extendsName:
+        node.heritageClauses
+          ?.find((clause) => clause.token === ts.SyntaxKind.ExtendsKeyword)
+          ?.types?.[0]?.getText(sourceFile) ?? "",
       methods,
     });
   }

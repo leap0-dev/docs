@@ -11,11 +11,11 @@ export const gitJsClone = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const result = await sandbox.git.clone({
-  url: "https://github.com/octocat/Hello-World.git",
-  path: "/workspace/repo",
-  branch: "main",
-  username: "x-access-token",
-  password: "<personal-access-token>",
+url: "https://github.com/octocat/Hello-World.git",
+path: "/workspace/repo",
+branch: "main",
+username: "x-access-token",
+password: "<personal-access-token>",
 })
 
 console.log(result.output)
@@ -35,8 +35,8 @@ export const gitJsBranches = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const result = await sandbox.git.branches({
-  path: "/workspace/repo",
-  branchType: "all",
+path: "/workspace/repo",
+branchType: "all",
 })
 
 console.log(result.output)
@@ -83,8 +83,8 @@ export const gitJsLog = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const result = await sandbox.git.log({
-  path: "/workspace/repo",
-  maxCount: 10,
+path: "/workspace/repo",
+maxCount: 10,
 })
 
 console.log(result.output)
@@ -104,10 +104,10 @@ export const gitJsCreateBranch = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const result = await sandbox.git.createBranch({
-  path: "/workspace/repo",
-  name: "feature/docs",
-  checkout: true,
-  baseBranch: "main",
+path: "/workspace/repo",
+name: "feature/docs",
+checkout: true,
+baseBranch: "main",
 })
 
 console.log(result.output)
@@ -118,8 +118,8 @@ export const gitJsCheckoutBranch = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const result = await sandbox.git.checkoutBranch({
-  path: "/workspace/repo",
-  branch: "main",
+path: "/workspace/repo",
+branch: "main",
 })
 
 console.log(result.output)
@@ -148,10 +148,10 @@ export const gitJsCommit = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const commit = await sandbox.git.commit({
-  path: "/workspace/repo",
-  message: "docs: update filesystem guide",
-  author: "Leap0 Bot",
-  email: "bot@example.com",
+path: "/workspace/repo",
+message: "docs: update filesystem guide",
+author: "Leap0 Bot",
+email: "bot@example.com",
 })
 
 console.log(commit.sha)
@@ -162,10 +162,10 @@ export const gitJsPush = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const result = await sandbox.git.push({
-  path: "/workspace/repo",
-  remote: "origin",
-  branch: "main",
-  setUpstream: true,
+path: "/workspace/repo",
+remote: "origin",
+branch: "main",
+setUpstream: true,
 })
 
 console.log(result.output)
@@ -176,16 +176,15 @@ export const gitJsPull = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const result = await sandbox.git.pull({
-  path: "/workspace/repo",
-  remote: "origin",
-  branch: "main",
-  rebase: true,
-  setUpstream: true,
+path: "/workspace/repo",
+remote: "origin",
+branch: "main",
+rebase: true,
+setUpstream: true,
 })
 
 console.log(result.output)
 await client.close()`;
-
 
 Git endpoints let you clone repositories, inspect diffs and history, manage branches, stage files, commit, push, and pull inside a running sandbox.
 

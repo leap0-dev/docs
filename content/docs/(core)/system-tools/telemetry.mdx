@@ -4,45 +4,44 @@ description: Collect metrics, logs, and traces from sandboxes using OpenTelemetr
 slug: telemetry
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { CodeSnippet } from '@/components/code-snippet';
+import { Tabs, TabItem } from "@/components/mdx-compat";
+import { CodeSnippet } from "@/components/code-snippet";
 
 export const telemetryJsSdkOtelExample = [
   'import { Leap0Client } from "leap0"',
-  '',
+  "",
   'process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "https://otel.example.com"',
-'process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123"',
-'',
-'const client = new Leap0Client({ sdkOtelEnabled: true })',
-'const sandbox = await client.sandboxes.create({',
-  '  vcpu: 2,',
-  '  memory: 2048,',
-  '  timeout: 30,',
-  '  otelExport: true,',
-  '})',
-  '',
-  'console.log(sandbox.id)',
-  'await client.close()',
-].join('\n');
+  'process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123"',
+  "",
+  "const client = new Leap0Client({ sdkOtelEnabled: true })",
+  "const sandbox = await client.sandboxes.create({",
+  "  vcpu: 2,",
+  "  memory: 2048,",
+  "  timeout: 30,",
+  "  otelExport: true,",
+  "})",
+  "",
+  "console.log(sandbox.id)",
+  "await client.close()",
+].join("\n");
 
 export const telemetryJsSandboxExport = [
   'import { Leap0Client } from "leap0"',
-  '',
+  "",
   'process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "https://otel.example.com"',
-'process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123"',
-'',
-'const client = new Leap0Client()',
-'const sandbox = await client.sandboxes.create({',
-  '  vcpu: 2,',
-  '  memory: 2048,',
-  '  timeout: 30,',
-  '  otelExport: true,',
-  '})',
-  '',
-  'console.log(sandbox.id)',
-  'await client.close()',
-].join('\n');
-
+  'process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123"',
+  "",
+  "const client = new Leap0Client()",
+  "const sandbox = await client.sandboxes.create({",
+  "  vcpu: 2,",
+  "  memory: 2048,",
+  "  timeout: 30,",
+  "  otelExport: true,",
+  "})",
+  "",
+  "console.log(sandbox.id)",
+  "await client.close()",
+].join("\n");
 
 Every sandbox runs an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) that collects host metrics, logs, traces, and spans and pushes them to an OTLP HTTP endpoint that you configure via environment variables. Your code can also send its own OTLP telemetry to the local collector, which forwards it alongside the host data.
 
@@ -52,15 +51,15 @@ The JavaScript and Python SDKs can also emit OpenTelemetry spans and metrics for
 
 Each sandbox automatically collects the following metrics:
 
-| Metric | Description |
-|---|---|
-| `leap0.sandbox.cpu.utilization` | CPU usage percentage |
-| `leap0.sandbox.cpu.limit` | Logical CPU count |
-| `leap0.sandbox.memory.utilization` | Memory usage percentage |
-| `leap0.sandbox.memory.usage` | Memory used in bytes |
-| `leap0.sandbox.memory.limit` | Memory limit in bytes |
-| `leap0.sandbox.filesystem.utilization` | Disk usage percentage |
-| `leap0.sandbox.filesystem.usage` | Disk space used in bytes |
+| Metric                                 | Description              |
+| -------------------------------------- | ------------------------ |
+| `leap0.sandbox.cpu.utilization`        | CPU usage percentage     |
+| `leap0.sandbox.cpu.limit`              | Logical CPU count        |
+| `leap0.sandbox.memory.utilization`     | Memory usage percentage  |
+| `leap0.sandbox.memory.usage`           | Memory used in bytes     |
+| `leap0.sandbox.memory.limit`           | Memory limit in bytes    |
+| `leap0.sandbox.filesystem.utilization` | Disk usage percentage    |
+| `leap0.sandbox.filesystem.usage`       | Disk space used in bytes |
 
 ## Logs, traces, and spans
 
@@ -92,10 +91,10 @@ Set these environment variables when creating a sandbox to enable telemetry expo
 
 If you run your own observability backend (Grafana, Datadog, etc.), pass the standard OTLP environment variables in the sandbox `env_vars`:
 
-| Variable | Description |
-|---|---|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | Your OTLP HTTP endpoint (e.g. `https://otel.example.com`) |
-| `OTEL_EXPORTER_OTLP_HEADERS` | Comma-separated `key=value` auth headers (e.g. `x-api-key=abc123`) |
+| Variable                      | Description                                                        |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Your OTLP HTTP endpoint (e.g. `https://otel.example.com`)          |
+| `OTEL_EXPORTER_OTLP_HEADERS`  | Comma-separated `key=value` auth headers (e.g. `x-api-key=abc123`) |
 
 ## Example
 

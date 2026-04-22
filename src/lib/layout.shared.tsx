@@ -1,11 +1,16 @@
-import { BookOpenText, Braces, MonitorSmartphone, SquareCode } from 'lucide-react';
-import type { BaseLayoutProps, LayoutTab } from 'fumadocs-ui/layouts/shared';
-import { Leap0Brand } from '@/components/leap0-brand';
-import { githubOrgUrl } from './shared';
+import { BookOpenText, Braces, MonitorSmartphone, SquareCode } from "lucide-react";
+import type { BaseLayoutProps, LayoutTab } from "fumadocs-ui/layouts/shared";
+import { Leap0Brand } from "@/components/leap0-brand";
+import { githubOrgUrl } from "./shared";
 
-function BrandTitle({ href = '/', className }: { href?: string; className?: string }) {
+function BrandTitle({ href = "/", className }: { href?: string; className?: string }) {
   return (
-    <a href={href} className={['flex w-full justify-center', className?.replace('me-auto', '')].filter(Boolean).join(' ')}>
+    <a
+      href={href}
+      className={["flex w-full justify-center", className?.replace("me-auto", "")]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <Leap0Brand />
     </a>
   );
@@ -13,60 +18,60 @@ function BrandTitle({ href = '/', className }: { href?: string; className?: stri
 
 export const referenceTabs: LayoutTab[] = [
   {
-    title: 'Core',
-    description: 'Guides and product documentation',
-    url: '/',
+    title: "Core",
+    description: "Guides and product documentation",
+    url: "/",
     icon: <BookOpenText className="size-4" />,
     urls: new Set([
-      '/',
-      '/quickstart',
-      '/sandboxes',
-      '/snapshots',
-      '/templates',
-      '/presigned-urls',
-      '/code-interpreter',
-      '/filesystem',
-      '/git',
-      '/lsp',
-      '/process',
-      '/pty',
-      '/desktop',
-      '/ssh',
-      '/vnc',
-      '/firewall',
-      '/metadata-service',
-      '/telemetry',
-      '/api-keys',
-      '/limits',
-      '/public-preview',
-      '/roadmap',
+      "/",
+      "/quickstart",
+      "/sandboxes",
+      "/snapshots",
+      "/templates",
+      "/presigned-urls",
+      "/code-interpreter",
+      "/filesystem",
+      "/git",
+      "/lsp",
+      "/process",
+      "/pty",
+      "/desktop",
+      "/ssh",
+      "/vnc",
+      "/firewall",
+      "/metadata-service",
+      "/telemetry",
+      "/api-keys",
+      "/limits",
+      "/public-preview",
+      "/roadmap",
     ]),
   },
   {
-    title: 'Python SDK',
-    description: 'Sync and async client reference',
-    url: '/reference/python-sdk',
+    title: "Python SDK",
+    description: "Sync and async client reference",
+    url: "/reference/python-sdk",
     icon: <SquareCode className="size-4" />,
   },
   {
-    title: 'JavaScript SDK',
-    description: 'Core and services reference',
-    url: '/reference/javascript-sdk',
+    title: "JavaScript SDK",
+    description: "Core and services reference",
+    url: "/reference/javascript-sdk",
     icon: <Braces className="size-4" />,
   },
   {
-    title: 'API',
-    description: 'Core, metadata service, code interpreter, and desktop OpenAPI reference',
-    url: '/api',
+    title: "API",
+    description: "Core, metadata service, code interpreter, and desktop OpenAPI reference",
+    url: "/api",
     icon: <MonitorSmartphone className="size-4" />,
-    urls: new Set(['/api', '/metadata-service/api', '/code-interpreter/api', '/desktop/api']),
+    urls: new Set(["/api", "/metadata-service/api", "/code-interpreter/api", "/desktop/api"]),
   },
 ];
 
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
-      title: BrandTitle,
+      title: <BrandTitle />,
     },
     githubUrl: githubOrgUrl,
   };

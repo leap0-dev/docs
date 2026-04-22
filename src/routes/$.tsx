@@ -1,39 +1,51 @@
-import { createFileRoute, notFound } from '@tanstack/react-router';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { createServerFn } from '@tanstack/react-start';
-import { getCookies } from '@tanstack/react-start/server';
-import browserCollections from '@/lib/browser-collections';
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { DocsLayout } from "fumadocs-ui/layouts/docs";
+import { createServerFn } from "@tanstack/react-start";
+import { getCookies } from "@tanstack/react-start/server";
+import browserCollections from "@/lib/browser-collections";
 import {
   DocsBody,
   DocsDescription,
   DocsPage,
   DocsTitle,
   MarkdownCopyButton,
-} from 'fumadocs-ui/layouts/docs/page';
-import { baseOptions } from '@/lib/layout.shared';
-import { TabPreferencesProvider } from '@/components/tab-preferences-provider';
-import { parseTabPreferences } from '@/lib/tab-preferences';
-import { filterSidebarTree, getSidebarSection } from '@/lib/sidebar-tree';
-import { gitConfig } from '@/lib/shared';
-import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { Suspense, type ReactNode } from 'react';
-import { useMDXComponents } from '@/components/mdx';
+} from "fumadocs-ui/layouts/docs/page";
+import { baseOptions } from "@/lib/layout.shared";
+import { TabPreferencesProvider } from "@/components/tab-preferences-provider";
+import { parseTabPreferences } from "@/lib/tab-preferences";
+import { filterSidebarTree, getSidebarSection } from "@/lib/sidebar-tree";
+import { gitConfig } from "@/lib/shared";
+import { useFumadocsLoader } from "fumadocs-core/source/client";
+import { Suspense, type ReactNode } from "react";
+import { useMDXComponents } from "@/components/mdx";
 import {
   CodeInterpreterAPIPage,
   CoreAPIPage,
   DesktopAPIPage,
   MetadataServiceAPIPage,
-} from '@/components/api-page';
-import { OpenOptionsButton } from '@/components/page-open-options';
-import { DocsFeedback } from '@/components/docs-feedback';
-import { SidebarReferenceDropdown } from '@/components/sidebar-reference-dropdown';
+} from "@/components/api-page";
+import { OpenOptionsButton } from "@/components/page-open-options";
+import { DocsFeedback } from "@/components/docs-feedback";
+import { SidebarReferenceDropdown } from "@/components/sidebar-reference-dropdown";
 
-export const Route = createFileRoute('/$')({
+const SLUG_SEGMENT_PATTERN = /^[A-Za-z0-9._-]{1,128}$/;
+
+function sanitizeSlugs(slugs: string[]): string[] | null {
+  const sanitized = slugs.filter(Boolean);
+  if (sanitized.length !== slugs.length) return null;
+  if (!sanitized.every((slug) => SLUG_SEGMENT_PATTERN.test(slug))) return null;
+
+  return sanitized;
+}
+
+export const Route = createFileRoute("/$")({
   component: Page,
   loader: async ({ params }) => {
-    const slugs = params._splat?.split('/') ?? [];
+    const slugs = sanitizeSlugs(params._splat?.split("/").filter(Boolean) ?? []);
+    if (!slugs) throw notFound();
+
     const data = await serverLoader({ data: slugs });
-    if (data.type === 'docs') {
+    if (data.type === "docs") {
       await clientLoader.preload(data.path);
     }
     return data;
@@ -41,19 +53,21 @@ export const Route = createFileRoute('/$')({
 });
 
 const serverLoader = createServerFn({
-  method: 'GET',
+  method: "GET",
 })
-  .inputValidator((slugs: string[]) => slugs)
+  .inputValidator((slugs: string[]) => sanitizeSlugs(slugs))
   .handler(async ({ data: slugs }) => {
-    const { getPageMarkdownUrl, source } = await import('@/lib/source');
+    if (!slugs) throw notFound();
+
+    const { getPageMarkdownUrl, source } = await import("@/lib/source");
     const page = source.getPage(slugs);
     if (!page) throw notFound();
 
     const pageTree = await source.serializePageTree(source.getPageTree());
 
-    if (page.data.type !== 'docs') {
+    if (page.data.type !== "docs") {
       return {
-        type: 'openapi' as const,
+        type: "openapi" as const,
         title: page.data.title,
         description: page.data.description,
         url: page.url,
@@ -64,7 +78,7 @@ const serverLoader = createServerFn({
     }
 
     return {
-      type: 'docs' as const,
+      type: "docs" as const,
       path: page.path,
       url: page.url,
       markdownUrl: getPageMarkdownUrl(page).url,
@@ -74,7 +88,7 @@ const serverLoader = createServerFn({
   });
 
 const clientLoader = browserCollections.docs.createClientLoader({
-  component(
+  component: function DocsContent(
     { toc, frontmatter, default: MDX },
     {
       markdownUrl,
@@ -86,6 +100,8 @@ const clientLoader = browserCollections.docs.createClientLoader({
       url: string;
     },
   ) {
+    const mdxComponents = useMDXComponents();
+
     return (
       <DocsPage toc={toc} className="max-w-none">
         <DocsTitle>{frontmatter.title}</DocsTitle>
@@ -98,7 +114,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
           />
         </div>
         <DocsBody>
-          <MDX components={useMDXComponents()} />
+          <MDX components={mdxComponents} />
           <DocsFeedback pageTitle={frontmatter.title} pageUrl={url} />
         </DocsBody>
       </DocsPage>
@@ -110,14 +126,14 @@ function Page() {
   const page = useFumadocsLoader(Route.useLoaderData());
   let content: ReactNode;
 
-  if (page.type === 'openapi') {
-    const APIPageComponent = page.url.startsWith('/code-interpreter/api')
+  if (page.type === "openapi") {
+    const APIPageComponent = page.url.startsWith("/code-interpreter/api")
       ? CodeInterpreterAPIPage
-      : page.url.startsWith('/metadata-service/api')
+      : page.url.startsWith("/metadata-service/api")
         ? MetadataServiceAPIPage
-      : page.url.startsWith('/desktop/api')
-        ? DesktopAPIPage
-        : CoreAPIPage;
+        : page.url.startsWith("/desktop/api")
+          ? DesktopAPIPage
+          : CoreAPIPage;
 
     content = (
       <DocsPage full className="max-w-none">
@@ -145,7 +161,7 @@ function Page() {
       {...baseOptions()}
       tree={tree}
       containerProps={{
-        className: '[--fd-layout-width:100vw]',
+        className: "[--fd-layout-width:100vw]",
       }}
       sidebar={{
         banner: <SidebarReferenceDropdown />,

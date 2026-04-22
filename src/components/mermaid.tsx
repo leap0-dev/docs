@@ -1,13 +1,15 @@
-import { renderMermaidSVG } from 'beautiful-mermaid';
+import { renderMermaidSVG } from "beautiful-mermaid";
 
 export async function Mermaid({ chart }: { chart: string }) {
   try {
-    const svg = softenMermaidSvg(renderMermaidSVG(chart, {
-      bg: 'var(--color-fd-background)',
-      fg: 'var(--color-fd-foreground)',
-      interactive: true,
-      transparent: true,
-    }));
+    const svg = softenMermaidSvg(
+      renderMermaidSVG(chart, {
+        bg: "var(--color-fd-background)",
+        fg: "var(--color-fd-foreground)",
+        interactive: true,
+        transparent: true,
+      }),
+    );
 
     return <div dangerouslySetInnerHTML={{ __html: svg }} />;
   } catch {
@@ -38,13 +40,13 @@ function roundedPathFromPoints(pointsAttr: string, radius: number) {
     .trim()
     .split(/\s+/)
     .map((point) => {
-      const [x, y] = point.split(',').map(Number);
+      const [x, y] = point.split(",").map(Number);
       return { x, y };
     })
     .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y));
 
   if (points.length < 2) {
-    return '';
+    return "";
   }
 
   let path = `M ${points[0]!.x} ${points[0]!.y}`;

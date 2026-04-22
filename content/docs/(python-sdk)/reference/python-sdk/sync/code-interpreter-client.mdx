@@ -26,9 +26,9 @@ Execute code inside a sandbox using a managed interpreter runtime.
         )
         print(result.main_text)
         ```
-    
+
 Attributes:
-    None.
+None.
 
 ## Methods
 
@@ -41,11 +41,11 @@ health(sandbox: SandboxRef, http_timeout: float | None = None) -> bool
 Check whether the code interpreter is healthy.
 
 Args:
-    sandbox: Sandbox ID or object.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    bool: ``True`` when the service reports ``"ok"``.
+bool: `True` when the service reports `"ok"`.
 
 ### `create_context`
 
@@ -56,13 +56,13 @@ create_context(sandbox: SandboxRef, *, language: str = 'python', cwd: str | None
 Create a new execution context.
 
 Args:
-    sandbox: Sandbox ID or object.
-    language: Language runtime (default ``"python"``).
-    cwd: Working directory for the new context.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+language: Language runtime (default `"python"`).
+cwd: Working directory for the new context.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    CodeContext: Newly created persistent execution context.
+CodeContext: Newly created persistent execution context.
 
 ### `list_contexts`
 
@@ -73,11 +73,11 @@ list_contexts(sandbox: SandboxRef, http_timeout: float | None = None) -> list[Co
 List all execution contexts in the sandbox.
 
 Args:
-    sandbox: Sandbox ID or object.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    list[CodeContext]: Active execution contexts.
+list[CodeContext]: Active execution contexts.
 
 ### `get_context`
 
@@ -88,12 +88,12 @@ get_context(sandbox: SandboxRef, context_id: str, http_timeout: float | None = N
 Get a single execution context by ID.
 
 Args:
-    sandbox: Sandbox ID or object.
-    context_id: Execution context identifier.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+context_id: Execution context identifier.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    CodeContext: Matching execution context.
+CodeContext: Matching execution context.
 
 ### `delete_context`
 
@@ -104,9 +104,9 @@ delete_context(sandbox: SandboxRef, context_id: str, http_timeout: float | None 
 Delete an execution context.
 
 Args:
-    sandbox: Sandbox ID or object.
-    context_id: Execution context identifier.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+context_id: Execution context identifier.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `execute`
 
@@ -117,17 +117,17 @@ execute(sandbox: SandboxRef, *, code: str, language: str = 'python', context_id:
 Execute code and wait for the full result.
 
 Args:
-    sandbox: Sandbox ID or object.
-    code: Source code to execute.
-    language: Language runtime (default ``"python"``).
-    context_id: Link to an existing context to share state.
-        Auto-generated if omitted.
-    env_vars: Environment variables for the execution.
-    timeout_ms: Execution timeout in milliseconds (default 30000).
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+code: Source code to execute.
+language: Language runtime (default `"python"`).
+context_id: Link to an existing context to share state.
+Auto-generated if omitted.
+env_vars: Environment variables for the execution.
+timeout_ms: Execution timeout in milliseconds (default 30000).
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    CodeExecutionResult: Structured execution output, errors, and logs.
+CodeExecutionResult: Structured execution output, errors, and logs.
 
 ### `execute_stream`
 
@@ -141,12 +141,12 @@ Execute code and stream output events via SSE.
         ``"stderr"``, ``"exit"``, or ``"error"``.
 
 Args:
-    sandbox: Sandbox ID or object.
-    code: Source code to execute.
-    language: Language runtime for the operation.
-    context_id: Parameter for this operation.
-    timeout_ms: Execution timeout in milliseconds.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+code: Source code to execute.
+language: Language runtime for the operation.
+context_id: Parameter for this operation.
+timeout_ms: Execution timeout in milliseconds.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Yields:
-    object: Items yielded by this operation.
+object: Items yielded by this operation.

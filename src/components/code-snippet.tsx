@@ -1,7 +1,7 @@
-import { Suspense } from 'react';
-import { useShiki } from 'fumadocs-core/highlight/shiki/react';
-import { defaultShikiFactory } from 'fumadocs-core/highlight/shiki/full';
-import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+import { Suspense } from "react";
+import { useShiki } from "fumadocs-core/highlight/shiki/react";
+import { defaultShikiFactory } from "fumadocs-core/highlight/shiki/full";
+import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
 
 type CodeSnippetProps = {
   lang?: string;
@@ -16,15 +16,19 @@ function HighlightedCodeSnippet({ lang, code }: Required<CodeSnippetProps>) {
       lang,
       defaultColor: false,
       themes: {
-        light: 'github-light',
-        dark: 'github-dark',
+        light: "github-light",
+        dark: "github-dark",
       },
       components: {
-        pre: (props) => (
-          <CodeBlock {...props} className="my-0">
-            <Pre>{props.children}</Pre>
-          </CodeBlock>
-        ),
+        pre: (props) => {
+          const className = [props.className, "my-0"].filter(Boolean).join(" ");
+
+          return (
+            <CodeBlock {...props} className={className}>
+              <Pre>{props.children}</Pre>
+            </CodeBlock>
+          );
+        },
       },
     },
     [lang, code],
@@ -41,7 +45,7 @@ function CodeSnippetPlaceholder({ code }: { code: string }) {
   );
 }
 
-export function CodeSnippet({ lang = 'text', code }: CodeSnippetProps) {
+export function CodeSnippet({ lang = "text", code }: CodeSnippetProps) {
   return (
     <Suspense fallback={<CodeSnippetPlaceholder code={code} />}>
       <HighlightedCodeSnippet lang={lang} code={code} />

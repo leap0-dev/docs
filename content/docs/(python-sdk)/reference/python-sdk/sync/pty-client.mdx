@@ -24,13 +24,15 @@ Create and manage interactive terminal sessions inside a sandbox.
         session = sandbox.pty.create(cols=120, rows=30)
         conn = sandbox.pty.connect(session.id)
         conn.send("pwd
+
 ")
-        print(conn.recv().decode())
-        conn.close()
-        ```
-    
+print(conn.recv().decode())
+conn.close()
+
+````
+
 Attributes:
-    None.
+None.
 
 ## Methods
 
@@ -38,15 +40,15 @@ Attributes:
 
 ```python
 list(sandbox: SandboxRef) -> list[PtySession]
-```
+````
 
 List all PTY sessions for a sandbox.
 
 Args:
-    sandbox: Sandbox ID or object.
+sandbox: Sandbox ID or object.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `create`
 
@@ -57,22 +59,22 @@ create(sandbox: SandboxRef, *, session_id: str | None = None, cols: int | None =
 Create a terminal session with a shell process.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: Session ID. Auto-generated if omitted.
-    cols: Terminal columns.
-    rows: Terminal rows.
-    cwd: Starting directory.
-    envs: Environment variables.
-    lazy_start: Defer shell start until the first WebSocket connection.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+session_id: Session ID. Auto-generated if omitted.
+cols: Terminal columns.
+rows: Terminal rows.
+cwd: Starting directory.
+envs: Environment variables.
+lazy_start: Defer shell start until the first WebSocket connection.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    PtySession: Metadata for the created PTY session.
+PtySession: Metadata for the created PTY session.
 
 ### `get`
 
@@ -83,11 +85,11 @@ get(sandbox: SandboxRef, session_id: str) -> PtySession
 Get details for a single PTY session.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `delete`
 
@@ -98,9 +100,9 @@ delete(sandbox: SandboxRef, session_id: str, http_timeout: float | None = None) 
 Kill the shell process and remove the session.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `resize`
 
@@ -111,13 +113,13 @@ resize(sandbox: SandboxRef, session_id: str, *, cols: int, rows: int) -> PtySess
 Change the terminal dimensions while connected.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
-    cols: Parameter for this operation.
-    rows: Parameter for this operation.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
+cols: Parameter for this operation.
+rows: Parameter for this operation.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `websocket_url`
 
@@ -128,11 +130,11 @@ websocket_url(sandbox: SandboxRef, session_id: str) -> str
 Build the WSS URL for connecting to a PTY session.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `connect`
 
@@ -142,15 +144,15 @@ connect(sandbox: SandboxRef, session_id: str, http_timeout: float | None = None,
 
 Open a WebSocket connection for interactive terminal I/O.
 
-Returns a :class:`PtyConnection` with ``send``, ``recv``, and
-``close`` methods. All messages are binary frames containing raw
+Returns a :class:`PtyConnection` with `send`, `recv`, and
+`close` methods. All messages are binary frames containing raw
 terminal bytes.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
-    http_timeout: Optional WebSocket open timeout in seconds.
-    **kwargs: Additional keyword arguments passed to ``websockets.sync.client.connect``.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
+http_timeout: Optional WebSocket open timeout in seconds.
+\*\*kwargs: Additional keyword arguments passed to `websockets.sync.client.connect`.
 
 Returns:
-    PtyConnection: Open WebSocket-backed PTY connection.
+PtyConnection: Open WebSocket-backed PTY connection.

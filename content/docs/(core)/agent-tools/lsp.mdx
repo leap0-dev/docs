@@ -20,11 +20,11 @@ const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 
 await sandbox.lsp.didOpenPath(
-  "python",
-  "/home/user/project",
-  "/home/user/project/main.py",
-  "import os\nos.path.",
-  1,
+"python",
+"/home/user/project",
+"/home/user/project/main.py",
+"import os\nos.path.",
+1,
 )
 
 await client.close()`;
@@ -34,11 +34,11 @@ export const lspJsCompletions = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const response = await sandbox.lsp.completionsPath(
-  "python",
-  "/home/user/project",
-  "/home/user/project/main.py",
-  1,
-  8,
+"python",
+"/home/user/project",
+"/home/user/project/main.py",
+1,
+8,
 )
 
 const items = response.result ?? []
@@ -50,13 +50,13 @@ export const lspJsDocumentSymbols = `import { Leap0Client } from "leap0"
 const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 const response = await sandbox.lsp.documentSymbolsPath(
-  "python",
-  "/home/user/project",
-  "/home/user/project/main.py",
+"python",
+"/home/user/project",
+"/home/user/project/main.py",
 )
 
 for (const symbol of response.result ?? []) {
-  console.log(symbol.name, symbol.kind)
+console.log(symbol.name, symbol.kind)
 }
 
 await client.close()`;
@@ -67,9 +67,9 @@ const client = new Leap0Client()
 const sandbox = await client.sandboxes.create()
 
 await sandbox.lsp.didClosePath(
-  "python",
-  "/home/user/project",
-  "/home/user/project/main.py",
+"python",
+"/home/user/project",
+"/home/user/project/main.py",
 )
 
 await client.close()`;
@@ -81,7 +81,6 @@ const sandbox = await client.sandboxes.create()
 
 await sandbox.lsp.stop("python", "/home/user/project")
 await client.close()`;
-
 
 LSP endpoints let you start language servers inside a sandbox and interact with them for code completions, document symbols, and document lifecycle notifications. Supported languages: **Python** (pyright) and **TypeScript/JavaScript** (typescript-language-server).
 

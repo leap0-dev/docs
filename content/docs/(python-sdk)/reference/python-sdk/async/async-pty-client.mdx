@@ -16,7 +16,7 @@ AsyncPtyClient(transport: AsyncTransport)
 Create and connect to PTY sessions asynchronously.
 
 Attributes:
-    None.
+None.
 
 ## Methods
 
@@ -29,10 +29,10 @@ async list(sandbox: SandboxRef) -> list[PtySession]
 List PTY sessions for a sandbox.
 
 Args:
-    sandbox: Sandbox ID or object.
+sandbox: Sandbox ID or object.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `create`
 
@@ -43,17 +43,17 @@ async create(sandbox: SandboxRef, *, session_id: str | None = None, cols: int | 
 Create a terminal session with a shell process.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: Session ID. Auto-generated if omitted.
-    cols: Terminal columns.
-    rows: Terminal rows.
-    cwd: Starting directory.
-    envs: Environment variables.
-    lazy_start: Defer shell start until the first WebSocket connection.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+session_id: Session ID. Auto-generated if omitted.
+cols: Terminal columns.
+rows: Terminal rows.
+cwd: Starting directory.
+envs: Environment variables.
+lazy_start: Defer shell start until the first WebSocket connection.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    PtySession: Metadata for the created PTY session.
+PtySession: Metadata for the created PTY session.
 
 ### `get`
 
@@ -64,11 +64,11 @@ async get(sandbox: SandboxRef, session_id: str) -> PtySession
 Get an object by ID or identifier.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `delete`
 
@@ -79,9 +79,9 @@ async delete(sandbox: SandboxRef, session_id: str, http_timeout: float | None = 
 Kill the shell process and remove the session.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
-    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
+http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `resize`
 
@@ -92,13 +92,13 @@ async resize(sandbox: SandboxRef, session_id: str, *, cols: int, rows: int) -> P
 Resize a PTY session.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
-    cols: Parameter for this operation.
-    rows: Parameter for this operation.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
+cols: Parameter for this operation.
+rows: Parameter for this operation.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `websocket_url`
 
@@ -109,11 +109,11 @@ websocket_url(sandbox: SandboxRef, session_id: str) -> str
 Build a websocket URL for this sandbox.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
 
 Returns:
-    object: Result returned by this operation.
+object: Result returned by this operation.
 
 ### `connect`
 
@@ -124,15 +124,15 @@ async connect(sandbox: SandboxRef, session_id: str, open_timeout: float | None =
 Open a WebSocket connection for interactive terminal I/O.
 
 Important:
-    Callers are responsible for closing the returned connection, ideally
-    with ``try/finally`` or an async context manager wrapper.
+Callers are responsible for closing the returned connection, ideally
+with `try/finally` or an async context manager wrapper.
 
 Args:
-    sandbox: Sandbox ID or object.
-    session_id: PTY session identifier.
-    open_timeout: Optional WebSocket open timeout in seconds.
-    http_timeout: Deprecated alias for ``open_timeout``.
-    **kwargs: Additional keyword arguments passed to ``websockets.asyncio.client.connect``.
+sandbox: Sandbox ID or object.
+session_id: PTY session identifier.
+open_timeout: Optional WebSocket open timeout in seconds.
+http_timeout: Deprecated alias for `open_timeout`.
+\*\*kwargs: Additional keyword arguments passed to `websockets.asyncio.client.connect`.
 
 Returns:
-    AsyncPtyConnection: Open WebSocket-backed PTY connection.
+AsyncPtyConnection: Open WebSocket-backed PTY connection.

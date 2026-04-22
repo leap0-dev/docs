@@ -4,10 +4,9 @@ description: What a sandbox is, how it behaves, and which endpoints you use to m
 slug: sandboxes
 ---
 
-
-import { TabItem, Tabs } from '@/components/mdx-compat';
-import { docsBaseUrl, env } from '@/lib/content';
-import sandboxLifecycleChart from './sandbox-lifecycle.mmd?raw';
+import { TabItem, Tabs } from "@/components/mdx-compat";
+import { docsBaseUrl, env } from "@/lib/content";
+import sandboxLifecycleChart from "./sandbox-lifecycle.mmd?raw";
 
 A sandbox is an isolated runtime environment.
 Create one from a template, invoke it over HTTP or WebSocket, then delete it when you are done.
@@ -76,9 +75,9 @@ print(sandbox.id, sandbox.state)
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client, NetworkPolicyMode } from "leap0"
+import { Leap0Client, NetworkPolicyMode } from "leap0";
 
-const client = new Leap0Client()
+const client = new Leap0Client();
 const sandbox = await client.sandboxes.create({
   vcpu: 2,
   memory: 2048,
@@ -91,10 +90,10 @@ const sandbox = await client.sandboxes.create({
     mode: NetworkPolicyMode.CUSTOM,
     allowCidrs: ["1.2.3.4/32"],
   },
-})
+});
 
-console.log(sandbox.id, sandbox.state)
-await client.close()
+console.log(sandbox.id, sandbox.state);
+await client.close();
 ```
 
   </TabItem>
@@ -119,13 +118,13 @@ print(sandbox.id, sandbox.state, sandbox.vcpu, sandbox.memory_mib)
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.get("<sandbox_id>")
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.get("<sandbox_id>");
 
-console.log(sandbox.id, sandbox.state, sandbox.vcpu, sandbox.memory)
-await client.close()
+console.log(sandbox.id, sandbox.state, sandbox.vcpu, sandbox.memory);
+await client.close();
 ```
 
   </TabItem>
@@ -175,18 +174,18 @@ print(response.text)
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>"
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.get("<sandbox_id>")
+const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>";
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.get("<sandbox_id>");
 
 const res = await fetch(sandbox.invokeUrl("/<your-path>"), {
   headers: { authorization: apiKey },
-})
+});
 
-console.log(await res.text())
-await client.close()
+console.log(await res.text());
+await client.close();
 ```
 
   </TabItem>
@@ -225,11 +224,11 @@ with httpx.stream(
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>"
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.get("<sandbox_id>")
+const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>";
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.get("<sandbox_id>");
 
 // EventSource does not support custom headers.
 // Use fetch + ReadableStream to send an Authorization header.
@@ -238,26 +237,26 @@ const res = await fetch(sandbox.invokeUrl("/<your-path>"), {
     authorization: apiKey,
     Accept: "text/event-stream",
   },
-})
+});
 
-const reader = res.body.getReader()
-const decoder = new TextDecoder()
-let buf = ""
+const reader = res.body.getReader();
+const decoder = new TextDecoder();
+let buf = "";
 
 while (true) {
-  const { value, done } = await reader.read()
-  if (done) break
-  buf += decoder.decode(value, { stream: true })
-  const lines = buf.split("\n")
-  buf = lines.pop()
+  const { value, done } = await reader.read();
+  if (done) break;
+  buf += decoder.decode(value, { stream: true });
+  const lines = buf.split("\n");
+  buf = lines.pop();
   for (const line of lines) {
     if (line.startsWith("data: ")) {
-      console.log(line.slice(6))
+      console.log(line.slice(6));
     }
   }
 }
 
-await client.close()
+await client.close();
 ```
 
   </TabItem>
@@ -296,20 +295,20 @@ asyncio.run(connect())
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>"
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.get("<sandbox_id>")
+const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>";
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.get("<sandbox_id>");
 
 const ws = new WebSocket(sandbox.websocketUrl("/<your-path>"), {
   headers: { authorization: apiKey },
-})
+});
 
-ws.on("open", () => ws.send("hello"))
-ws.on("message", (data) => console.log(data.toString()))
+ws.on("open", () => ws.send("hello"));
+ws.on("message", (data) => console.log(data.toString()));
 
-await client.close()
+await client.close();
 ```
 
   </TabItem>
@@ -336,14 +335,14 @@ print(sandbox.state)
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.get("<sandbox_id>")
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.get("<sandbox_id>");
 
-await sandbox.pause()
-console.log(sandbox.state)
-await client.close()
+await sandbox.pause();
+console.log(sandbox.state);
+await client.close();
 ```
 
   </TabItem>
@@ -366,11 +365,11 @@ sandbox.delete()
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
-await client.sandboxes.delete("<sandbox_id>")
-await client.close()
+const client = new Leap0Client();
+await client.sandboxes.delete("<sandbox_id>");
+await client.close();
 ```
 
   </TabItem>

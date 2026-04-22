@@ -372,8 +372,12 @@ def main() -> None:
     output_root = Path(args.output_root)
     with tempfile.TemporaryDirectory(prefix="leap0-python-") as temp_dir:
         sdk_root = Path(temp_dir) / "repo"
+        git_bin = shutil.which("git")
+        if git_bin is None:
+            raise RuntimeError("git executable not found on PATH")
+
         subprocess.run(
-            ["git", "clone", "--depth", "1", "--branch", GITHUB_REF, GITHUB_REPO, str(sdk_root)],
+            [git_bin, "clone", "--depth", "1", "--branch", GITHUB_REF, GITHUB_REPO, str(sdk_root)],
             check=True,
         )
 

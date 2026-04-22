@@ -4,9 +4,9 @@ description: Automate a full desktop sandbox with screenshots, mouse and keyboar
 slug: desktop
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { CodeSnippet } from '@/components/code-snippet';
-import { docsBaseUrl } from '@/lib/content';
+import { Tabs, TabItem } from "@/components/mdx-compat";
+import { CodeSnippet } from "@/components/code-snippet";
+import { docsBaseUrl } from "@/lib/content";
 
 export const preamble = `import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0"
 
@@ -105,7 +105,6 @@ export const desktopJsPerProcess = `${preamble}console.log(await sandbox.desktop
 console.log(await sandbox.desktop.restartProcess("xfce4"))
 console.log(await sandbox.desktop.processLogs("novnc"))
 ${close}`;
-
 
 Computer use endpoints let you programmatically control a full Linux desktop running inside a sandbox.
 

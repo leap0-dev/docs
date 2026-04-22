@@ -1,28 +1,28 @@
-import { createFileRoute, notFound } from '@tanstack/react-router';
-import { createServerFn } from '@tanstack/react-start';
-import { getCookies } from '@tanstack/react-start/server';
-import browserCollections from '@/lib/browser-collections';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
+import { getCookies } from "@tanstack/react-start/server";
+import browserCollections from "@/lib/browser-collections";
+import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import {
   DocsBody,
   DocsDescription,
   DocsPage,
   DocsTitle,
   MarkdownCopyButton,
-} from 'fumadocs-ui/layouts/docs/page';
-import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { Suspense } from 'react';
-import { DocsFeedback } from '@/components/docs-feedback';
-import { OpenOptionsButton } from '@/components/page-open-options';
-import { useMDXComponents } from '@/components/mdx';
-import { baseOptions } from '@/lib/layout.shared';
-import { TabPreferencesProvider } from '@/components/tab-preferences-provider';
-import { parseTabPreferences } from '@/lib/tab-preferences';
-import { filterSidebarTree, getSidebarSection } from '@/lib/sidebar-tree';
-import { gitConfig } from '@/lib/shared';
-import { SidebarReferenceDropdown } from '@/components/sidebar-reference-dropdown';
+} from "fumadocs-ui/layouts/docs/page";
+import { useFumadocsLoader } from "fumadocs-core/source/client";
+import { Suspense } from "react";
+import { DocsFeedback } from "@/components/docs-feedback";
+import { OpenOptionsButton } from "@/components/page-open-options";
+import { useMDXComponents } from "@/components/mdx";
+import { baseOptions } from "@/lib/layout.shared";
+import { TabPreferencesProvider } from "@/components/tab-preferences-provider";
+import { parseTabPreferences } from "@/lib/tab-preferences";
+import { filterSidebarTree, getSidebarSection } from "@/lib/sidebar-tree";
+import { gitConfig } from "@/lib/shared";
+import { SidebarReferenceDropdown } from "@/components/sidebar-reference-dropdown";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   component: Page,
   loader: async () => {
     const data = await serverLoader();
@@ -32,11 +32,11 @@ export const Route = createFileRoute('/')({
 });
 
 const serverLoader = createServerFn({
-  method: 'GET',
+  method: "GET",
 }).handler(async () => {
-  const { getPageMarkdownUrl, source } = await import('@/lib/source');
+  const { getPageMarkdownUrl, source } = await import("@/lib/source");
   const page = source.getPage([]);
-  if (!page || page.data.type !== 'docs') throw notFound();
+  if (!page || page.data.type !== "docs") throw notFound();
 
   return {
     path: page.path,
@@ -48,10 +48,12 @@ const serverLoader = createServerFn({
 });
 
 const clientLoader = browserCollections.docs.createClientLoader({
-  component(
+  component: function IndexDocsContent(
     { toc, frontmatter, default: MDX },
     { markdownUrl, path }: { markdownUrl: string; path: string },
   ) {
+    const mdxComponents = useMDXComponents();
+
     return (
       <DocsPage toc={toc} className="max-w-none">
         <DocsTitle>{frontmatter.title}</DocsTitle>
@@ -64,7 +66,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
           />
         </div>
         <DocsBody>
-          <MDX components={useMDXComponents()} />
+          <MDX components={mdxComponents} />
           <DocsFeedback pageTitle={frontmatter.title} pageUrl="/" />
         </DocsBody>
       </DocsPage>
@@ -83,7 +85,7 @@ function Page() {
       {...baseOptions()}
       tree={tree}
       containerProps={{
-        className: '[--fd-layout-width:100vw]',
+        className: "[--fd-layout-width:100vw]",
       }}
       sidebar={{
         banner: <SidebarReferenceDropdown />,

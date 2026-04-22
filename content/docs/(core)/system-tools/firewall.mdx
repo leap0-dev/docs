@@ -4,81 +4,80 @@ description: Configure outbound network restrictions for sandbox runtimes.
 slug: firewall
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { CodeSnippet } from '@/components/code-snippet';
+import { Tabs, TabItem } from "@/components/mdx-compat";
+import { CodeSnippet } from "@/components/code-snippet";
 
 export const firewallJsAllowAll = [
-'import { Leap0Client, NetworkPolicyMode } from "leap0"',
-'',
-'const client = new Leap0Client()',
-'const sandbox = await client.sandboxes.create({',
-  '  vcpu: 2,',
-  '  memory: 2048,',
-  '  networkPolicy: { mode: NetworkPolicyMode.ALLOW_ALL },',
-  '})',
-  '',
-  'console.log(sandbox.id, sandbox.networkPolicy)',
-  'await client.close()',
-].join('\n');
+  'import { Leap0Client, NetworkPolicyMode } from "leap0"',
+  "",
+  "const client = new Leap0Client()",
+  "const sandbox = await client.sandboxes.create({",
+  "  vcpu: 2,",
+  "  memory: 2048,",
+  "  networkPolicy: { mode: NetworkPolicyMode.ALLOW_ALL },",
+  "})",
+  "",
+  "console.log(sandbox.id, sandbox.networkPolicy)",
+  "await client.close()",
+].join("\n");
 
 export const firewallJsDenyAll = [
-'import { Leap0Client, NetworkPolicyMode } from "leap0"',
-'',
-'const client = new Leap0Client()',
-'const sandbox = await client.sandboxes.create({',
-  '  vcpu: 2,',
-  '  memory: 2048,',
-  '  networkPolicy: { mode: NetworkPolicyMode.DENY_ALL },',
-  '})',
-  '',
-  'console.log(sandbox.id, sandbox.networkPolicy)',
-  'await client.close()',
-].join('\n');
+  'import { Leap0Client, NetworkPolicyMode } from "leap0"',
+  "",
+  "const client = new Leap0Client()",
+  "const sandbox = await client.sandboxes.create({",
+  "  vcpu: 2,",
+  "  memory: 2048,",
+  "  networkPolicy: { mode: NetworkPolicyMode.DENY_ALL },",
+  "})",
+  "",
+  "console.log(sandbox.id, sandbox.networkPolicy)",
+  "await client.close()",
+].join("\n");
 
 export const firewallJsCustomDomains = [
-'import { Leap0Client, NetworkPolicyMode } from "leap0"',
-'',
-'const client = new Leap0Client()',
-'const sandbox = await client.sandboxes.create({',
-  '  vcpu: 2,',
-  '  memory: 2048,',
-  '  networkPolicy: {',
-  '    mode: NetworkPolicyMode.CUSTOM,',
+  'import { Leap0Client, NetworkPolicyMode } from "leap0"',
+  "",
+  "const client = new Leap0Client()",
+  "const sandbox = await client.sandboxes.create({",
+  "  vcpu: 2,",
+  "  memory: 2048,",
+  "  networkPolicy: {",
+  "    mode: NetworkPolicyMode.CUSTOM,",
   '    allowDomains: ["api.openai.com", "pypi.org"],',
   '    allowCidrs: ["10.0.0.0/24"],',
-  '  },',
-  '})',
-  '',
-  'console.log(sandbox.id, sandbox.networkPolicy)',
-  'await client.close()',
-].join('\n');
+  "  },",
+  "})",
+  "",
+  "console.log(sandbox.id, sandbox.networkPolicy)",
+  "await client.close()",
+].join("\n");
 
 export const firewallJsCustomTransforms = [
-'import { Leap0Client, NetworkPolicyMode } from "leap0"',
-'',
-'const client = new Leap0Client()',
-'const sandbox = await client.sandboxes.create({',
-  '  vcpu: 2,',
-  '  memory: 2048,',
-  '  networkPolicy: {',
-  '    mode: NetworkPolicyMode.CUSTOM,',
+  'import { Leap0Client, NetworkPolicyMode } from "leap0"',
+  "",
+  "const client = new Leap0Client()",
+  "const sandbox = await client.sandboxes.create({",
+  "  vcpu: 2,",
+  "  memory: 2048,",
+  "  networkPolicy: {",
+  "    mode: NetworkPolicyMode.CUSTOM,",
   '    allowDomains: ["api.openai.com"],',
-  '    transforms: [',
-  '      {',
+  "    transforms: [",
+  "      {",
   '        domain: "api.openai.com",',
-  '        injectHeaders: {',
+  "        injectHeaders: {",
   '          Authorization: "Bearer sk-proj-...",',
-  '        },',
+  "        },",
   '        stripHeaders: ["X-Debug"],',
-  '      },',
-  '    ],',
-  '  },',
-  '})',
-  '',
-  'console.log(sandbox.id, sandbox.networkPolicy)',
-  'await client.close()',
-].join('\n');
-
+  "      },",
+  "    ],",
+  "  },",
+  "})",
+  "",
+  "console.log(sandbox.id, sandbox.networkPolicy)",
+  "await client.close()",
+].join("\n");
 
 Control what a sandbox can reach over the network using the `network_policy` field when creating or restoring a sandbox.
 
@@ -86,11 +85,11 @@ When `network_policy` is omitted, all outbound traffic is allowed.
 
 ## Policy modes
 
-| Mode | Behavior |
-|------|----------|
-| `allow-all` | All outbound traffic is permitted (default). |
-| `deny-all` | All outbound traffic is blocked. |
-| `custom` | Traffic is filtered by `allow_domains`, `allow_cidrs`, and optional `transforms`. |
+| Mode        | Behavior                                                                          |
+| ----------- | --------------------------------------------------------------------------------- |
+| `allow-all` | All outbound traffic is permitted (default).                                      |
+| `deny-all`  | All outbound traffic is blocked.                                                  |
+| `custom`    | Traffic is filtered by `allow_domains`, `allow_cidrs`, and optional `transforms`. |
 
 ## Allow all traffic (default)
 

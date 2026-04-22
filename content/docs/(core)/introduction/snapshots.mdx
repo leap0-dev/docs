@@ -4,9 +4,9 @@ description: Save a running sandbox and restore it later with the same in-memory
 slug: snapshots
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { docsBaseUrl } from '@/lib/content';
-import snapshotFlowChart from './snapshot-flow.mmd?raw';
+import { Tabs, TabItem } from "@/components/mdx-compat";
+import { docsBaseUrl } from "@/lib/content";
+import snapshotFlowChart from "./snapshot-flow.mmd?raw";
 
 export const base = docsBaseUrl;
 
@@ -52,15 +52,15 @@ print(snapshot.id, snapshot.name)
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
+const client = new Leap0Client();
 const snapshot = await client.snapshots.create("<sandbox_id>", {
   name: "workspace-warm",
-})
+});
 
-console.log(snapshot.id, snapshot.name)
-await client.close()
+console.log(snapshot.id, snapshot.name);
+await client.close();
 ```
 
   </TabItem>
@@ -89,15 +89,15 @@ print(snapshot.id, snapshot.name)
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
+const client = new Leap0Client();
 const snapshot = await client.snapshots.pause("<sandbox_id>", {
   name: "workspace-warm",
-})
+});
 
-console.log(snapshot.id, snapshot.name)
-await client.close()
+console.log(snapshot.id, snapshot.name);
+await client.close();
 ```
 
   </TabItem>
@@ -129,9 +129,9 @@ print(sandbox.id, sandbox.state)
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client, NetworkPolicyMode } from "leap0"
+import { Leap0Client, NetworkPolicyMode } from "leap0";
 
-const client = new Leap0Client()
+const client = new Leap0Client();
 const sandbox = await client.snapshots.resume({
   snapshotName: "workspace-warm",
   autoPause: true,
@@ -140,10 +140,10 @@ const sandbox = await client.snapshots.resume({
     mode: NetworkPolicyMode.CUSTOM,
     allowCidrs: ["1.2.3.4/32"],
   },
-})
+});
 
-console.log(sandbox.id, sandbox.state)
-await client.close()
+console.log(sandbox.id, sandbox.state);
+await client.close();
 ```
 
   </TabItem>
@@ -167,11 +167,11 @@ client.snapshots.delete("<snapshot_id>")
   <TabItem label="JavaScript & TypeScript">
 
 ```js
-import { Leap0Client } from "leap0"
+import { Leap0Client } from "leap0";
 
-const client = new Leap0Client()
-await client.snapshots.delete("<snapshot_id>")
-await client.close()
+const client = new Leap0Client();
+await client.snapshots.delete("<snapshot_id>");
+await client.close();
 ```
 
   </TabItem>

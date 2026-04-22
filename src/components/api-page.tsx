@@ -1,8 +1,8 @@
-import { createClientAPIPage } from 'fumadocs-openapi/ui/create-client';
+import { createClientAPIPage } from "fumadocs-openapi/ui/create-client";
 
 export const CoreAPIPage = createClientAPIPage({
   client: {
-    storageKeyPrefix: 'leap0-docs-openapi-core-',
+    storageKeyPrefix: "leap0-docs-openapi-core-",
   },
 });
 
@@ -11,7 +11,7 @@ export const CodeInterpreterAPIPage = createClientAPIPage({
     enabled: false,
   },
   client: {
-    storageKeyPrefix: 'leap0-docs-openapi-code-interpreter-',
+    storageKeyPrefix: "leap0-docs-openapi-code-interpreter-",
   },
 });
 
@@ -20,7 +20,7 @@ export const DesktopAPIPage = createClientAPIPage({
     enabled: false,
   },
   client: {
-    storageKeyPrefix: 'leap0-docs-openapi-desktop-',
+    storageKeyPrefix: "leap0-docs-openapi-desktop-",
   },
 });
 
@@ -29,6 +29,6 @@ export const MetadataServiceAPIPage = createClientAPIPage({
     enabled: false,
   },
   client: {
-    storageKeyPrefix: 'leap0-docs-openapi-metadata-service-',
+    storageKeyPrefix: "leap0-docs-openapi-metadata-service-",
   },
 });
