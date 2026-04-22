@@ -1,0 +1,119 @@
+---
+title: Telemetry
+description: Collect metrics, logs, and traces from sandboxes using OpenTelemetry.
+slug: telemetry
+---
+
+import { Tabs, TabItem } from "@/components/mdx-compat";
+
+Every sandbox runs an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) that collects host metrics, logs, traces, and spans and pushes them to an OTLP HTTP endpoint that you configure via environment variables. Your code can also send its own OTLP telemetry to the local collector, which forwards it alongside the host data.
+
+The JavaScript and Python SDKs can also emit OpenTelemetry spans and metrics for SDK calls such as sandbox creation and tool usage. That lets you correlate client-side operations with sandbox-side telemetry in the same backend.
+
+## Metrics
+
+Each sandbox automatically collects the following metrics:
+
+| Metric                                 | Description              |
+| -------------------------------------- | ------------------------ |
+| `leap0.sandbox.cpu.utilization`        | CPU usage percentage     |
+| `leap0.sandbox.cpu.limit`              | Logical CPU count        |
+| `leap0.sandbox.memory.utilization`     | Memory usage percentage  |
+| `leap0.sandbox.memory.usage`           | Memory used in bytes     |
+| `leap0.sandbox.memory.limit`           | Memory limit in bytes    |
+| `leap0.sandbox.filesystem.utilization` | Disk usage percentage    |
+| `leap0.sandbox.filesystem.usage`       | Disk space used in bytes |
+
+## Logs, traces, and spans
+
+Any OTLP logs, traces, and spans your code sends to the local collector (ports 4317/4318) are forwarded to the configured endpoint.
+
+## SDK OpenTelemetry
+
+The JavaScript and Python SDKs can emit OpenTelemetry spans and metrics for SDK operations such as creating sandboxes and calling sandbox tools.
+
+Enable that client-side instrumentation by setting `sdkOtelEnabled: true` on `new Leap0Client(...)`, `sdk_otel_enabled=True` on the Python client, or `LEAP0_SDK_OTEL_ENABLED=true` in your local environment.
+
+If `OTEL_EXPORTER_OTLP_ENDPOINT` is already set locally, the SDK enables this instrumentation automatically.
+
+This is separate from sandbox telemetry: use `otelExport: true` in the JavaScript SDK or `otel_export=True` in Python to forward telemetry produced inside the sandbox itself.
+
+### JavaScript SDK and sandbox example
+
+```ts
+import { Leap0Client } from "leap0";
+
+process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "https://otel.example.com";
+process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123";
+
+const client = new Leap0Client({ sdkOtelEnabled: true });
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  timeout: 30,
+  otelExport: true,
+});
+
+console.log(sandbox.id);
+await client.close();
+```
+
+## Resource attributes
+
+Every signal is tagged with `leap0.sandbox.id`, `leap0.org.id`, and `leap0.template.id` so you can filter and group by sandbox.
+
+## Configuration
+
+Set these environment variables when creating a sandbox to enable telemetry export.
+
+### Your own endpoint
+
+If you run your own observability backend (Grafana, Datadog, etc.), pass the standard OTLP environment variables in the sandbox `env_vars`:
+
+| Variable                      | Description                                                        |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Your OTLP HTTP endpoint (e.g. `https://otel.example.com`)          |
+| `OTEL_EXPORTER_OTLP_HEADERS`  | Comma-separated `key=value` auth headers (e.g. `x-api-key=abc123`) |
+
+## Example
+
+Create a sandbox with telemetry export enabled. Metrics, logs, and traces will be pushed to the configured endpoint as OTLP HTTP.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(
+    vcpu=2,
+    memory=2048,
+    timeout=30,
+    otel_export=True,
+)
+
+print(sandbox.id)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "https://otel.example.com";
+process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  timeout: 30,
+  otelExport: true,
+});
+
+console.log(sandbox.id);
+await client.close();
+```
+  </TabItem>
+</Tabs>

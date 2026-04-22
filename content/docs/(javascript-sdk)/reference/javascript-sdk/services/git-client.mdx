@@ -1,0 +1,336 @@
+---
+title: GitClient
+description: Auto-generated reference for GitClient.
+---
+
+Source: [`src/services/git.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/git.ts)
+
+## Signature
+
+```ts
+GitClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Runs git operations inside a sandbox repository.
+
+#### Throws
+
+- `Leap0Error`: If an API call fails.
+- `Error`: If the service returns an unexpected empty response.
+
+## Methods
+
+### `clone`
+
+```ts
+async clone(sandbox: SandboxRef, params: { url: string; path: string; branch?: string; commitId?: string; depth?: number; username?: string; password?: string; }, options?: RequestOptions): Promise<GitResult>
+```
+
+Clones a git repository into the sandbox filesystem.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Clone parameters.
+- `params.url`: Repository URL to clone.
+- `params.path`: Destination path inside the sandbox.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git command result.
+
+#### Examples
+
+```ts
+await sandbox.git.clone({
+  url: "https://github.com/example/repo.git",
+  path: "/workspace/repo",
+  branch: "main",
+});
+```
+
+### `status`
+
+```ts
+async status(sandbox: SandboxRef, path: string, options?: RequestOptions): Promise<GitResult>
+```
+
+Returns repository status information for a sandbox path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Repository path inside the sandbox.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git status result.
+
+### `branches`
+
+```ts
+async branches(sandbox: SandboxRef, params: { path: string; branchType?: "local" | "remote" | "all"; contains?: string; notContains?: string; }, options?: RequestOptions): Promise<GitResult>
+```
+
+Lists branches for a repository path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Branch listing parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git branch listing result.
+
+### `diffUnstaged`
+
+```ts
+async diffUnstaged(sandbox: SandboxRef, path: string, contextLines?: number, options?: RequestOptions): Promise<GitResult>
+```
+
+Returns the unstaged diff for a repository path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Repository path inside the sandbox.
+- `contextLines`: Optional unified diff context line count.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git diff result.
+
+### `diffStaged`
+
+```ts
+async diffStaged(sandbox: SandboxRef, path: string, contextLines?: number, options?: RequestOptions): Promise<GitResult>
+```
+
+Returns the staged diff for a repository path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Repository path inside the sandbox.
+- `contextLines`: Optional unified diff context line count.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git diff result.
+
+### `diff`
+
+```ts
+async diff(sandbox: SandboxRef, path: string, target: string, contextLines?: number, options?: RequestOptions): Promise<GitResult>
+```
+
+Returns a diff against a target revision, branch, or commit.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Repository path inside the sandbox.
+- `target`: Revision, branch, or commit to diff against.
+- `contextLines`: Optional unified diff context line count.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git diff result.
+
+### `reset`
+
+```ts
+async reset(sandbox: SandboxRef, path: string, options?: RequestOptions): Promise<GitResult>
+```
+
+Resets staged and unstaged changes for a repository path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Repository path inside the sandbox.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git reset result.
+
+### `log`
+
+```ts
+async log(sandbox: SandboxRef, params: { path: string; maxCount?: number; startTimestamp?: string; endTimestamp?: string; }, options?: RequestOptions): Promise<GitResult>
+```
+
+Returns commit history for a repository path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Log query parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git log result.
+
+### `show`
+
+```ts
+async show(sandbox: SandboxRef, path: string, revision = "HEAD", options?: RequestOptions): Promise<GitResult>
+```
+
+Shows a revision for a repository path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Repository path inside the sandbox.
+- `revision`: Revision to show.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git show result.
+
+### `createBranch`
+
+```ts
+async createBranch(sandbox: SandboxRef, params: { path: string; name: string; checkout?: boolean; baseBranch?: string; }, options?: RequestOptions): Promise<GitResult>
+```
+
+Creates a new branch, optionally checking it out immediately.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Branch creation parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git branch creation result.
+
+### `checkoutBranch`
+
+```ts
+async checkoutBranch(sandbox: SandboxRef, params: { path: string; branch: string; create?: boolean; setUpstream?: boolean; }, options?: RequestOptions): Promise<GitResult>
+```
+
+Checks out an existing branch or creates one on demand.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Checkout parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git checkout result.
+
+### `deleteBranch`
+
+```ts
+async deleteBranch(sandbox: SandboxRef, path: string, name: string, force = false, options?: RequestOptions): Promise<GitResult>
+```
+
+Deletes a branch from the repository.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Repository path inside the sandbox.
+- `name`: Branch name to delete.
+- `force`: Whether to force-delete the branch.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git branch deletion result.
+
+### `add`
+
+```ts
+async add(sandbox: SandboxRef, path: string, files: string[], options?: RequestOptions): Promise<GitResult>
+```
+
+Adds files to the git index.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Repository path inside the sandbox.
+- `files`: File paths to stage.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git add result.
+
+### `commit`
+
+```ts
+async commit(sandbox: SandboxRef, params: { path: string; message: string; author?: string; email?: string; allowEmpty?: boolean; }, options?: RequestOptions): Promise<GitCommitResult>
+```
+
+Creates a git commit from staged changes.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Commit parameters.
+- `params.path`: Repository path inside the sandbox.
+- `params.message`: Commit message.
+- `params.author`: Optional author name.
+- `params.email`: Optional author email.
+- `params.allowEmpty`: Whether to allow empty commits.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The commit result, including the created commit ID when available.
+
+### `push`
+
+```ts
+async push(sandbox: SandboxRef, params: { path: string; remote?: string; branch?: string; setUpstream?: boolean; username?: string; password?: string; }, options?: RequestOptions): Promise<GitResult>
+```
+
+Pushes local commits to a remote.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Push parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git push result.
+
+### `pull`
+
+```ts
+async pull(sandbox: SandboxRef, params: { path: string; remote?: string; branch?: string; rebase?: boolean; setUpstream?: boolean; username?: string; password?: string; }, options?: RequestOptions): Promise<GitResult>
+```
+
+Pulls remote changes into the local repository.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Pull parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The git pull result.

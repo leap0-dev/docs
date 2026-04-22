@@ -1,0 +1,1041 @@
+openapi: 3.1.0
+info:
+  title: Computer Use (Desktop) API
+  description: |
+    Control a full Linux desktop inside a sandbox. Take screenshots, move the mouse,
+    type on the keyboard, record the screen, and manage desktop processes.
+    These endpoints are served inside the sandbox at `https://<sandbox_id>.<domain>/`.
+  version: 0.1.0
+
+servers:
+  - url: https://{sandbox_id}.sandbox.leap0.dev
+    description: Sandbox
+    variables:
+      sandbox_id:
+        default: "<sandbox_id>"
+        description: The sandbox identifier.
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Display
+    description: Display info, screen resolution, and window listing.
+  - name: Screenshot
+    description: Capture the screen or a region.
+  - name: Input
+    description: Mouse and keyboard input.
+  - name: Recording
+    description: Screen recording management.
+  - name: Process
+    description: Desktop process status, restart, and logs.
+  - name: Health
+    description: Liveness probe.
+
+paths:
+  # ── Health ──
+  /api/healthz:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      description: Fast liveness probe. Returns `ok` when the control server is running.
+      tags: [Health]
+      responses:
+        "200":
+          description: Healthy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  # ── Display ──
+  /api/display:
+    get:
+      operationId: getDisplayInfo
+      summary: Get display info
+      description: Query the current display name and resolution.
+      tags: [Display]
+      responses:
+        "200":
+          description: Display info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DisplayInfo"
+
+  /api/display/screen:
+    get:
+      operationId: getScreen
+      summary: Get screen resolution
+      description: Get the current virtual screen resolution.
+      tags: [Display]
+      responses:
+        "200":
+          description: Screen state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScreenState"
+    post:
+      operationId: resizeScreen
+      summary: Resize screen
+      description: Change the virtual display resolution.
+      tags: [Display]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResizeScreenRequest"
+      responses:
+        "200":
+          description: Screen resized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScreenState"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/display/windows:
+    get:
+      operationId: listWindows
+      summary: List windows
+      description: List all open windows on the desktop.
+      tags: [Display]
+      responses:
+        "200":
+          description: Windows listed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WindowsResponse"
+
+  # ── Screenshot ──
+  /api/screenshot:
+    get:
+      operationId: screenshot
+      summary: Take screenshot
+      description: Capture the full screen or a region via query parameters. Returns the image as binary.
+      tags: [Screenshot]
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [png, jpg, jpeg]
+            default: png
+          description: Image format.
+        - name: quality
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: JPEG quality (1–100).
+        - name: x
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Left edge of the capture region.
+        - name: y
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Top edge of the capture region.
+        - name: width
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Region width in pixels. Set `width` and `height` together. Use `0` for both to capture the full screen; otherwise both must be positive pixel values.
+        - name: height
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Region height in pixels. Set `width` and `height` together. Use `0` for both to capture the full screen; otherwise both must be positive pixel values.
+      responses:
+        "200":
+          description: Screenshot image.
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/screenshot/region:
+    post:
+      operationId: screenshotRegion
+      summary: Region screenshot
+      description: Capture a specific region of the screen.
+      tags: [Screenshot]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegionScreenshotRequest"
+      responses:
+        "200":
+          description: Screenshot image.
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  # ── Input ──
+  /api/input/position:
+    get:
+      operationId: getPointerPosition
+      summary: Get pointer position
+      description: Get the current mouse pointer coordinates.
+      tags: [Input]
+      responses:
+        "200":
+          description: Pointer position.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointerPosition"
+
+  /api/input/move:
+    post:
+      operationId: movePointer
+      summary: Move pointer
+      description: Move the cursor to absolute coordinates.
+      tags: [Input]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovePointerRequest"
+      responses:
+        "200":
+          description: Pointer moved. Returns new position.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointerPosition"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/input/click:
+    post:
+      operationId: clickPointer
+      summary: Click
+      description: "Click at the current position or at optional coordinates. Button: 1 = left, 2 = middle, 3 = right."
+      tags: [Input]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClickPointerRequest"
+      responses:
+        "200":
+          description: Clicked. Returns pointer position.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointerPosition"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/input/drag:
+    post:
+      operationId: dragPointer
+      summary: Drag
+      description: Drag from one coordinate to another.
+      tags: [Input]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DragPointerRequest"
+      responses:
+        "200":
+          description: Dragged. Returns pointer position.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointerPosition"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/input/scroll:
+    post:
+      operationId: scrollPointer
+      summary: Scroll
+      description: Scroll at the current pointer position.
+      tags: [Input]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScrollPointerRequest"
+      responses:
+        "200":
+          description: Scrolled. Returns pointer position.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PointerPosition"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/input/type:
+    post:
+      operationId: typeText
+      summary: Type text
+      description: Type a string of text as keyboard input.
+      tags: [Input]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TypeTextRequest"
+      responses:
+        "200":
+          description: Text typed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/input/press:
+    post:
+      operationId: pressKey
+      summary: Press key
+      description: Press a single key by its X11 keysym name.
+      tags: [Input]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PressKeyRequest"
+      responses:
+        "200":
+          description: Key pressed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/input/hotkey:
+    post:
+      operationId: hotkey
+      summary: Hotkey
+      description: Press a multi-key shortcut. Keys are joined with `+` and sent as a single combination.
+      tags: [Input]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HotkeyRequest"
+      responses:
+        "200":
+          description: Hotkey pressed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  # ── Recording ──
+  /api/recording:
+    get:
+      operationId: getRecordingStatus
+      summary: Recording status
+      description: Get the state of the current or most recent recording.
+      tags: [Recording]
+      responses:
+        "200":
+          description: Recording status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordingStatus"
+
+  /api/recording/start:
+    post:
+      operationId: startRecording
+      summary: Start recording
+      description: Start capturing the screen as an MP4 video.
+      tags: [Recording]
+      responses:
+        "201":
+          description: Recording started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordingStatus"
+        "409":
+          description: A recording is already active.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/recording/stop:
+    post:
+      operationId: stopRecording
+      summary: Stop recording
+      description: Stop the active screen recording.
+      tags: [Recording]
+      responses:
+        "200":
+          description: Recording stopped.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordingStatus"
+        "409":
+          description: No recording is active.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/recordings:
+    get:
+      operationId: listRecordings
+      summary: List recordings
+      description: List all saved recordings.
+      tags: [Recording]
+      responses:
+        "200":
+          description: Recordings listed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordingsResponse"
+
+  /api/recordings/{recordingID}:
+    parameters:
+      - $ref: "#/components/parameters/recordingID"
+    get:
+      operationId: getRecording
+      summary: Get recording
+      description: Get metadata for a single recording.
+      tags: [Recording]
+      responses:
+        "200":
+          description: Recording metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordingSummary"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteRecording
+      summary: Delete recording
+      description: Delete a saved recording. Active recordings cannot be deleted.
+      tags: [Recording]
+      responses:
+        "204":
+          description: Recording deleted.
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Cannot delete an active recording.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/recordings/{recordingID}/download:
+    parameters:
+      - $ref: "#/components/parameters/recordingID"
+    get:
+      operationId: downloadRecording
+      summary: Download recording
+      description: Download a recording as an MP4 file.
+      tags: [Recording]
+      responses:
+        "200":
+          description: MP4 file.
+          content:
+            video/mp4:
+              schema:
+                type: string
+                format: binary
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ── Process ──
+  /api/status:
+    get:
+      operationId: getProcessStatus
+      summary: Overall status
+      description: Get the status of all desktop processes.
+      tags: [Process]
+      responses:
+        "200":
+          description: Process status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessStatusResponse"
+
+  /api/status/stream:
+    get:
+      operationId: streamProcessStatus
+      summary: Status stream (SSE)
+      description: |
+        Subscribe to a live Server-Sent Events stream of process status.
+        Events are sent immediately on connect, on status changes, and every 2 seconds as a heartbeat.
+        Each SSE message is a framed `data:` line containing a JSON-encoded `ProcessStatusResponse`.
+        Error events use `event: error` with a plain-text `data:` payload.
+      tags: [Process]
+      responses:
+        "200":
+          description: SSE stream of framed `event`/`data` text messages. Each `data` line contains a JSON-encoded `ProcessStatusResponse`.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /api/process/{processName}/status:
+    parameters:
+      - $ref: "#/components/parameters/processName"
+    get:
+      operationId: getProcessInfo
+      summary: Process status
+      description: Get the status of a single desktop process.
+      tags: [Process]
+      responses:
+        "200":
+          description: Process info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessInfo"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/process/{processName}/restart:
+    parameters:
+      - $ref: "#/components/parameters/processName"
+    post:
+      operationId: restartProcess
+      summary: Restart process
+      description: Restart a single desktop process.
+      tags: [Process]
+      responses:
+        "200":
+          description: Process restarted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RestartResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/process/{processName}/logs:
+    parameters:
+      - $ref: "#/components/parameters/processName"
+    get:
+      operationId: getProcessLogs
+      summary: Process logs
+      description: Read stdout logs for a desktop process.
+      tags: [Process]
+      responses:
+        "200":
+          description: Process logs.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /api/process/{processName}/errors:
+    parameters:
+      - $ref: "#/components/parameters/processName"
+    get:
+      operationId: getProcessErrors
+      summary: Process errors
+      description: Read stderr logs for a desktop process.
+      tags: [Process]
+      responses:
+        "200":
+          description: Process errors.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorLogResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: API key passed as a Bearer token.
+
+  parameters:
+    recordingID:
+      name: recordingID
+      in: path
+      required: true
+      description: Recording identifier.
+      schema:
+        type: string
+    processName:
+      name: processName
+      in: path
+      required: true
+      description: "Desktop process name: `xvfb`, `xfce4`, `x11vnc`, or `novnc`."
+      schema:
+        type: string
+        enum: [xvfb, xfce4, x11vnc, novnc]
+
+  responses:
+    BadRequest:
+      description: Bad request – validation error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorResponse"
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+
+    ValidationErrorResponse:
+      type: object
+      required: [message, errors]
+      properties:
+        message:
+          type: string
+          example: Invalid request
+        errors:
+          type: array
+          items:
+            type: object
+            required: [field, error]
+            properties:
+              field:
+                type: string
+              error:
+                type: string
+
+    HealthResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          example: true
+
+    OkResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          example: true
+
+    # ── Display ──
+    DisplayInfo:
+      type: object
+      required: [display, width, height]
+      properties:
+        display:
+          type: string
+          description: X11 display name.
+          example: ":0"
+        width:
+          type: integer
+          description: Display width in pixels.
+          example: 1440
+        height:
+          type: integer
+          description: Display height in pixels.
+          example: 900
+
+    ScreenState:
+      type: object
+      required: [display, width, height]
+      properties:
+        display:
+          type: string
+          example: ":0"
+        width:
+          type: integer
+          example: 1440
+        height:
+          type: integer
+          example: 900
+
+    ResizeScreenRequest:
+      type: object
+      required: [width, height]
+      properties:
+        width:
+          type: integer
+          minimum: 320
+          maximum: 7680
+          description: New display width.
+          example: 1280
+        height:
+          type: integer
+          minimum: 320
+          maximum: 4320
+          description: New display height.
+          example: 800
+
+    WindowInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: X11 window ID.
+          example: "0x04000007"
+        desktop:
+          type: integer
+          description: Desktop number.
+        pid:
+          type: integer
+          description: Process ID of the window owner.
+        x:
+          type: integer
+          description: Window X position.
+        y:
+          type: integer
+          description: Window Y position.
+        width:
+          type: integer
+          description: Window width.
+        height:
+          type: integer
+          description: Window height.
+        class:
+          type: string
+          description: Window class.
+          example: Xfce4-terminal.Xfce4-terminal
+        host:
+          type: string
+          description: Window host.
+          example: sandbox
+        title:
+          type: string
+          description: Window title.
+          example: Terminal
+        focused:
+          type: boolean
+          description: Whether the window is focused.
+
+    WindowsResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WindowInfo"
+
+    # ── Screenshot ──
+    RegionScreenshotRequest:
+      type: object
+      required: [x, y, width, height]
+      properties:
+        x:
+          type: integer
+          minimum: 0
+          description: Left edge of the capture region.
+        y:
+          type: integer
+          minimum: 0
+          description: Top edge of the capture region.
+        width:
+          type: integer
+          minimum: 1
+          description: Region width in pixels.
+        height:
+          type: integer
+          minimum: 1
+          description: Region height in pixels.
+        format:
+          type: string
+          enum: [png, jpg, jpeg]
+          description: Image format.
+        quality:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: JPEG quality.
+
+    # ── Input ──
+    PointerPosition:
+      type: object
+      required: [x, y]
+      properties:
+        x:
+          type: integer
+          example: 720
+        y:
+          type: integer
+          example: 450
+
+    MovePointerRequest:
+      type: object
+      required: [x, y]
+      properties:
+        x:
+          type: integer
+          minimum: 0
+          description: Target X coordinate.
+        y:
+          type: integer
+          minimum: 0
+          description: Target Y coordinate.
+
+    ClickPointerRequest:
+      type: object
+      properties:
+        x:
+          type: integer
+          minimum: 0
+          description: X coordinate. If omitted, clicks at current position.
+        y:
+          type: integer
+          minimum: 0
+          description: Y coordinate. Must be provided with `x`.
+        button:
+          type: integer
+          minimum: 1
+          maximum: 3
+          default: 1
+          description: "Mouse button: 1 = left, 2 = middle, 3 = right."
+
+    DragPointerRequest:
+      type: object
+      required: [from_x, from_y, to_x, to_y]
+      properties:
+        from_x:
+          type: integer
+          minimum: 0
+        from_y:
+          type: integer
+          minimum: 0
+        to_x:
+          type: integer
+          minimum: 0
+        to_y:
+          type: integer
+          minimum: 0
+        button:
+          type: integer
+          minimum: 1
+          maximum: 3
+          default: 1
+          description: "Mouse button: 1 = left, 2 = middle, 3 = right."
+
+    ScrollPointerRequest:
+      type: object
+      required: [direction]
+      properties:
+        direction:
+          type: string
+          enum: [up, down, left, right]
+          description: Scroll direction.
+        amount:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 1
+          description: Number of scroll steps.
+
+    TypeTextRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          maxLength: 50000
+          description: Text to type.
+
+    PressKeyRequest:
+      type: object
+      required: [key]
+      properties:
+        key:
+          type: string
+          description: X11 keysym name (e.g. `Return`, `Escape`, `Tab`).
+
+    HotkeyRequest:
+      type: object
+      required: [keys]
+      properties:
+        keys:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            type: string
+          description: 'Keys to press simultaneously (e.g. `["ctrl", "l"]`).'
+
+    # ── Recording ──
+    RecordingStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          example: rec_1234567890
+        active:
+          type: boolean
+        started_at:
+          type: string
+          format: date-time
+        stopped_at:
+          type: string
+          format: date-time
+        download:
+          type: string
+          description: Download URL path.
+        mime_type:
+          type: string
+          example: video/mp4
+        file_name:
+          type: string
+          example: rec_1234567890.mp4
+        display:
+          type: string
+          example: ":0"
+        resolution:
+          type: string
+          example: 1440x900
+
+    RecordingSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          example: rec_1234567890
+        file_name:
+          type: string
+          example: rec_1234567890.mp4
+        download:
+          type: string
+        mime_type:
+          type: string
+          example: video/mp4
+        size_bytes:
+          type: integer
+          example: 2048576
+        created_at:
+          type: string
+          format: date-time
+        active:
+          type: boolean
+
+    RecordingsResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecordingSummary"
+
+    # ── Process ──
+    ProcessInfo:
+      type: object
+      required: [name, running, stdout_log, stderr_log]
+      properties:
+        name:
+          type: string
+          example: x11vnc
+        running:
+          type: boolean
+        pid:
+          type: integer
+        stdout_log:
+          type: string
+        stderr_log:
+          type: string
+
+    ProcessStatusResponse:
+      type: object
+      required: [status, items, running, total]
+      properties:
+        status:
+          type: string
+          enum: [running, degraded, stopped]
+          description: Overall status.
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProcessInfo"
+        running:
+          type: integer
+          description: Number of running processes.
+        total:
+          type: integer
+          description: Total number of managed processes.
+
+    RestartResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: x11vnc restarted
+        status:
+          $ref: "#/components/schemas/ProcessInfo"
+
+    LogResponse:
+      type: object
+      properties:
+        process:
+          type: string
+        logs:
+          type: string
+
+    ErrorLogResponse:
+      type: object
+      properties:
+        process:
+          type: string
+        errors:
+          type: string

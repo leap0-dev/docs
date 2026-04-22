@@ -1,0 +1,376 @@
+---
+title: Code Interpreter
+description: Execute Python and TypeScript code inside a sandbox with stateful sessions, rich output, and streaming.
+slug: code-interpreter
+---
+
+import { Tabs, TabItem } from "@/components/mdx-compat";
+
+Execute code inside a running sandbox. The interpreter keeps a persistent REPL process alive so that variables, imports, and working directory survive across calls. Send code, get back stdout, stderr, rich results (text, images, HTML, JSON), and structured errors. For a full endpoint reference, see the Code Interpreter API.
+
+Two runtimes are available:
+
+| Alias | Runtime | Notes |
+| ----- | ------- | ----- |
+| `python`, `py`, `python3` | Python 3.12 | 50+ pre-installed data-science packages. Matplotlib charts auto-captured as PNG and SVG. |
+| `typescript`, `ts`, `javascript`, `js`, `bun`, `node` | Bun v1.3.10 (TypeScript) | Last expression is returned as a result. State accumulates across calls. |
+
+### Create a context
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME)
+context = sandbox.code_interpreter.create_context(
+    language="python",
+    cwd="/home/user",
+)
+
+print(context.id, context.language)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+const context = await sandbox.codeInterpreter.createContext("python", "/home/user");
+
+console.log(context.id, context.language);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+| Field      | Type   | Required | Description                                          |
+| ---------- | ------ | -------- | ---------------------------------------------------- |
+| `language` | string | Yes      | One of the supported language aliases.               |
+| `cwd`      | string | No       | Initial working directory. Defaults to `/home/user`. |
+
+### List contexts
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME)
+for context in sandbox.code_interpreter.list_contexts():
+    print(context.id, context.language, context.cwd)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+for (const context of await sandbox.codeInterpreter.listContexts()) {
+  console.log(context.id, context.language, context.cwd);
+}
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+### Get a context
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME)
+context = sandbox.code_interpreter.get_context("<context_id>")
+print(context)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+const context = await sandbox.codeInterpreter.getContext("<context_id>");
+
+console.log(context);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+### Delete a context
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME)
+sandbox.code_interpreter.delete_context("<context_id>")
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+await sandbox.codeInterpreter.deleteContext("<context_id>");
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Execute code
+
+Run code synchronously. The sandbox waits for the code to finish and returns the full result in one response.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME)
+
+first = sandbox.code_interpreter.execute(
+    code="prices = [10, 20, 30, 40, 50]",
+    language="python",
+)
+
+second = sandbox.code_interpreter.execute(
+    code="sum(prices) / len(prices)",
+    language="python",
+    context_id=first.context_id,
+)
+
+for item in second.items:
+    if item.text:
+        print(item.text)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+const first = await sandbox.codeInterpreter.execute({
+  code: "prices = [10, 20, 30, 40, 50]",
+  language: "python",
+});
+
+const second = await sandbox.codeInterpreter.execute({
+  code: "sum(prices) / len(prices)",
+  language: "python",
+  contextId: first.contextId,
+});
+
+for (const item of second.items) {
+  if (item.text) console.log(item.text);
+}
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+### Request fields
+
+| Field        | Type    | Required | Default        | Description                         |
+| ------------ | ------- | -------- | -------------- | ----------------------------------- |
+| `code`       | string  | Yes      |                | Source code to execute.             |
+| `language`   | string  | No       | `python`       | Any supported alias.                |
+| `context_id` | string  | No       | auto-generated | Reuse an existing session.          |
+| `timeout_ms` | integer | No       | `30000`        | Max execution time in milliseconds. |
+
+## Stream execution
+
+Execute code and receive output line-by-line as Server-Sent Events. Use this for long-running scripts or anything where you want to show progress to the user before the process exits.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME)
+for event in sandbox.code_interpreter.execute_stream(
+    code="""import time
+for i in range(5):
+print(f'Step {i}')
+time.sleep(1)""",
+    language="python",
+    timeout_ms=60000,
+):
+    if event.type == "stdout":
+        print(event.data)
+    elif event.type == "exit":
+        print(f"Done (exit code {event.code})")
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+for await (const event of sandbox.codeInterpreter.executeStream({
+  code:
+    "import time\n" +
+    "for i in range(5):\n" +
+    " print(f'Step {i}')\n" +
+    " time.sleep(1)",
+  language: "python",
+  timeoutMs: 60000,
+})) {
+  if (event.type === "stdout") console.log(event.data);
+  if (event.type === "exit") console.log("Done (exit code " + event.code + ")");
+}
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+### Event types
+
+Each `data:` line in the SSE stream is a JSON object:
+
+| Type     | Fields | Meaning                                       |
+| -------- | ------ | --------------------------------------------- |
+| `stdout` | `data` | A line printed to standard output.            |
+| `stderr` | `data` | A line printed to standard error.             |
+| `exit`   | `code` | Process finished. `code` is `0` on success.   |
+| `error`  | `data` | Interpreter-level failure (e.g. `"timeout"`). |
+
+Example stream for `print("hello")`:
+
+```
+
+data: {"type":"stdout","data":"hello"}
+
+data: {"type":"exit","code":0}
+
+```
+
+## Generating charts
+
+Python's matplotlib is pre-installed and patched to automatically capture figures. Call `plt.show()` and the PNG and SVG representations appear in the `items` array - no file I/O required.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME)
+result = sandbox.code_interpreter.execute(
+    code="""import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 2 * np.pi, 100)
+plt.figure(figsize=(8, 4))
+plt.plot(x, np.sin(x), label='sin(x)')
+plt.plot(x, np.cos(x), label='cos(x)')
+plt.legend()
+plt.title('Trigonometric Functions')
+plt.show()""",
+    language="python",
+)
+
+for item in result.items:
+    if item.png:
+        print(f"PNG image: {len(item.png)} base64 chars")
+    if item.svg:
+        print(f"SVG image: {len(item.svg)} chars")
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+const result = await sandbox.codeInterpreter.execute({
+  code:
+    "import matplotlib.pyplot as plt\n" +
+    "import numpy as np\n\n" +
+    "x = np.linspace(0, 2 * np.pi, 100)\n" +
+    "plt.figure(figsize=(8, 4))\n" +
+    "plt.plot(x, np.sin(x), label='sin(x)')\n" +
+    "plt.plot(x, np.cos(x), label='cos(x)')\n" +
+    "plt.legend()\n" +
+    "plt.title('Trigonometric Functions')\n" +
+    "plt.show()",
+  language: "python",
+});
+
+for (const item of result.items) {
+  if (item.png) console.log("PNG image:", item.png.length, "base64 chars");
+  if (item.svg) console.log("SVG image:", item.svg.length, "chars");
+}
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Pre-installed Python packages
+
+The Python runtime ships with these packages ready to import:
+
+| Category             | Packages                                     |
+| -------------------- | -------------------------------------------- |
+| Data science         | numpy, pandas, scipy, scikit-learn, sympy    |
+| Visualization        | matplotlib, seaborn, plotly, bokeh, kaleido  |
+| Image processing     | pillow, opencv-python, scikit-image, imageio |
+| Audio                | librosa, soundfile                           |
+| HTTP / Web           | requests, aiohttp, beautifulsoup4, urllib3   |
+| Data formats         | orjson, openpyxl, xlrd, python-docx          |
+| Scientific computing | numba, xarray                                |
+| NLP                  | nltk, gensim, spacy, textblob                |
+| Utilities            | pytz, joblib, pytest                         |
+```

@@ -1,0 +1,16 @@
+{
+  "root": true,
+  "title": "API",
+  "description": "Core, metadata service, code interpreter, and desktop OpenAPI reference",
+  "icon": "MonitorSmartphone",
+  "pages": [
+    "---API---",
+    "...api",
+    "---Metadata Service---",
+    "...metadata-service/api",
+    "---Code Interpreter---",
+    "...code-interpreter/api",
+    "---Desktop---",
+    "...desktop/api"
+  ]
+}

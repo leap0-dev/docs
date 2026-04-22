@@ -1,0 +1,551 @@
+---
+title: DesktopClient
+description: Auto-generated reference for DesktopClient.
+---
+
+Source: [`src/services/desktop.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/desktop.ts)
+
+## Signature
+
+```ts
+DesktopClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Drives the desktop sandbox APIs for browser and GUI automation.
+
+#### Throws
+
+- `Leap0Error`: If API calls, stream decoding, or response validation fail.
+
+## Methods
+
+### `desktopUrl`
+
+```ts
+desktopUrl(sandbox: SandboxRef): string
+```
+
+Returns the base desktop URL for opening the remote UI in a browser.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+
+#### Returns
+
+- The base desktop URL.
+
+### `displayInfo`
+
+```ts
+async displayInfo(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopDisplayInfo>
+```
+
+Returns display metadata for the desktop session.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Desktop display metadata.
+
+### `screen`
+
+```ts
+async screen(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopDisplayInfo>
+```
+
+Returns the currently active desktop screen geometry.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Desktop screen geometry.
+
+### `resizeScreen`
+
+```ts
+async resizeScreen(sandbox: SandboxRef, payload: DesktopSetScreenParams, options?: RequestOptions): Promise<DesktopDisplayInfo>
+```
+
+Resizes the desktop screen to the requested dimensions.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `payload`: Screen resize parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Updated desktop display metadata.
+
+### `windows`
+
+```ts
+async windows(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopWindow[]>
+```
+
+Lists windows visible on the desktop.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The visible desktop windows.
+
+### `screenshot`
+
+```ts
+async screenshot(sandbox: SandboxRef, params: DesktopScreenshotParams = {}, options?: RequestOptions): Promise<Uint8Array>
+```
+
+Captures a screenshot and returns raw image bytes.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Screenshot parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Raw screenshot bytes.
+
+### `screenshotRegion`
+
+```ts
+async screenshotRegion(sandbox: SandboxRef, payload: DesktopScreenshotRegionParams, options?: RequestOptions): Promise<Uint8Array>
+```
+
+Captures a screenshot of a required rectangular region.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `payload`: Region screenshot parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Raw screenshot bytes.
+
+### `pointerPosition`
+
+```ts
+async pointerPosition(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopPointerPosition>
+```
+
+Returns the current pointer position.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The current pointer position.
+
+### `movePointer`
+
+```ts
+async movePointer(sandbox: SandboxRef, params: { x: number; y: number }, options?: RequestOptions): Promise<DesktopPointerPosition>
+```
+
+Moves the desktop pointer to a coordinate.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Pointer move parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The updated pointer position.
+
+### `click`
+
+```ts
+async click(sandbox: SandboxRef, params: DesktopClickParams = {}, options?: RequestOptions): Promise<DesktopPointerPosition>
+```
+
+Clicks the current pointer position or an explicit coordinate.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Click parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The resulting pointer position.
+
+### `drag`
+
+```ts
+async drag(sandbox: SandboxRef, payload: DesktopDragParams, options?: RequestOptions): Promise<DesktopPointerPosition>
+```
+
+Drags the pointer from one coordinate to another.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `payload`: Drag parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The resulting pointer position.
+
+### `scroll`
+
+```ts
+async scroll(sandbox: SandboxRef, payload: DesktopScrollParams, options?: RequestOptions): Promise<DesktopPointerPosition>
+```
+
+Scrolls the desktop in the requested direction.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `payload`: Scroll parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The resulting pointer position.
+
+### `typeText`
+
+```ts
+async typeText(sandbox: SandboxRef, text: string, options?: RequestOptions): Promise<boolean>
+```
+
+Types text into the active desktop input target.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `text`: Text to type.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Whether the action succeeded.
+
+### `pressKey`
+
+```ts
+async pressKey(sandbox: SandboxRef, key: string, options?: RequestOptions): Promise<boolean>
+```
+
+Sends a single key press to the desktop.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `key`: Key to press.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Whether the action succeeded.
+
+### `hotkey`
+
+```ts
+async hotkey(sandbox: SandboxRef, keys: string[], options?: RequestOptions): Promise<boolean>
+```
+
+Sends a key chord such as `Ctrl+C` or `Cmd+Shift+P`.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `keys`: Keys to press together.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Whether the action succeeded.
+
+### `recordingStatus`
+
+```ts
+async recordingStatus(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopRecordingStatus>
+```
+
+Returns current desktop recording state.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The current recording state.
+
+### `startRecording`
+
+```ts
+async startRecording(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopRecordingStatus>
+```
+
+Starts desktop recording.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The updated recording state.
+
+### `stopRecording`
+
+```ts
+async stopRecording(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopRecordingStatus>
+```
+
+Stops desktop recording.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The updated recording state.
+
+### `recordings`
+
+```ts
+async recordings(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopRecordingSummary[]>
+```
+
+Lists recorded desktop sessions.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Desktop recording summaries.
+
+### `getRecording`
+
+```ts
+async getRecording(sandbox: SandboxRef, id: string, options?: RequestOptions): Promise<DesktopRecordingSummary>
+```
+
+Fetches metadata for a single recording.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `id`: Recording identifier.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The recording metadata.
+
+### `downloadRecording`
+
+```ts
+async downloadRecording(sandbox: SandboxRef, id: string, options?: RequestOptions): Promise<Uint8Array>
+```
+
+Downloads a recording and returns raw file bytes.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `id`: Recording identifier.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Raw recording file bytes.
+
+### `deleteRecording`
+
+```ts
+async deleteRecording(sandbox: SandboxRef, id: string, options?: RequestOptions): Promise<void>
+```
+
+Deletes a recording by ID.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `id`: Recording identifier.
+- `options`: Optional request settings such as timeout and query params.
+
+### `health`
+
+```ts
+async health(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopHealth>
+```
+
+Returns desktop service health, accepting both healthy and degraded status codes.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Desktop health information.
+
+### `processStatus`
+
+```ts
+async processStatus(sandbox: SandboxRef, options?: RequestOptions): Promise<DesktopProcessStatusList>
+```
+
+Returns aggregate status for desktop-managed processes.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Aggregate process status information.
+
+### `getProcess`
+
+```ts
+async getProcess(sandbox: SandboxRef, name: string, options?: RequestOptions): Promise<DesktopProcessStatus>
+```
+
+Returns status for a named desktop-managed process.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `name`: Process name.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Status for the named process.
+
+### `restartProcess`
+
+```ts
+async restartProcess(sandbox: SandboxRef, name: string, options?: RequestOptions): Promise<DesktopProcessRestart>
+```
+
+Restarts a named desktop-managed process.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `name`: Process name.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The restart operation result.
+
+### `processLogs`
+
+```ts
+async processLogs(sandbox: SandboxRef, name: string, options?: RequestOptions): Promise<DesktopProcessLogs>
+```
+
+Returns logs for a named desktop-managed process.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `name`: Process name.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Process logs.
+
+### `processErrors`
+
+```ts
+async processErrors(sandbox: SandboxRef, name: string, options?: RequestOptions): Promise<DesktopProcessErrors>
+```
+
+Returns error logs for a named desktop-managed process.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `name`: Process name.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Process error logs.
+
+### `statusStream`
+
+```ts
+async statusStream(sandbox: SandboxRef, options: RequestOptions = {}): AsyncIterable<DesktopStatusStreamEvent>
+```
+
+Streams desktop process status updates.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Throws
+
+- `Leap0Error`: If the stream returns malformed events or reports an error envelope.
+
+### `waitUntilReady`
+
+```ts
+async waitUntilReady(sandbox: SandboxRef, params: { timeout?: number } = {}, options: RequestOptions = {}): Promise<void>
+```
+
+Waits until the desktop reports a running state or all tracked processes are up.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Wait parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Throws
+
+- `Leap0Error`: If the desktop never becomes ready or a non-retryable error occurs.
+
+#### Examples
+
+```ts
+await sandbox.desktop.waitUntilReady();
+```

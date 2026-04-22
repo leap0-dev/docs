@@ -1,0 +1,11 @@
+stateDiagram-v2
+  direction TB
+
+  Starting --> Running: booted
+  Running --> Snapshotting: snapshot requested
+  Snapshotting --> Paused: complete
+  Running --> Paused: pause or auto-pause
+  Paused --> Unpausing: resume
+  Unpausing --> Running: restored
+  Running --> Deleting: delete requested
+  Deleting --> Deleted: cleanup complete

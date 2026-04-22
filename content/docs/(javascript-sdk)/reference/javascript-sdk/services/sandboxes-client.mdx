@@ -1,0 +1,271 @@
+---
+title: SandboxesClient
+description: Auto-generated reference for SandboxesClient.
+---
+
+Source: [`src/services/sandboxes.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/sandboxes.ts)
+
+## Signature
+
+```ts
+SandboxesClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Creates, fetches, pauses, and deletes sandboxes.
+
+#### Throws
+
+- `Leap0Error`: If request validation, API calls, or response validation fail.
+
+## Methods
+
+### `create`
+
+```ts
+async create(params: CreateSandboxParams = {}, options: RequestOptions = {}): Promise<T>
+```
+
+Creates a sandbox from a template and resource config.
+
+#### Parameters
+
+- `params`: Sandbox creation parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The created sandbox resource.
+
+#### Throws
+
+- `Leap0Error`: If params are invalid, local OTEL env is missing, or sandbox creation fails.
+
+#### Examples
+
+```ts
+const sandbox = await client.sandboxes.create({
+  templateName: "base",
+  timeout: 1800,
+});
+```
+
+### `list`
+
+```ts
+async list(params: ListSandboxesParams = {}, options: RequestOptions = {}): Promise<ListSandboxesResponse>
+```
+
+Lists sandboxes for the authenticated organization.
+
+#### Parameters
+
+- `params`: Optional filter, sort, and pagination parameters.
+- `options`: Optional request settings such as timeout and headers.
+
+#### Returns
+
+- Paginated sandbox summaries.
+
+### `pause`
+
+```ts
+async pause(sandbox: SandboxRef, options: RequestOptions = {}): Promise<T>
+```
+
+Pauses a running sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The updated sandbox resource.
+
+### `createSnapshot`
+
+```ts
+async createSnapshot(sandbox: SandboxRef, params: CreateSnapshotParams = {}, options: RequestOptions = {}): Promise<SnapshotData>
+```
+
+Creates a snapshot from a running sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Optional snapshot naming parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The created snapshot resource.
+
+### `get`
+
+```ts
+async get(sandbox: SandboxRef, options: RequestOptions = {}): Promise<T>
+```
+
+Fetches a sandbox by ID.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The current sandbox resource.
+
+### `delete`
+
+```ts
+async delete(sandbox: SandboxRef, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes a sandbox by ID.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+### `addMount`
+
+```ts
+async addMount(sandbox: SandboxRef, mount: ObjectStorageMount, options: RequestOptions = {}): Promise<ObjectStorageMountSummary>
+```
+
+Adds an object storage mount to a running sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `mount`: Object storage mount configuration.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The created mount summary.
+
+### `updateMount`
+
+```ts
+async updateMount(sandbox: SandboxRef, mountID: string, mount: ObjectStorageMountUpdate, options: RequestOptions = {}): Promise<ObjectStorageMountSummary>
+```
+
+Updates an existing object storage mount on a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `mountID`: Mount identifier.
+- `mount`: Partial mount update payload.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The updated mount summary.
+
+### `deleteMount`
+
+```ts
+async deleteMount(sandbox: SandboxRef, mountID: string, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes an object storage mount from a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `mountID`: Mount identifier.
+- `options`: Optional request settings such as timeout and query params.
+
+### `getUserHomeDir`
+
+```ts
+async getUserHomeDir(sandbox: SandboxRef, options: RequestOptions = {}): Promise<string>
+```
+
+Fetches the resolved home directory for the sandbox user.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The resolved sandbox user home directory.
+
+### `getWorkdir`
+
+```ts
+async getWorkdir(sandbox: SandboxRef, options: RequestOptions = {}): Promise<string>
+```
+
+Fetches the configured working directory for the sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The configured sandbox workdir.
+
+### `createPresignedUrl`
+
+```ts
+async createPresignedUrl(sandbox: SandboxRef, params: CreatePresignedUrlParams, options: RequestOptions = {}): Promise<PresignedUrl>
+```
+
+Creates a temporary public URL for a specific sandbox port.
+
+### `deletePresignedUrl`
+
+```ts
+async deletePresignedUrl(sandbox: SandboxRef, id: string, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes a previously issued presigned URL.
+
+### `invokeUrl`
+
+```ts
+invokeUrl(sandbox: SandboxRef, path = "/", port?: number): string
+```
+
+Builds the public invoke URL for a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Route path to append to the sandbox base URL.
+- `port`: Optional forwarded port.
+
+#### Returns
+
+- The public HTTPS URL for the sandbox.
+
+### `websocketUrl`
+
+```ts
+websocketUrl(sandbox: SandboxRef, path = "/", port?: number): string
+```
+
+Builds the public websocket URL for a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Route path to append to the sandbox base URL.
+- `port`: Optional forwarded port.
+
+#### Returns
+
+- The public websocket URL for the sandbox.

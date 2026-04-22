@@ -1,0 +1,141 @@
+---
+title: AsyncPtyClient
+description: Auto-generated reference for AsyncPtyClient.
+---
+
+Source: [`leap0/_async/pty.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_async/pty.py)
+
+## Signature
+
+```python
+AsyncPtyClient(transport: AsyncTransport)
+```
+
+## Overview
+
+Create and connect to PTY sessions asynchronously.
+
+Attributes:
+    None.
+
+## Methods
+
+### `list`
+
+```python
+async list(sandbox: SandboxRef) -> list[PtySession]
+```
+
+List PTY sessions for a sandbox.
+
+Args:
+    sandbox: Sandbox ID or object.
+
+Returns:
+    list[PtySession]: Result returned by this operation.
+
+### `create`
+
+```python
+async create(sandbox: SandboxRef, *, session_id: str | None = None, cols: int | None = None, rows: int | None = None, cwd: str | None = None, envs: dict[str, str] | None = None, lazy_start: bool | None = None, http_timeout: float | None = None) -> PtySession
+```
+
+Create a terminal session with a shell process.
+
+Args:
+    sandbox: Sandbox ID or object.
+    session_id: Session ID. Auto-generated if omitted.
+    cols: Terminal columns.
+    rows: Terminal rows.
+    cwd: Starting directory.
+    envs: Environment variables.
+    lazy_start: Defer shell start until the first WebSocket connection.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    PtySession: Metadata for the created PTY session.
+
+### `get`
+
+```python
+async get(sandbox: SandboxRef, session_id: str) -> PtySession
+```
+
+Get an object by ID or identifier.
+
+Args:
+    sandbox: Sandbox ID or object.
+    session_id: PTY session identifier.
+
+Returns:
+    PtySession: Result returned by this operation.
+
+### `delete`
+
+```python
+async delete(sandbox: SandboxRef, session_id: str, http_timeout: float | None = None) -> None
+```
+
+Kill the shell process and remove the session.
+
+Args:
+    sandbox: Sandbox ID or object.
+    session_id: PTY session identifier.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
+
+### `resize`
+
+```python
+async resize(sandbox: SandboxRef, session_id: str, *, cols: int, rows: int) -> PtySession
+```
+
+Resize a PTY session.
+
+Args:
+    sandbox: Sandbox ID or object.
+    session_id: PTY session identifier.
+    cols: Parameter for this operation.
+    rows: Parameter for this operation.
+
+Returns:
+    PtySession: Result returned by this operation.
+
+### `websocket_url`
+
+```python
+websocket_url(sandbox: SandboxRef, session_id: str) -> str
+```
+
+Build a websocket URL for this sandbox.
+
+Args:
+    sandbox: Sandbox ID or object.
+    session_id: PTY session identifier.
+
+Returns:
+    str: Result returned by this operation.
+
+### `connect`
+
+```python
+async connect(sandbox: SandboxRef, session_id: str, open_timeout: float | None = None, http_timeout: float | None = None, **kwargs: Any) -> AsyncPtyConnection
+```
+
+Open a WebSocket connection for interactive terminal I/O.
+
+Important:
+    Callers are responsible for closing the returned connection, ideally
+    with ``try/finally`` or an async context manager wrapper.
+
+Args:
+    sandbox: Sandbox ID or object.
+    session_id: PTY session identifier.
+    open_timeout: Optional WebSocket open timeout in seconds.
+    http_timeout: Deprecated alias for ``open_timeout``.
+    kwargs: Parameter for this operation.
+
+Returns:
+    AsyncPtyConnection: Open WebSocket-backed PTY connection.

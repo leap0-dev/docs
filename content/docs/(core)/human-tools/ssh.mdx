@@ -1,0 +1,155 @@
+---
+title: SSH
+description: Manage SSH access to sandboxes.
+slug: ssh
+---
+
+import { Tabs, TabItem } from "@/components/mdx-compat";
+
+SSH endpoints let you create and manage SSH access credentials for a sandbox. Generate credentials, validate them, regenerate them, or revoke access entirely.
+
+## Create SSH access
+
+Generate SSH credentials for a sandbox. Returns an `id` to use as the SSH username, a `password`, and the SSH command to connect.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+access = sandbox.ssh.create_access()
+
+print("SSH username:", access.id)
+print(access.ssh_command)
+print("Password:", access.password)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+const access = await client.ssh.createAccess(sandbox);
+
+console.log("SSH username:", access.id);
+console.log(access.sshCommand);
+console.log("Password:", access.password);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Validate SSH access
+
+Check whether a specific SSH access credential is still valid and not expired.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+access = sandbox.ssh.create_access()
+validation = sandbox.ssh.validate_access(
+    id=access.id,
+    password=access.password,
+)
+
+print("Valid:", validation.valid)
+print("Sandbox:", validation.sandbox_id)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const access = await client.ssh.createAccess(sandbox);
+
+const validation = await client.ssh.validateAccess(sandbox, {
+  id: access.id,
+  password: access.password,
+});
+
+console.log("Valid:", validation.valid);
+console.log("Sandbox:", validation.sandboxId);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Regenerate SSH access
+
+Invalidate a specific credential and generate a new one. The expiry is also reset.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+access = sandbox.ssh.create_access()
+regenerated = sandbox.ssh.regenerate_access(id=access.id)
+
+print("New password:", regenerated.password)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const access = await client.ssh.createAccess(sandbox);
+
+const regenerated = await client.ssh.regenerateAccess(sandbox, { id: access.id });
+
+console.log("New password:", regenerated.password);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Delete SSH access
+
+Revoke a specific SSH access credential. The credential is invalidated immediately.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+access = sandbox.ssh.create_access()
+sandbox.ssh.delete_access(id=access.id)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const access = await client.ssh.createAccess(sandbox);
+
+await client.ssh.deleteAccess(sandbox, { id: access.id });
+await client.close();
+```
+  </TabItem>
+</Tabs>

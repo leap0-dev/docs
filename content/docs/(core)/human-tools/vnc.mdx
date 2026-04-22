@@ -1,0 +1,29 @@
+---
+title: VNC Access
+description: Access a graphical desktop environment for your sandbox directly in the browser via VNC.
+slug: vnc
+---
+
+import { env } from "@/env";
+
+VNC access gives you a full graphical Linux desktop inside a sandbox, streamed directly to your browser through [noVNC](https://novnc.com). No local VNC client or browser plugin is needed.
+
+:::note[Sandbox template requirement]
+VNC requires a sandbox created with the `system/desktop:v0.1.0` template. See <a href="/sandboxes">Sandboxes</a> for how to create one.
+:::
+
+## Open the desktop
+
+Open the sandbox invoke URL in any browser. The noVNC client loads and connects to the XFCE4 desktop automatically.
+
+<pre>
+  <code>{`https://<sandbox_id>.${env.LEAP0_SANDBOX_DOMAIN}/`}</code>
+</pre>
+
+Mouse and keyboard input works the same as a native desktop.
+
+## What is noVNC
+
+[noVNC](https://novnc.com) is an open-source VNC client written in JavaScript. It uses WebSockets and the HTML5 Canvas API to render a remote desktop directly in a browser tab. Input events (mouse clicks, keystrokes, scrolling) travel back over the same WebSocket connection, giving you interactive control without installing anything locally.
+
+See <a href="/desktop">Computer Use (Desktop)</a> for the full desktop architecture, pre-installed software, and programmatic automation API.

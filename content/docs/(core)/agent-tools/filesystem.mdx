@@ -1,0 +1,632 @@
+---
+title: Filesystem
+description: Run filesystem operations inside a sandbox.
+slug: filesystem
+---
+
+import { Tabs, TabItem } from "@/components/mdx-compat";
+
+Filesystem endpoints let you list, read, write, move, copy, delete, and search files inside a running sandbox. File content is transferred as raw binary bytes.
+
+## List files
+
+List directory entries.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.filesystem.ls(
+    path="/workspace",
+    recursive=False,
+    exclude=["node_modules", ".git"],
+)
+
+print(len(result.items))
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const result = await sandbox.filesystem.ls("/workspace", {
+  recursive: false,
+  exclude: ["node_modules", ".git"],
+});
+
+console.log(result.items.length);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Stat path
+
+Get metadata for a single path.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+info = sandbox.filesystem.stat(path="/workspace/main.py")
+print(info.size)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const info = await sandbox.filesystem.stat("/workspace/main.py");
+
+console.log(info.size);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Make directory
+
+Create a directory. Set `recursive` to create parent directories.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.filesystem.mkdir(
+    path="/workspace/src",
+    recursive=True,
+    permissions="755",
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.mkdir("/workspace/src", {
+  recursive: true,
+  permissions: "755",
+});
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Write file
+
+Write raw binary content to a single path. The file path is passed as a query parameter and the request body is the raw file bytes.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.filesystem.write_bytes(
+    path="/workspace/hello.txt",
+    content=b"Hello, world!",
+    permissions="644",
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.writeFile("/workspace/hello.txt", "Hello, world!", { permissions: "644" });
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Write multiple files
+
+Write multiple files in a single request using multipart/form-data. Each part's name is the file path and the body is the raw file bytes.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.filesystem.write_files_bytes(
+    files={
+        "/workspace/a.txt": b"a",
+        "/workspace/b.txt": b"b",
+    }
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.writeFiles({
+  "/workspace/a.txt": "a",
+  "/workspace/b.txt": "b",
+});
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Read file
+
+Read a single file. The response body contains the raw file bytes with content type `application/octet-stream`.
+
+Use `head` to read only the first N lines or `tail` to read only the last N lines. These options are mutually exclusive.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+
+print(sandbox.filesystem.read_bytes(path="/workspace/main.py"))
+print(sandbox.filesystem.read_bytes(path="/workspace/main.py", head=20))
+print(sandbox.filesystem.read_bytes(path="/workspace/main.py", tail=10))
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+console.log(await sandbox.filesystem.readFile("/workspace/main.py"));
+console.log(await sandbox.filesystem.readFile("/workspace/main.py", { head: 20 }));
+console.log(await sandbox.filesystem.readFile("/workspace/main.py", { tail: 10 }));
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Read multiple files
+
+Read multiple files. The response is `multipart/form-data` where each part's name is the file path and the body is the raw file bytes.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+files = sandbox.filesystem.read_files_bytes(
+    paths=["/workspace/a.txt", "/workspace/b.txt"],
+)
+
+for path, content in files.items():
+    print(path, content)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const files = await sandbox.filesystem.readFiles(["/workspace/a.txt", "/workspace/b.txt"]);
+
+for (const [path, content] of Object.entries(files)) {
+  console.log(path, content);
+}
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Delete path
+
+Delete a file or directory. Set `recursive` for directories with contents.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.filesystem.delete(path="/workspace/old", recursive=True)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.delete("/workspace/old", true);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Set permissions
+
+Set file mode and optionally change owner and group.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.filesystem.set_permissions(
+    path="/workspace/script.sh",
+    mode="755",
+    owner="root",
+    group="root",
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.setPermissions("/workspace/script.sh", {
+  mode: "755",
+  owner: "root",
+  group: "root",
+});
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Glob
+
+Find file paths matching a glob pattern.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+matches = sandbox.filesystem.glob(
+    path="/workspace",
+    pattern="*.ts",
+    exclude=["node_modules"],
+)
+
+print(len(matches))
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const matches = await sandbox.filesystem.glob("/workspace", "*.ts", {
+  exclude: ["node_modules"],
+});
+
+console.log(matches.length);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Grep
+
+Search for a text pattern across files in a directory.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+matches = sandbox.filesystem.grep(
+    path="/workspace",
+    pattern="TODO",
+    include="*.py",
+    exclude=["node_modules", ".git"],
+)
+
+print(len(matches))
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const matches = await sandbox.filesystem.grep("/workspace", "TODO", {
+  include: "*.py",
+  exclude: ["node_modules", ".git"],
+});
+
+console.log(matches.length);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Edit file
+
+Apply one or more find-and-replace edits to a single file. The response includes a unified diff and the total number of replacements made.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import FileEdit, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.filesystem.edit_file(
+    path="/workspace/main.py",
+    edits=[
+        FileEdit(find="hello", replace="hi"),
+        FileEdit(find="world", replace="earth"),
+    ],
+)
+
+print(result.diff)
+print(result.replacements)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const result = await sandbox.filesystem.editFile("/workspace/main.py", [
+  { find: "hello", replace: "hi" },
+  { find: "world", replace: "earth" },
+]);
+
+console.log(result.diff);
+console.log(result.replacements);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Edit files
+
+Replace text across multiple files at once.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+results = sandbox.filesystem.edit_files(
+    paths=["/workspace/a.py", "/workspace/b.py"],
+    find="old_name",
+    replace="new_name",
+)
+
+print(len(results))
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const results = await sandbox.filesystem.editFiles({
+  paths: ["/workspace/a.py", "/workspace/b.py"],
+  find: "old_name",
+  replace: "new_name",
+});
+
+console.log(results.items?.length ?? 0);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Move path
+
+Move or rename a file or directory.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.filesystem.move(
+    src_path="/workspace/old.txt",
+    dst_path="/workspace/new.txt",
+    overwrite=False,
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.move("/workspace/old.txt", "/workspace/new.txt", false);
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Copy
+
+Copy a file or directory. Set `recursive` to copy directories with contents.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+sandbox.filesystem.copy(
+    src_path="/home/user/file.txt",
+    dst_path="/home/user/file-copy.txt",
+    recursive=False,
+    overwrite=False,
+)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.copy("/home/user/file.txt", "/home/user/file-copy.txt", {
+  recursive: false,
+  overwrite: false,
+});
+
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Exists
+
+Check whether a path exists in the sandbox.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+print(sandbox.filesystem.exists(path="/workspace/main.py"))
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+console.log(await sandbox.filesystem.exists("/workspace/main.py"));
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Tree
+
+Get a recursive directory tree. Use `exclude` to skip directories and `max_depth` to limit traversal depth. The response is JSON: `{"items": [{"name": "src", "type": "directory", "children": [...]}, ...]}`.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+tree = sandbox.filesystem.tree(
+    path="/workspace",
+    exclude=["node_modules", ".git"],
+    max_depth=3,
+)
+
+print(tree.items)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const tree = await sandbox.filesystem.tree("/workspace", {
+  exclude: ["node_modules", ".git"],
+  maxDepth: 3,
+});
+
+console.log(tree.items);
+await client.close();
+```
+  </TabItem>
+</Tabs>

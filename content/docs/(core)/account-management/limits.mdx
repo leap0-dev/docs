@@ -1,0 +1,31 @@
+---
+title: Limits
+description: Sandbox resource limits and organization-level quotas.
+slug: limits
+---
+
+:::note[Public preview]
+Limits may change during the public preview period. Contact us if you need higher limits for your use case.
+:::
+
+## Sandbox resource limits
+
+| Resource               | Limit                           |
+| ---------------------- | ------------------------------- |
+| vCPU                   | 1 - 8                           |
+| Memory                 | 512 MiB - 8 GB (must be even)   |
+| Timeout                | 1 min - 8 hours (default 5 min) |
+| Disk                   | 10 GiB                          |
+| Max request/response   | 10 MiB                          |
+| WebSocket idle timeout | 5 minutes                       |
+
+## Organization quotas
+
+When a limit is reached, related endpoints reject new creates or invites.
+
+| Resource                            | Limit               |
+| ----------------------------------- | ------------------- |
+| API keys per organization           | 100                 |
+| Templates per organization          | 25                  |
+| Users + pending invitations per org | 20                  |
+| API rate limit                      | 1000 requests / 60s |

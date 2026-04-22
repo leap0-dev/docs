@@ -1,0 +1,26 @@
+---
+title: Python SDK Reference
+description: Auto-generated reference for the Leap0 Python SDK.
+---
+
+## Overview
+
+The Leap0 Python SDK provides synchronous and asynchronous clients for sandbox lifecycle, files, git, process execution, PTY sessions, LSP, SSH, code interpreter, desktop automation, snapshots, and templates.
+
+## Installation
+
+```text
+pip install leap0
+```
+
+## Getting Started
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+print(sandbox.id)
+```
+
+Use the sidebar to browse shared defaults, errors, sync clients, and async clients.

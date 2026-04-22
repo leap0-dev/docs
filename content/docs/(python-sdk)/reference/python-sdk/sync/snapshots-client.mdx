@@ -1,0 +1,71 @@
+---
+title: SnapshotsClient
+description: Auto-generated reference for SnapshotsClient.
+---
+
+Source: [`leap0/_sync/snapshots.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_sync/snapshots.py)
+
+## Signature
+
+```python
+SnapshotsClient(transport: Transport, *, sandbox_factory: SandboxFactory[Sandbox, SnapshotSandboxT] | None = None)
+```
+
+## Overview
+
+List, restore, and delete sandbox snapshots.
+
+    A snapshot captures the full state of a running sandbox so it can be
+    restored later.
+
+    Use snapshots when you want a reusable checkpoint of an initialized
+    sandbox environment.
+    
+Attributes:
+    None.
+
+## Methods
+
+### `list`
+
+```python
+list(*, query: str = '', sort: str = 'created_at', order_by: str = 'desc', page: int = 1, page_size: int = 20, http_timeout: float | None = None) -> SnapshotListResponse
+```
+
+List snapshots for the authenticated organization.
+
+Returns:
+    SnapshotListResponse: Result returned by this operation.
+
+### `restore`
+
+```python
+restore(*, snapshot_name: str, auto_pause: bool = False, timeout: int | None = None, network_policy: NetworkPolicyDict | None = None, http_timeout: float | None = None) -> SnapshotSandboxT | Sandbox
+```
+
+Restore a sandbox from a snapshot.
+
+Args:
+    snapshot_name: Name of the snapshot to restore.
+    auto_pause: Automatically pause the restored sandbox on timeout.
+    timeout: Sandbox timeout in seconds.
+    network_policy: Override the network policy from the snapshot.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    Sandbox: Newly restored sandbox.
+
+### `delete`
+
+```python
+delete(snapshot: SnapshotRef, http_timeout: float | None = None) -> None
+```
+
+Delete a snapshot.
+
+Args:
+    snapshot: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.

@@ -1,0 +1,31 @@
+---
+title: Metadata Service API
+description: Reference and overview for the in-sandbox metadata service.
+slug: /metadata-service/api
+---
+
+import { env } from "@/env";
+
+The Metadata Service API is available inside the sandbox at `http://169.254.169.254`.
+
+Use it to read sandbox metadata from inside the guest, including environment details and service state exposed by Leap0.
+
+## Base URL
+
+`http://169.254.169.254`
+
+## Authentication
+
+The metadata service uses IMDSv2 semantics from inside the sandbox.
+
+## What It's For
+
+- Read metadata about the current sandbox
+- Inspect guest-visible Leap0 state
+- Access sandbox-local metadata flows without calling the public API
+
+## Related APIs
+
+- [Leap0 API](/api) for sandbox lifecycle and platform operations
+- [Code Interpreter API](/code-interpreter/api) for REPL execution
+- [Desktop API](/desktop/api) for desktop automation

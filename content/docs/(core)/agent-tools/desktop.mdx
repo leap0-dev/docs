@@ -1,0 +1,773 @@
+---
+title: Computer Use (Desktop)
+description: Automate a full desktop sandbox with screenshots, mouse and keyboard input, recordings, and a built-in noVNC session.
+slug: desktop
+---
+
+import { Tabs, TabItem } from "@/components/mdx-compat";
+
+Computer use endpoints let you programmatically control a full Linux desktop running inside a sandbox.
+
+The runtime is based on Ubuntu 22.04 with an XFCE4 desktop at 1440x900 resolution. Firefox ESR, Google Chrome, and VS Code are pre-installed.
+
+:::note[Sandbox template requirement]
+Computer Use requires a sandbox created with the `system/desktop:v0.1.0` template. Sandboxes created with other templates do not include the desktop environment or VNC support unless you install the required packages. See <a href="/sandboxes">Sandboxes</a> for how to create one.
+:::
+
+For a full endpoint reference, see the <a href="/desktop/api">Computer Use (Desktop) API</a>.
+
+## Desktop access
+
+To open the desktop in a browser, see <a href="/vnc">VNC Access</a>.
+
+## Display info
+
+Query the current display name and resolution. Useful for calculating coordinates before sending mouse or screenshot commands.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(sandbox.desktop.display_info())
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.displayInfo());
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+## Resize screen
+
+Change the virtual display resolution. Width must be between 320 and 7680, height between 320 and 4320.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(sandbox.desktop.resize_screen(width=1280, height=800))
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.resizeScreen({ width: 1280, height: 800 }));
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+## List windows
+
+Inspect all open windows on the desktop. Each window includes its position, size, class, title, and whether it is focused.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+for window in sandbox.desktop.windows():
+    print(f"{window.title} ({window.width}x{window.height}) focused={window.focused}")
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+const windows = await sandbox.desktop.windows();
+windows.forEach((window) =>
+console.log(window.title, window.width + "x" + window.height, "focused=" + window.focused),
+);
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+## Screenshots
+
+### Full screen
+
+Capture the entire screen. Supports `png`, `jpg`, or `jpeg` format via the `format` query parameter. JPEG quality can be set with `quality` (1--100).
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from pathlib import Path
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+screenshot = sandbox.desktop.screenshot(image_format="png")
+Path("screen.png").write_bytes(screenshot)
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+const bytes = await sandbox.desktop.screenshot({ format: "png" });
+console.log("screenshot bytes", bytes.byteLength);
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Region
+
+Capture a specific region of the screen.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from pathlib import Path
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+region = sandbox.desktop.screenshot_region(
+    x=0,
+    y=0,
+    width=800,
+    height=600,
+    image_format="jpg",
+    quality=85,
+)
+Path("region.jpg").write_bytes(region)
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+const bytes = await sandbox.desktop.screenshotRegion({
+x: 0,
+y: 0,
+width: 800,
+height: 600,
+format: "jpg",
+quality: 85,
+});
+
+console.log("region bytes", bytes.byteLength);
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+## Mouse
+
+### Get pointer position
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(sandbox.desktop.pointer_position())
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.pointerPosition());
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Move pointer
+
+Move the cursor to absolute coordinates. Returns the new pointer position.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(sandbox.desktop.move_pointer(x=320, y=240))
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.movePointer(320, 240));
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Click
+
+Click at the current pointer position or at optional `x`, `y` coordinates. The `button` field maps to X11 buttons: `1` (left, default), `2` (middle), `3` (right). Returns the pointer position after the click.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+
+sandbox.desktop.click(x=320, y=240, button=1)
+sandbox.desktop.click(button=3)
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+await sandbox.desktop.click({ x: 320, y: 240, button: 1 });
+
+await sandbox.desktop.click({ button: 3 });
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Drag
+
+Drag from one coordinate to another. Uses button `1` (left) by default.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(
+    sandbox.desktop.drag(
+        from_x=100,
+        from_y=200,
+        to_x=400,
+        to_y=200,
+    )
+)
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(
+await sandbox.desktop.drag({
+fromX: 100,
+fromY: 200,
+toX: 400,
+toY: 200,
+}),
+);
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Scroll
+
+Scroll at the current pointer position. Direction must be `up`, `down`, `left`, or `right`. The `amount` field controls how many scroll steps to perform (1--100, defaults to 1).
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+sandbox.desktop.scroll(direction="down", amount=3)
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+await sandbox.desktop.scroll({ direction: "down", amount: 3 });
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+## Keyboard
+
+### Type text
+
+Type a string of text as if entered from the keyboard. Supports up to 50,000 characters.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+sandbox.desktop.type_text(text="hello from Leap0")
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+await sandbox.desktop.typeText("hello from Leap0");
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Press key
+
+Press a single key by its X11 keysym name (e.g. `Return`, `Escape`, `Tab`, `BackSpace`, `space`).
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+sandbox.desktop.press_key(key="Return")
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+await sandbox.desktop.pressKey("Return");
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Hotkey
+
+Press a multi-key shortcut. Pass an array of keys that will be joined with `+` and sent as a single xdotool key combination (e.g. `["ctrl", "l"]` becomes `ctrl+l`). Accepts 1--10 keys.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+sandbox.desktop.hotkey(keys=["ctrl", "l"])
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+await sandbox.desktop.hotkey(["ctrl", "l"]);
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+## Recordings
+
+Screen recordings are captured as MP4 files (H.264/libx264, yuv420p) using ffmpeg at 12 fps. Files are saved inside the sandbox at `~/.cache/leap0-recordings` by default (configurable via the `LEAP0_RECORDINGS_DIR` environment variable). Only one recording can be active at a time.
+
+### Start recording
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(sandbox.desktop.start_recording())
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.startRecording());
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Stop recording
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(sandbox.desktop.stop_recording())
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.stopRecording());
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Recording status
+
+Get the state of the current or most recent recording.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(sandbox.desktop.recording_status())
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.recordingStatus());
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### List recordings
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+for recording in sandbox.desktop.recordings():
+    print(f"{recording.id}: {recording.size_bytes} bytes")
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+const recordings = await sandbox.desktop.recordings();
+recordings.forEach((recording) => console.log(recording.id, recording.sizeBytes + " bytes"));
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Get recording
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(sandbox.desktop.get_recording("<recording_id>"))
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.getRecording("<recording_id>"));
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Download recording
+
+Returns the MP4 file as a binary download.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from pathlib import Path
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+recording = sandbox.desktop.download_recording("<recording_id>")
+Path("recording.mp4").write_bytes(recording)
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+const bytes = await sandbox.desktop.downloadRecording("<recording_id>");
+console.log("recording bytes", bytes.byteLength);
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Delete recording
+
+Delete a saved recording. Active recordings cannot be deleted. Stop them first. Returns `204 No Content` on success.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+sandbox.desktop.delete_recording("<recording_id>")
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+await sandbox.desktop.deleteRecording("<recording_id>");
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+## Process management
+
+The template runs five processes: `xvfb` (virtual framebuffer), `xfce4` (desktop session), `x11vnc` (VNC server), `novnc` (web-based VNC client via websockify), and `control` (the HTTP API server). The four managed processes (`xvfb`, `xfce4`, `x11vnc`, `novnc`) can be inspected and restarted through the endpoints below.
+
+### Overall status
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+print(sandbox.desktop.process_status())
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.processStatus());
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Status stream (SSE)
+
+Subscribe to a live Server-Sent Events stream of process status. The server sends an event immediately on connect, whenever a process status changes (e.g. after a restart), and every 2 seconds as a heartbeat. Each event has the same payload as `GET /api/status`. The connection stays open until the client disconnects.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+for status in sandbox.desktop.status_stream():
+    print(status)
+    break
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+for await (const status of sandbox.desktop.statusStream()) {
+console.log(status);
+break;
+}
+
+await client.close();
+
+````
+  </TabItem>
+</Tabs>
+
+### Per-process endpoints
+
+Inspect or restart individual processes. Replace `{name}` with `xvfb`, `xfce4`, `x11vnc`, or `novnc`.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(template_name=DEFAULT_DESKTOP_TEMPLATE_NAME)
+
+print(sandbox.desktop.get_process("x11vnc"))
+print(sandbox.desktop.restart_process("xfce4"))
+print(sandbox.desktop.process_logs("novnc"))
+````
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { DEFAULT_DESKTOP_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({ templateName: DEFAULT_DESKTOP_TEMPLATE_NAME });
+
+console.log(await sandbox.desktop.getProcess("x11vnc"));
+console.log(await sandbox.desktop.restartProcess("xfce4"));
+console.log(await sandbox.desktop.processLogs("novnc"));
+await client.close();
+
+```
+  </TabItem>
+</Tabs>
+```

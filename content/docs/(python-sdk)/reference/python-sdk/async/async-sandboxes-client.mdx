@@ -1,0 +1,226 @@
+---
+title: AsyncSandboxesClient
+description: Auto-generated reference for AsyncSandboxesClient.
+---
+
+Source: [`leap0/_async/sandbox.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_async/sandbox.py)
+
+## Signature
+
+```python
+AsyncSandboxesClient(transport: AsyncTransport, *, sandbox_domain: str | None = None, sandbox_factory: SandboxFactory[SandboxData | SandboxStatus, AsyncSandboxT] | None = None)
+```
+
+## Overview
+
+Create, inspect, pause, and delete sandboxes asynchronously.
+
+Attributes:
+    None.
+
+## Methods
+
+### `create`
+
+```python
+async create(*, template_name: str = DEFAULT_TEMPLATE_NAME, vcpu: int = DEFAULT_VCPU, memory: int = DEFAULT_MEMORY_MIB, timeout: int = DEFAULT_TIMEOUT, auto_pause: bool = False, otel_export: bool = False, env_vars: dict[str, str] | None = None, network_policy: NetworkPolicyDict | None = None, mounts: list[ObjectStorageMountRequestDict] | None = None, http_timeout: float | None = None) -> AsyncSandboxT | SandboxData | SandboxStatus
+```
+
+Create a new sandbox from a template.
+
+Args:
+    template_name: Name of the template to use.
+    vcpu: Number of virtual CPUs (1 to 8).
+    memory: Memory in MiB (512 to 8192, must be even).
+    timeout: Sandbox timeout in seconds (1 to 28800).
+    auto_pause: Whether the sandbox should auto-pause on timeout.
+    otel_export: Inject OpenTelemetry exporter environment into the sandbox. Requires ``OTEL_EXPORTER_OTLP_ENDPOINT`` in the local environment and also forwards ``OTEL_EXPORTER_OTLP_HEADERS`` when present.
+    env_vars: Environment variables to set inside the sandbox.
+    network_policy: Outbound network policy for the sandbox.
+    mounts: Object storage mounts to attach before boot.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    AsyncSandboxT | SandboxData | SandboxStatus: Created sandbox object.
+
+### `list`
+
+```python
+async list(*, state: str | None = None, sort: str = 'created_at', order_by: str = 'desc', page: int = 1, page_size: int = 20, http_timeout: float | None = None) -> SandboxListResponse
+```
+
+List sandboxes for the authenticated organization.
+
+Args:
+    state: Optional sandbox state filter.
+    sort: Sort field, either ``created_at`` or ``state``.
+    order_by: Sort direction, either ``asc`` or ``desc``.
+    page: 1-based page number.
+    page_size: Page size between 1 and 100.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    SandboxListResponse: Paginated sandbox summaries.
+
+### `pause`
+
+```python
+async pause(sandbox: SandboxRef, http_timeout: float | None = None) -> AsyncSandboxT | SandboxData | SandboxStatus
+```
+
+Pause the sandbox and return updated metadata.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    AsyncSandboxT | SandboxData | SandboxStatus: Updated sandbox object.
+
+### `create_snapshot`
+
+```python
+async create_snapshot(sandbox: SandboxRef, *, name: str | None = None, kill_sandbox_after: bool = False, http_timeout: float | None = None) -> Snapshot
+```
+
+Create a snapshot from a running sandbox.
+
+Returns:
+    Snapshot: Result returned by this operation.
+
+### `get`
+
+```python
+async get(sandbox: SandboxRef, http_timeout: float | None = None) -> AsyncSandboxT | SandboxData | SandboxStatus
+```
+
+Get the latest sandbox metadata.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    AsyncSandboxT | SandboxData | SandboxStatus: Current sandbox object.
+
+### `delete`
+
+```python
+async delete(sandbox: SandboxRef, http_timeout: float | None = None) -> None
+```
+
+Terminate and delete a sandbox.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
+
+### `get_user_home_dir`
+
+```python
+async get_user_home_dir(sandbox: SandboxRef, http_timeout: float | None = None) -> str
+```
+
+Get the resolved home directory for the sandbox user.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    str: Resolved sandbox user home directory.
+
+### `get_workdir`
+
+```python
+async get_workdir(sandbox: SandboxRef, http_timeout: float | None = None) -> str
+```
+
+Get the configured working directory for the sandbox.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    str: Configured sandbox workdir.
+
+### `create_presigned_url`
+
+```python
+async create_presigned_url(sandbox: SandboxRef, *, port: int, expires_in: int | None = None, http_timeout: float | None = None) -> PresignedURL
+```
+
+Returns:
+    PresignedURL: Result returned by this operation.
+
+### `delete_presigned_url`
+
+```python
+async delete_presigned_url(sandbox: SandboxRef, presigned_url_id: str, http_timeout: float | None = None) -> None
+```
+
+Returns:
+    None: Result returned by this operation.
+
+### `add_mount`
+
+```python
+async add_mount(sandbox: SandboxRef, mount: ObjectStorageMountRequestDict, http_timeout: float | None = None) -> ObjectStorageMount
+```
+
+Returns:
+    ObjectStorageMount: Result returned by this operation.
+
+### `update_mount`
+
+```python
+async update_mount(sandbox: SandboxRef, mount_id: str, mount: ObjectStorageMountUpdateDict, http_timeout: float | None = None) -> ObjectStorageMount
+```
+
+Returns:
+    ObjectStorageMount: Result returned by this operation.
+
+### `delete_mount`
+
+```python
+async delete_mount(sandbox: SandboxRef, mount_id: str, http_timeout: float | None = None) -> None
+```
+
+Returns:
+    None: Result returned by this operation.
+
+### `invoke_url`
+
+```python
+invoke_url(sandbox: SandboxRef, path: str = '/', *, port: int | None = None) -> str
+```
+
+Build an HTTPS URL for this sandbox.
+
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    port: Port number for the generated URL.
+
+Returns:
+    str: Result returned by this operation.
+
+### `websocket_url`
+
+```python
+websocket_url(sandbox: SandboxRef, path: str = '/', *, port: int | None = None) -> str
+```
+
+Build a websocket URL for this sandbox.
+
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    port: Port number for the generated URL.
+
+Returns:
+    str: Result returned by this operation.

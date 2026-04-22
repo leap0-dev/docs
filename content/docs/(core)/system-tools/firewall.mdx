@@ -1,0 +1,216 @@
+---
+title: Firewall
+description: Configure outbound network restrictions for sandbox runtimes.
+slug: firewall
+---
+
+import { Tabs, TabItem } from "@/components/mdx-compat";
+
+Control what a sandbox can reach over the network using the `network_policy` field when creating or restoring a sandbox.
+
+When `network_policy` is omitted, all outbound traffic is allowed.
+
+## Policy modes
+
+| Mode        | Behavior                                                                          |
+| ----------- | --------------------------------------------------------------------------------- |
+| `allow-all` | All outbound traffic is permitted (default).                                      |
+| `deny-all`  | All outbound traffic is blocked.                                                  |
+| `custom`    | Traffic is filtered by `allow_domains`, `allow_cidrs`, and optional `transforms`. |
+
+## Allow all traffic (default)
+
+Omit `network_policy` or set it explicitly:
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client, NetworkPolicyMode
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(
+    vcpu=2,
+    memory=2048,
+    network_policy={"mode": NetworkPolicyMode.ALLOW_ALL},
+)
+
+print(sandbox.id, sandbox.network_policy)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client, NetworkPolicyMode } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  networkPolicy: { mode: NetworkPolicyMode.ALLOW_ALL },
+});
+
+console.log(sandbox.id, sandbox.networkPolicy);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Block all outbound traffic
+
+Completely isolate the sandbox from the network.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client, NetworkPolicyMode
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(
+    vcpu=2,
+    memory=2048,
+    network_policy={"mode": NetworkPolicyMode.DENY_ALL},
+)
+
+print(sandbox.id, sandbox.network_policy)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client, NetworkPolicyMode } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  networkPolicy: { mode: NetworkPolicyMode.DENY_ALL },
+});
+
+console.log(sandbox.id, sandbox.networkPolicy);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Custom policy with domains and CIDRs
+
+Allow specific domains and IP ranges while blocking everything else.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client, NetworkPolicyMode
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(
+    vcpu=2,
+    memory=2048,
+    network_policy={
+        "mode": NetworkPolicyMode.CUSTOM,
+        "allow_domains": ["api.openai.com", "pypi.org"],
+        "allow_cidrs": ["10.0.0.0/24"],
+    },
+)
+
+print(sandbox.id, sandbox.network_policy)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client, NetworkPolicyMode } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  networkPolicy: {
+    mode: NetworkPolicyMode.CUSTOM,
+    allowDomains: ["api.openai.com", "pypi.org"],
+    allowCidrs: ["10.0.0.0/24"],
+  },
+});
+
+console.log(sandbox.id, sandbox.networkPolicy);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## Transforms
+
+Transforms let you inject or strip headers on a per-domain basis. This is useful for credential brokering: the sandbox code makes requests without API keys, and the firewall injects the credentials on the host side. The secrets never enter the sandbox.
+
+Domains with transform rules are implicitly allowed. You don't need to add them to `allow_domains` separately.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client, NetworkPolicyMode
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(
+    vcpu=2,
+    memory=2048,
+    network_policy={
+        "mode": NetworkPolicyMode.CUSTOM,
+        "allow_domains": ["api.openai.com"],
+        "transforms": [
+            {
+                "domain": "api.openai.com",
+                "inject_headers": {
+                    "Authorization": "Bearer sk-proj-...",
+                },
+                "strip_headers": ["X-Debug"],
+            }
+        ],
+    },
+)
+
+print(sandbox.id, sandbox.network_policy)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+```ts
+import { Leap0Client, NetworkPolicyMode } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  networkPolicy: {
+    mode: NetworkPolicyMode.CUSTOM,
+    allowDomains: ["api.openai.com"],
+    transforms: [
+      {
+        domain: "api.openai.com",
+        injectHeaders: {
+          Authorization: "Bearer sk-proj-...",
+        },
+        stripHeaders: ["X-Debug"],
+      },
+    ],
+  },
+});
+
+console.log(sandbox.id, sandbox.networkPolicy);
+await client.close();
+```
+  </TabItem>
+</Tabs>
+
+## TLS termination
+
+To perform request transformation on HTTPS traffic, the firewall terminates TLS connections. Only connections to domains with defined transform rules are terminated. All other allowed domains pass through as an opaque TCP tunnel without any inspection.
+
+A unique, per-sandbox CA is added to the system certificates. Standard environment variables are configured automatically to ensure compatibility with most clients.
+
+## Snapshots
+
+Network policy is persisted with snapshots. When restoring a snapshot, the policy from the snapshot is used by default. You can override it by passing a new `network_policy` in the restore request.
+```

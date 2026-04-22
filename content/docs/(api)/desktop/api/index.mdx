@@ -1,0 +1,28 @@
+---
+title: Desktop API
+description: Reference and overview for desktop automation inside a sandbox.
+slug: /desktop/api
+---
+
+import { env } from "@/env";
+
+The Desktop API runs inside a sandbox and is exposed at <code>{`https://<sandbox_id>.${env.LEAP0_SANDBOX_DOMAIN}`}</code>.
+
+Use it to control a Linux desktop programmatically, including screenshots, mouse and keyboard input, screen recording, and desktop processes.
+
+## Base URL
+
+<code>{`https://<sandbox_id>.${env.LEAP0_SANDBOX_DOMAIN}`}</code>
+
+## What It's For
+
+- Capture screenshots
+- Send mouse and keyboard input
+- Record the screen
+- Launch and manage desktop-side processes
+
+## Related APIs
+
+- [Leap0 API](/api) for core platform operations
+- [Metadata Service API](/metadata-service/api) for in-guest metadata
+- [Code Interpreter API](/code-interpreter/api) for interpreter execution

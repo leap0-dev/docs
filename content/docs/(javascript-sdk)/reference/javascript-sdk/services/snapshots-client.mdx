@@ -1,0 +1,69 @@
+---
+title: SnapshotsClient
+description: Auto-generated reference for SnapshotsClient.
+---
+
+Source: [`src/services/snapshots.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/snapshots.ts)
+
+## Signature
+
+```ts
+SnapshotsClient(transport: Leap0Transport, sandboxFactory?: (data: SandboxData) => T)
+```
+
+## Overview
+
+Lists, restores, and deletes named snapshots.
+
+#### Throws
+
+- `Leap0Error`: If request validation, API calls, or response validation fail.
+
+## Methods
+
+### `list`
+
+```ts
+async list(params: ListSnapshotsParams = {}, options: RequestOptions = {}): Promise<ListSnapshotsResponse>
+```
+
+Lists snapshots for the authenticated organization.
+
+#### Parameters
+
+- `params`: Optional filter, sort, and pagination parameters.
+- `options`: Optional request settings such as timeout and headers.
+
+#### Returns
+
+- Paginated snapshot summaries.
+
+### `restore`
+
+```ts
+async restore(params: RestoreSnapshotParams, options: RequestOptions = {}): Promise<T>
+```
+
+Restores a sandbox from a snapshot.
+
+#### Parameters
+
+- `params`: Snapshot name and optional sandbox overrides.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The restored sandbox, optionally wrapped in a custom sandbox type.
+
+### `delete`
+
+```ts
+async delete(snapshot: SnapshotRef, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes a snapshot by ID.
+
+#### Parameters
+
+- `snapshot`: Snapshot ID or snapshot-like object.
+- `options`: Optional request settings such as timeout and query params.

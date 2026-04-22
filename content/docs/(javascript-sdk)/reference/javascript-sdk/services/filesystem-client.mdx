@@ -1,0 +1,406 @@
+---
+title: FilesystemClient
+description: Auto-generated reference for FilesystemClient.
+---
+
+Source: [`src/services/filesystem.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/filesystem.ts)
+
+## Signature
+
+```ts
+FilesystemClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Performs filesystem operations inside a sandbox.
+
+#### Throws
+
+- `Leap0Error`: If API calls or response validation fail.
+
+## Methods
+
+### `ls`
+
+```ts
+async ls(sandbox: SandboxRef, path: string, params: { recursive?: boolean; exclude?: string[] } = {}, options: RequestOptions = {}): Promise<LsResult>
+```
+
+Lists directory contents, optionally recursively.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Directory path to list.
+- `params`: Listing options.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The directory listing result.
+
+### `stat`
+
+```ts
+async stat(sandbox: SandboxRef, path: string, options: RequestOptions = {}): Promise<FileInfo>
+```
+
+Fetches metadata for a path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Filesystem path to stat.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The path metadata.
+
+### `mkdir`
+
+```ts
+async mkdir(sandbox: SandboxRef, path: string, params: { recursive?: boolean; permissions?: string } = {}, options: RequestOptions = {}): Promise<void>
+```
+
+Creates a directory. Set `recursive` to create parent directories.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Directory path to create.
+- `params`: Directory creation options.
+- `options`: Optional request settings such as timeout and query params.
+
+### `writeBytes`
+
+```ts
+async writeBytes(sandbox: SandboxRef, path: string, content: Uint8Array, params: { permissions?: string } = {}, options: RequestOptions = {}): Promise<void>
+```
+
+Writes raw bytes to a single file path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: File path to write.
+- `content`: File bytes to write.
+- `params`: File write options.
+- `options`: Optional request settings such as timeout and query params.
+
+### `writeFile`
+
+```ts
+async writeFile(sandbox: SandboxRef, path: string, content: string, params: { permissions?: string } = {}, options: RequestOptions = {}): Promise<void>
+```
+
+Writes UTF-8 text to a single file path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: File path to write.
+- `content`: UTF-8 text content to write.
+- `params`: File write options.
+- `options`: Optional request settings such as timeout and query params.
+
+### `writeFilesBytes`
+
+```ts
+async writeFilesBytes(sandbox: SandboxRef, files: Record<string, Uint8Array>, options: RequestOptions = {}): Promise<void>
+```
+
+Writes multiple files in a single request using multipart upload.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `files`: Files keyed by destination path.
+- `options`: Optional request settings such as timeout and query params.
+
+### `writeFiles`
+
+```ts
+async writeFiles(sandbox: SandboxRef, files: Record<string, string>, options: RequestOptions = {}): Promise<void>
+```
+
+Writes multiple UTF-8 text files in a single request.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `files`: Files keyed by destination path.
+- `options`: Optional request settings such as timeout and query params.
+
+### `readBytes`
+
+```ts
+async readBytes(sandbox: SandboxRef, path: string, params: { offset?: number; limit?: number; head?: number; tail?: number } = {}, options: RequestOptions = {}): Promise<Uint8Array>
+```
+
+Reads a single file and returns its raw bytes.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: File path to read.
+- `params`: Read options.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The file contents as bytes.
+
+#### Throws
+
+- `Error`: If both `head` and `tail` are provided.
+- `Leap0Error`: If the read request fails.
+
+### `readFile`
+
+```ts
+async readFile(sandbox: SandboxRef, path: string, params: { offset?: number; limit?: number; head?: number; tail?: number } = {}, options: RequestOptions = {}): Promise<string>
+```
+
+Reads a single file and returns its content decoded as text.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: File path to read.
+- `params`: Read options.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The file contents decoded as text.
+
+#### Throws
+
+- `Error`: If both `head` and `tail` are provided.
+- `Leap0Error`: If the read request fails.
+
+#### Examples
+
+```ts
+const readme = await sandbox.filesystem.readFile("/workspace/README.md");
+```
+
+### `readFilesBytes`
+
+```ts
+async readFilesBytes(sandbox: SandboxRef, paths: string[], options: RequestOptions = {}): Promise<Record<string, Uint8Array>>
+```
+
+Reads multiple files and returns raw bytes keyed by path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `paths`: File paths to read.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- File contents keyed by path.
+
+#### Throws
+
+- `Error`: If the multipart response is malformed.
+- `Leap0Error`: If the read request fails.
+
+### `readFiles`
+
+```ts
+async readFiles(sandbox: SandboxRef, paths: string[], options: RequestOptions = {}): Promise<Record<string, string>>
+```
+
+Reads multiple files and returns decoded text keyed by path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `paths`: File paths to read.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Decoded file contents keyed by path.
+
+### `delete`
+
+```ts
+async delete(sandbox: SandboxRef, params: { path: string; recursive?: boolean }, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes a file or directory. Set `recursive` for non-empty directories.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Delete parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+### `setPermissions`
+
+```ts
+async setPermissions(sandbox: SandboxRef, path: string, params: { mode?: string; owner?: string; group?: string } = {}, options: RequestOptions = {}): Promise<void>
+```
+
+Sets file mode and optionally changes owner and group.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: File or directory path to update.
+- `params`: Permission update parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Throws
+
+- `Leap0Error`: If params are invalid or the request fails.
+
+### `glob`
+
+```ts
+async glob(sandbox: SandboxRef, path: string, pattern: string, params: { exclude?: string[] } = {}, options: RequestOptions = {}): Promise<string[]>
+```
+
+Finds file paths matching a glob pattern.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Base directory to search.
+- `pattern`: Glob pattern to match.
+- `params`: Glob options.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Matching file paths.
+
+### `grep`
+
+```ts
+async grep(sandbox: SandboxRef, path: string, pattern: string, params: { include?: string; exclude?: string[] } = {}, options: RequestOptions = {}): Promise<SearchMatch[]>
+```
+
+Searches for a text pattern across files in a directory.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Base directory to search.
+- `pattern`: Text or regex pattern to search for.
+- `params`: Grep options.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Matching search results.
+
+### `editFile`
+
+```ts
+async editFile(sandbox: SandboxRef, path: string, edits: FileEdit[], options: RequestOptions = {}): Promise<EditFileResult>
+```
+
+Applies one or more find-and-replace edits to a single file.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: File path to edit.
+- `edits`: Edit operations to apply.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The single-file edit result.
+
+### `editFiles`
+
+```ts
+async editFiles(sandbox: SandboxRef, params: { paths: string[]; find: string; replace?: string }, options: RequestOptions = {}): Promise<EditFilesResult>
+```
+
+Replaces text across multiple files at once.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Multi-file edit parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The multi-file edit result.
+
+### `move`
+
+```ts
+async move(sandbox: SandboxRef, params: { srcPath: string; dstPath: string; overwrite?: boolean }, options: RequestOptions = {}): Promise<void>
+```
+
+Moves or renames a file or directory.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Move parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+### `copy`
+
+```ts
+async copy(sandbox: SandboxRef, srcPath: string, dstPath: string, params: { recursive?: boolean; overwrite?: boolean } = {}, options: RequestOptions = {}): Promise<void>
+```
+
+Copies a file or directory.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `srcPath`: Source path.
+- `dstPath`: Destination path.
+- `params`: Copy options.
+- `options`: Optional request settings such as timeout and query params.
+
+### `exists`
+
+```ts
+async exists(sandbox: SandboxRef, path: string, options: RequestOptions = {}): Promise<boolean>
+```
+
+Checks whether a path exists in the sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: File or directory path to check.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- Whether the path exists.
+
+### `tree`
+
+```ts
+async tree(sandbox: SandboxRef, path: string, params: { maxDepth?: number; exclude?: string[] } = {}, options: RequestOptions = {}): Promise<TreeResult>
+```
+
+Gets a recursive directory tree.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `path`: Root path for the tree.
+- `params`: Tree options.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The recursive tree result.

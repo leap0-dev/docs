@@ -1,0 +1,190 @@
+---
+title: AsyncSandbox
+description: Auto-generated reference for AsyncSandbox.
+---
+
+Source: [`leap0/_async/sandbox.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_async/sandbox.py)
+
+## Signature
+
+```python
+AsyncSandbox(client: 'AsyncLeap0Client', data: SandboxData | SandboxStatus)
+```
+
+## Overview
+
+Sandbox object with bound asynchronous service clients.
+
+Attributes:
+    filesystem: Bound filesystem client.
+    git: Bound git client.
+    process: Bound process client.
+    pty: Bound PTY client.
+    lsp: Bound LSP client.
+    ssh: Bound SSH client.
+    code_interpreter: Bound code interpreter client.
+    desktop: Bound desktop client.
+
+## Methods
+
+### `refresh`
+
+```python
+async refresh() -> AsyncSandbox
+```
+
+Refresh this sandbox object with the latest metadata.
+
+Returns:
+    AsyncSandbox: This sandbox object with refreshed metadata.
+
+### `pause`
+
+```python
+async pause(http_timeout: float | None = None) -> AsyncSandbox
+```
+
+Pause the sandbox and return updated metadata.
+
+Args:
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    AsyncSandbox: This sandbox object with updated metadata.
+
+### `create_snapshot`
+
+```python
+async create_snapshot(*, name: str | None = None, kill_sandbox_after: bool = False, http_timeout: float | None = None) -> Snapshot
+```
+
+Create a snapshot from this sandbox.
+
+Args:
+    name: Optional snapshot name. Auto-generated if omitted.
+    kill_sandbox_after: Terminate the source sandbox after the snapshot is stored.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    Snapshot: Created snapshot metadata.
+
+### `delete`
+
+```python
+async delete(http_timeout: float | None = None) -> None
+```
+
+Terminate and delete a sandbox.
+
+Args:
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
+
+### `create_presigned_url`
+
+```python
+async create_presigned_url(*, port: int, expires_in: int | None = None, http_timeout: float | None = None) -> PresignedURL
+```
+
+Create a temporary public URL for a specific sandbox port.
+
+Returns:
+    PresignedURL: Result returned by this operation.
+
+### `delete_presigned_url`
+
+```python
+async delete_presigned_url(presigned_url_id: str, http_timeout: float | None = None) -> None
+```
+
+Delete a previously issued presigned URL.
+
+Returns:
+    None: Result returned by this operation.
+
+### `invoke_url`
+
+```python
+invoke_url(path: str = '/', *, port: int | None = None) -> str
+```
+
+Build an HTTPS URL for this sandbox.
+
+Args:
+    path: Request path inside the sandbox application.
+    port: Port number for the generated URL.
+
+Returns:
+    str: Sandbox-scoped HTTPS URL.
+
+### `websocket_url`
+
+```python
+websocket_url(path: str = '/', *, port: int | None = None) -> str
+```
+
+Build a websocket URL for this sandbox.
+
+Args:
+    path: Request path inside the sandbox application.
+    port: Port number for the generated URL.
+
+Returns:
+    str: Sandbox-scoped websocket URL.
+
+### `get_user_home_dir`
+
+```python
+async get_user_home_dir(http_timeout: float | None = None) -> str
+```
+
+Fetch the resolved home directory for the sandbox user.
+
+Returns:
+    str: Result returned by this operation.
+
+### `get_workdir`
+
+```python
+async get_workdir(http_timeout: float | None = None) -> str
+```
+
+Fetch the configured working directory for the sandbox.
+
+Returns:
+    str: Result returned by this operation.
+
+### `add_mount`
+
+```python
+async add_mount(mount: ObjectStorageMountRequestDict, http_timeout: float | None = None) -> ObjectStorageMount
+```
+
+Attach an object storage mount to this sandbox.
+
+Returns:
+    ObjectStorageMount: Result returned by this operation.
+
+### `update_mount`
+
+```python
+async update_mount(mount_id: str, mount: ObjectStorageMountUpdateDict, http_timeout: float | None = None) -> ObjectStorageMount
+```
+
+Update an existing object storage mount on this sandbox.
+
+Returns:
+    ObjectStorageMount: Result returned by this operation.
+
+### `delete_mount`
+
+```python
+async delete_mount(mount_id: str, http_timeout: float | None = None) -> None
+```
+
+Delete an object storage mount from this sandbox.
+
+Returns:
+    None: Result returned by this operation.

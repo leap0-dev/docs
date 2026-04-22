@@ -1,0 +1,199 @@
+---
+title: LspClient
+description: Auto-generated reference for LspClient.
+---
+
+Source: [`src/services/lsp.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/lsp.ts)
+
+## Signature
+
+```ts
+LspClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Starts and interacts with language servers inside a sandbox.
+
+#### Throws
+
+- `Leap0Error`: If an API call fails.
+- `Error`: If the service returns an unexpected empty response.
+
+## Methods
+
+### `start`
+
+```ts
+async start(sandbox: SandboxRef, params: Pick<LspRequestParams, "languageId" | "pathToProject">, options?: RequestOptions): Promise<LspResponse>
+```
+
+Starts a language server for a project path inside the sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Language server start parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The language server response payload.
+
+### `stop`
+
+```ts
+async stop(sandbox: SandboxRef, params: Pick<LspRequestParams, "languageId" | "pathToProject">, options?: RequestOptions): Promise<LspResponse>
+```
+
+Stops a previously started language server.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Language server stop parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The language server response payload.
+
+### `didOpen`
+
+```ts
+async didOpen(sandbox: SandboxRef, params: LspRequestParams, options?: RequestOptions): Promise<void>
+```
+
+Opens a document in the language server.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Document open parameters.
+- `options`: Optional request options.
+
+#### Examples
+
+```ts
+await sandbox.lsp.didOpen({
+  languageId: "typescript",
+  pathToProject: "/workspace/app",
+  uri: "file:///workspace/app/src/index.ts",
+  text: "const x = 1;",
+  version: 1,
+});
+```
+
+### `didOpenPath`
+
+```ts
+async didOpenPath(sandbox: SandboxRef, params: Omit<LspRequestParams, "uri"> & { path: string }, options?: RequestOptions): Promise<void>
+```
+
+Opens a document by filesystem path instead of a file URI.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Document open parameters using a filesystem path.
+- `options`: Optional request options.
+
+### `didClose`
+
+```ts
+async didClose(sandbox: SandboxRef, params: Pick<LspRequestParams, "languageId" | "pathToProject" | "uri">, options?: RequestOptions): Promise<void>
+```
+
+Closes a previously opened document.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Document close parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+### `didClosePath`
+
+```ts
+async didClosePath(sandbox: SandboxRef, params: Pick<LspRequestParams, "languageId" | "pathToProject"> & { path: string }, options?: RequestOptions): Promise<void>
+```
+
+Closes a document by filesystem path instead of a file URI.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Document close parameters using a filesystem path.
+- `options`: Optional request settings such as timeout and query params.
+
+### `completions`
+
+```ts
+async completions(sandbox: SandboxRef, params: Pick<LspRequestParams, "languageId" | "pathToProject" | "uri"> & { line: number; character: number; }, options?: RequestOptions): Promise<LspJsonRpcResponse>
+```
+
+Requests completion items at a line/character position.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Completion request parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The raw JSON-RPC response from the language server.
+
+### `completionsPath`
+
+```ts
+async completionsPath(sandbox: SandboxRef, params: Pick<LspRequestParams, "languageId" | "pathToProject"> & { path: string; line: number; character: number; }, options?: RequestOptions): Promise<LspJsonRpcResponse>
+```
+
+Requests completion items for a filesystem path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Completion request parameters using a filesystem path.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The raw JSON-RPC response from the language server.
+
+### `documentSymbols`
+
+```ts
+async documentSymbols(sandbox: SandboxRef, params: Pick<LspRequestParams, "languageId" | "pathToProject" | "uri">, options?: RequestOptions): Promise<LspJsonRpcResponse>
+```
+
+Returns document symbols for an open document.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Document symbol request parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The raw JSON-RPC response from the language server.
+
+### `documentSymbolsPath`
+
+```ts
+async documentSymbolsPath(sandbox: SandboxRef, params: Pick<LspRequestParams, "languageId" | "pathToProject"> & { path: string }, options?: RequestOptions): Promise<LspJsonRpcResponse>
+```
+
+Returns document symbols for a filesystem path.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: Document symbol request parameters using a filesystem path.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The raw JSON-RPC response from the language server.

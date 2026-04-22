@@ -1,0 +1,65 @@
+---
+title: AsyncLeap0Client
+description: Auto-generated reference for AsyncLeap0Client.
+---
+
+Source: [`leap0/_async/client.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_async/client.py)
+
+## Signature
+
+```python
+AsyncLeap0Client(*, config: Leap0Config | None = None, api_key: str | None = None, base_url: str | None = None, sandbox_domain: str | None = None, timeout: float = DEFAULT_CLIENT_TIMEOUT, auth_header: str = 'authorization', bearer: bool = True, sdk_otel_enabled: bool | None = None)
+```
+
+## Overview
+
+Top-level asynchronous client for the Leap0 API.
+
+Use this client to create sandboxes and access top-level control-plane
+services. Sandbox-scoped services are exposed through bound sandbox objects.
+
+Attributes:
+    sandboxes: Client for sandbox lifecycle operations.
+    snapshots: Client for snapshot lifecycle operations.
+    templates: Client for template management.
+
+## Methods
+
+### `get_sandbox`
+
+```python
+async get_sandbox(sandbox_id: str) -> AsyncSandbox
+```
+
+Get a sandbox by ID.
+
+Args:
+    sandbox_id: Sandbox identifier.
+
+Returns:
+    AsyncSandbox: Sandbox object with bound service clients.
+
+### `create_sandbox`
+
+```python
+async create_sandbox(**kwargs: object) -> AsyncSandbox
+```
+
+Create a sandbox.
+
+Args:
+    kwargs: Parameter for this operation.
+
+Returns:
+    AsyncSandbox: Sandbox object with bound service clients.
+
+### `close`
+
+```python
+async close() -> None
+```
+
+Close the client and release resources.
+
+Returns:
+    None: Result returned by this operation.

@@ -1,0 +1,31 @@
+---
+title: JavaScript SDK Reference
+description: Auto-generated reference for the Leap0 JavaScript SDK.
+---
+
+## Overview
+
+The Leap0 JavaScript SDK is a typed Node.js client for sandbox lifecycle, files, git, process execution, PTY sessions, LSP, SSH, code interpreter, desktop automation, snapshots, and templates.
+
+## Installation
+
+```text
+npm install leap0
+```
+
+## Runtime
+
+- Node.js 20.6.0 or newer
+- ESM package
+
+## Getting Started
+
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+console.log(sandbox.id);
+```
+
+Use the sidebar to browse shared defaults, errors, core classes, and service clients.

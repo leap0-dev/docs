@@ -1,0 +1,239 @@
+---
+title: Sandbox
+description: Auto-generated reference for Sandbox.
+---
+
+Source: [`src/client/sandbox.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/client/sandbox.ts)
+
+## Signature
+
+```ts
+Sandbox(client: Leap0Client, data: SandboxData)
+```
+
+## Overview
+
+Bound sandbox handle with convenience methods and resource-scoped helpers.
+
+#### Throws
+
+- `Leap0Error`: If API requests or response validation fail.
+
+## Methods
+
+### `refresh`
+
+```ts
+async refresh(): Promise<this>
+```
+
+Fetches the latest sandbox state from the API.
+
+#### Returns
+
+- The refreshed sandbox handle.
+
+#### Throws
+
+- `Leap0Error`: If fetching the sandbox fails.
+
+### `pause`
+
+```ts
+async pause(options?: { timeout?: number }): Promise<this>
+```
+
+Pauses the sandbox and updates local state.
+
+#### Parameters
+
+- `options`: Optional request settings.
+
+#### Returns
+
+- The paused sandbox handle.
+
+#### Throws
+
+- `Leap0Error`: If pausing the sandbox fails.
+
+### `createSnapshot`
+
+```ts
+async createSnapshot(params: CreateSnapshotParams = {}, options?: { timeout?: number })
+```
+
+Creates a snapshot from this sandbox.
+
+#### Parameters
+
+- `params`: Optional snapshot naming and lifecycle parameters.
+- `options`: Optional request settings.
+
+#### Returns
+
+- The created snapshot resource.
+
+#### Throws
+
+- `Leap0Error`: If creating the snapshot fails.
+
+### `delete`
+
+```ts
+async delete(options?: { timeout?: number }): Promise<void>
+```
+
+Deletes the sandbox.
+
+#### Parameters
+
+- `options`: Optional request settings.
+
+#### Throws
+
+- `Leap0Error`: If deleting the sandbox fails.
+
+### `addMount`
+
+```ts
+async addMount(mount: ObjectStorageMount, options?: { timeout?: number }): Promise<ObjectStorageMountSummary>
+```
+
+Adds an object storage mount to the sandbox.
+
+#### Parameters
+
+- `mount`: Object storage mount configuration.
+- `options`: Optional request settings.
+
+#### Returns
+
+- The created mount summary.
+
+### `updateMount`
+
+```ts
+async updateMount(mountID: string, mount: ObjectStorageMountUpdate, options?: { timeout?: number }): Promise<ObjectStorageMountSummary>
+```
+
+Updates an existing object storage mount on the sandbox.
+
+#### Parameters
+
+- `mountID`: Mount identifier.
+- `mount`: Partial mount update payload.
+- `options`: Optional request settings.
+
+#### Returns
+
+- The updated mount summary.
+
+### `deleteMount`
+
+```ts
+async deleteMount(mountID: string, options?: { timeout?: number }): Promise<void>
+```
+
+Deletes an object storage mount from the sandbox.
+
+#### Parameters
+
+- `mountID`: Mount identifier.
+- `options`: Optional request settings.
+
+### `createPresignedUrl`
+
+```ts
+async createPresignedUrl(params: { port: number; expiresIn?: number }, options?: { timeout?: number }): Promise<PresignedUrl>
+```
+
+Creates a temporary public URL for a specific sandbox port.
+
+#### Parameters
+
+- `params`: Presigned URL creation parameters.
+- `options`: Optional request settings.
+
+#### Returns
+
+- The created presigned URL.
+
+### `deletePresignedUrl`
+
+```ts
+async deletePresignedUrl(id: string, options?: { timeout?: number }): Promise<void>
+```
+
+Deletes a previously issued presigned URL.
+
+#### Parameters
+
+- `id`: Presigned URL identifier.
+- `options`: Optional request settings.
+
+### `invokeUrl`
+
+```ts
+invokeUrl(path = "/", port?: number): string
+```
+
+Returns the public invoke URL for the sandbox.
+
+#### Parameters
+
+- `path`: Route path to append.
+- `port`: Optional forwarded port.
+
+#### Returns
+
+- The public HTTPS URL.
+
+### `websocketUrl`
+
+```ts
+websocketUrl(path = "/", port?: number): string
+```
+
+Returns the public websocket URL for the sandbox.
+
+#### Parameters
+
+- `path`: Route path to append.
+- `port`: Optional forwarded port.
+
+#### Returns
+
+- The public websocket URL.
+
+### `getUserHomeDir`
+
+```ts
+async getUserHomeDir(options?: { timeout?: number }): Promise<string>
+```
+
+Fetches the resolved home directory for the sandbox user.
+
+#### Parameters
+
+- `options`: Optional request settings.
+
+#### Returns
+
+- The resolved sandbox user home directory.
+
+### `getWorkdir`
+
+```ts
+async getWorkdir(options?: { timeout?: number }): Promise<string>
+```
+
+Fetches the configured working directory for the sandbox.
+
+#### Parameters
+
+- `options`: Optional request settings.
+
+#### Returns
+
+- The configured sandbox workdir.

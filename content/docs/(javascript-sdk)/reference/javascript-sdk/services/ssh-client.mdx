@@ -1,0 +1,89 @@
+---
+title: SshClient
+description: Auto-generated reference for SshClient.
+---
+
+Source: [`src/services/ssh.ts`](https://github.com/leap0-dev/leap0-js/blob/main/src/services/ssh.ts)
+
+## Signature
+
+```ts
+SshClient(transport: Leap0Transport)
+```
+
+## Overview
+
+Manages SSH access credentials for a sandbox.
+
+#### Throws
+
+- `Leap0Error`: If API calls or response validation fail.
+
+## Methods
+
+### `createAccess`
+
+```ts
+async createAccess(sandbox: SandboxRef, options: RequestOptions = {}): Promise<SshAccess>
+```
+
+Creates SSH credentials for a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The generated SSH access payload.
+
+### `deleteAccess`
+
+```ts
+async deleteAccess(sandbox: SandboxRef, params: { id: string }, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes a specific SSH credential for a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: SSH credential deletion parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+### `validateAccess`
+
+```ts
+async validateAccess(sandbox: SandboxRef, params: { id: string; password: string }, options: RequestOptions = {}): Promise<SshValidation>
+```
+
+Verifies a specific previously issued SSH credential pair.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: SSH credential validation parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The validation result.
+
+### `regenerateAccess`
+
+```ts
+async regenerateAccess(sandbox: SandboxRef, params: { id: string }, options: RequestOptions = {}): Promise<SshAccess>
+```
+
+Rotates a specific SSH credential for a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `params`: SSH credential rotation parameters.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The newly generated SSH access payload.

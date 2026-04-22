@@ -1,0 +1,171 @@
+---
+title: Snapshots
+description: Save a running sandbox and restore it later with the same in-memory and writable-disk state.
+slug: snapshots
+---
+
+import { Tabs, TabItem } from "@/components/mdx-compat";
+
+Snapshots let you create a point-in-time capture of a running sandbox, including its in-memory execution state and writable disk state.
+
+You can then restore that snapshot into a brand new sandbox that starts from the same checkpoint.
+
+:::note[Sandbox state]
+Snapshots can only be created from a `running` sandbox. The VM is briefly paused during the capture and then resumed automatically unless you set `kill_sandbox_after`.
+:::
+
+## Restore behavior
+
+Restoring a snapshot creates a brand new sandbox.
+
+- Compute settings come from the snapshot, not the restore request.
+- The snapshot's template is reattached automatically.
+- `timeout` can be overridden when restoring.
+- `auto_pause` can be enabled when restoring if you want the new sandbox to pause itself at timeout.
+- `network_policy` defaults to the snapshot values, but you can override it on restore.
+- Restore requests address snapshots by `snapshot_name`.
+
+## Create a snapshot
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+snapshot = sandbox.create_snapshot(name="workspace-warm")
+
+print(snapshot.id, snapshot.name)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.get("<sandbox_id>");
+const snapshot = await sandbox.createSnapshot({
+  name: "workspace-warm",
+});
+
+console.log(snapshot.id, snapshot.name);
+await client.close();
+```
+
+  </TabItem>
+</Tabs>
+
+## Snapshot and terminate a sandbox
+
+Use this when you want to create a named snapshot and shut the sandbox down immediately after the snapshot is stored.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+snapshot = sandbox.create_snapshot(name="workspace-warm", kill_sandbox_after=True)
+
+print(snapshot.id, snapshot.name)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.get("<sandbox_id>");
+const snapshot = await sandbox.createSnapshot({
+  name: "workspace-warm",
+  killSandboxAfter: true,
+});
+
+console.log(snapshot.id, snapshot.name);
+await client.close();
+```
+
+  </TabItem>
+</Tabs>
+
+## Restore a snapshot
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client, NetworkPolicyMode
+
+client = Leap0Client()
+sandbox = client.snapshots.restore(
+    snapshot_name="workspace-warm",
+    auto_pause=True,
+    timeout=30,
+    network_policy={
+        "mode": NetworkPolicyMode.CUSTOM,
+        "allow_cidrs": ["1.2.3.4/32"],
+    },
+)
+
+print(sandbox.id, sandbox.state)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client, NetworkPolicyMode } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.snapshots.restore({
+  snapshotName: "workspace-warm",
+  autoPause: true,
+  timeout: 30,
+  networkPolicy: {
+    mode: NetworkPolicyMode.CUSTOM,
+    allowCidrs: ["1.2.3.4/32"],
+  },
+});
+
+console.log(sandbox.id, sandbox.state);
+await client.close();
+```
+
+  </TabItem>
+</Tabs>
+
+## Delete a snapshot
+
+When a snapshot is deleted, all stored data for that sandbox (memory state, disk state) is permanently removed.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+client.snapshots.delete("<snapshot_id>")
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+await client.snapshots.delete("<snapshot_id>");
+await client.close();
+```
+
+  </TabItem>
+</Tabs>

@@ -1,0 +1,154 @@
+---
+title: CodeInterpreterClient
+description: Auto-generated reference for CodeInterpreterClient.
+---
+
+Source: [`leap0/_sync/code_interpreter.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_sync/code_interpreter.py)
+
+## Signature
+
+```python
+CodeInterpreterClient(transport: Transport, *, sandbox_domain: str | None = None)
+```
+
+## Overview
+
+Execute code inside a sandbox using a managed interpreter runtime.
+
+    Supports Python and TypeScript/JavaScript. Each execution can be linked
+    to a persistent context to share state across multiple calls.
+
+    Example:
+        ```python
+        result = sandbox.code_interpreter.execute(
+            code="sum([1, 2, 3])",
+            language="python",
+        )
+        print(result.main_text)
+        ```
+    
+Attributes:
+    None.
+
+## Methods
+
+### `health`
+
+```python
+health(sandbox: SandboxRef, http_timeout: float | None = None) -> bool
+```
+
+Check whether the code interpreter is healthy.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    bool: ``True`` when the service reports ``"ok"``.
+
+### `create_context`
+
+```python
+create_context(sandbox: SandboxRef, *, language: str = 'python', cwd: str | None = None, http_timeout: float | None = None) -> CodeContext
+```
+
+Create a new execution context.
+
+Args:
+    sandbox: Sandbox ID or object.
+    language: Language runtime (default ``"python"``).
+    cwd: Working directory for the new context.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    CodeContext: Newly created persistent execution context.
+
+### `list_contexts`
+
+```python
+list_contexts(sandbox: SandboxRef, http_timeout: float | None = None) -> list[CodeContext]
+```
+
+List all execution contexts in the sandbox.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    list[CodeContext]: Active execution contexts.
+
+### `get_context`
+
+```python
+get_context(sandbox: SandboxRef, context_id: str, http_timeout: float | None = None) -> CodeContext
+```
+
+Get a single execution context by ID.
+
+Args:
+    sandbox: Sandbox ID or object.
+    context_id: Execution context identifier.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    CodeContext: Matching execution context.
+
+### `delete_context`
+
+```python
+delete_context(sandbox: SandboxRef, context_id: str, http_timeout: float | None = None) -> None
+```
+
+Delete an execution context.
+
+Args:
+    sandbox: Sandbox ID or object.
+    context_id: Execution context identifier.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
+
+### `execute`
+
+```python
+execute(sandbox: SandboxRef, *, code: str, language: str = 'python', context_id: str | None = None, env_vars: dict[str, str] | None = None, timeout_ms: int | None = None, http_timeout: float | None = None) -> CodeExecutionResult
+```
+
+Execute code and wait for the full result.
+
+Args:
+    sandbox: Sandbox ID or object.
+    code: Source code to execute.
+    language: Language runtime (default ``"python"``).
+    context_id: Link to an existing context to share state. Auto-generated if omitted.
+    env_vars: Environment variables for the execution.
+    timeout_ms: Execution timeout in milliseconds (default 30000).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    CodeExecutionResult: Structured execution output, errors, and logs.
+
+### `execute_stream`
+
+```python
+execute_stream(sandbox: SandboxRef, *, code: str, language: str = 'python', context_id: str | None = None, timeout_ms: int | None = None, http_timeout: float | None = None) -> Iterator[StreamEvent]
+```
+
+Execute code and stream output events via SSE.
+
+        Yields :class:`StreamEvent` objects with type ``"stdout"``,
+        ``"stderr"``, ``"exit"``, or ``"error"``.
+
+Args:
+    sandbox: Sandbox ID or object. code: Source code to execute. language: Language runtime for the operation. context_id: Parameter for this operation. timeout_ms: Execution timeout in milliseconds. http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    code: Parameter for this operation.
+    language: Parameter for this operation.
+    context_id: Parameter for this operation.
+    timeout_ms: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    Iterator[StreamEvent]: Result returned by this operation.

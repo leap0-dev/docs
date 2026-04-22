@@ -1,0 +1,413 @@
+openapi: 3.1.0
+info:
+  title: Code Interpreter API
+  description: |
+    Execute code inside a sandbox using persistent REPL sessions.
+    These endpoints are served inside the sandbox at `https://<sandbox_id>.<domain>/`.
+  version: 0.1.0
+
+servers:
+  - url: https://{sandbox_id}.sandbox.leap0.dev
+    description: Sandbox
+    variables:
+      sandbox_id:
+        default: "<sandbox_id>"
+        description: The sandbox identifier.
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Execution
+    description: Execute code synchronously or as a stream.
+  - name: Context
+    description: Manage persistent execution contexts (sessions).
+  - name: Health
+    description: Liveness probe.
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      description: Returns `ok` when the code interpreter is running.
+      tags: [Health]
+      responses:
+        "200":
+          description: Healthy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /execute:
+    post:
+      operationId: execute
+      summary: Execute code
+      description: |
+        Run code in a persistent REPL session and wait for the full result.
+        If `context_id` is omitted a new session is created automatically.
+        Supported languages: `python`, `typescript`.
+      tags: [Execution]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecuteRequest"
+      responses:
+        "200":
+          description: Execution completed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Execution"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          description: Internal error (returned as an Execution object with an `error` field).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Execution"
+
+  /execute/async:
+    post:
+      operationId: executeStream
+      summary: Execute code (streaming)
+      description: |
+        Run code and stream stdout/stderr via Server-Sent Events.
+        Unlike `/execute`, this spawns a fresh subprocess per request.
+        Each SSE message is a JSON `StreamEvent`.
+      tags: [Execution]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StreamExecuteRequest"
+      responses:
+        "200":
+          description: SSE stream of execution events.
+          content:
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/StreamEvent"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          description: Internal error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /contexts:
+    get:
+      operationId: listContexts
+      summary: List contexts
+      description: List all active execution contexts.
+      tags: [Context]
+      responses:
+        "200":
+          description: Contexts retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListContextsResponse"
+    post:
+      operationId: createContext
+      summary: Create context
+      description: Create a new execution context with a pre-assigned language and working directory.
+      tags: [Context]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContextRequest"
+      responses:
+        "201":
+          description: Context created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Context"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /contexts/{contextID}:
+    parameters:
+      - $ref: "#/components/parameters/contextID"
+    get:
+      operationId: getContext
+      summary: Get context
+      description: Retrieve a single execution context by ID.
+      tags: [Context]
+      responses:
+        "200":
+          description: Context retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Context"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteContext
+      summary: Delete context
+      description: Delete an execution context and kill any associated REPL processes.
+      tags: [Context]
+      responses:
+        "204":
+          description: Context deleted.
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: API key passed as a Bearer token.
+
+  parameters:
+    contextID:
+      name: contextID
+      in: path
+      required: true
+      description: Unique context identifier.
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Bad request – validation error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorResponse"
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+
+    ValidationErrorResponse:
+      type: object
+      required: [message, errors]
+      properties:
+        message:
+          type: string
+          description: Summary message.
+          example: Invalid request
+        errors:
+          type: array
+          items:
+            type: object
+            required: [field, error]
+            properties:
+              field:
+                type: string
+                description: JSON field name that failed validation.
+              error:
+                type: string
+                description: Human-readable validation failure.
+
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          example: ok
+
+    ExecuteRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          description: Source code to execute.
+          example: "print('hello')"
+        context_id:
+          type: string
+          description: Link execution to an existing context. Auto-generated if omitted.
+        language:
+          type: string
+          enum: [python, py, python3, typescript, ts, javascript, js, bun, node]
+          default: python
+          description: Language runtime to use.
+        env_vars:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables for the execution.
+        timeout_ms:
+          type: integer
+          default: 30000
+          description: Execution timeout in milliseconds.
+
+    StreamExecuteRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          description: Source code to execute.
+          example: "print('hello')"
+        context_id:
+          type: string
+          description: Link execution to an existing context.
+        language:
+          type: string
+          enum: [python, py, python3, typescript, ts, javascript, js, bun, node]
+          default: python
+          description: Language runtime to use.
+        timeout_ms:
+          type: integer
+          default: 30000
+          description: Execution timeout in milliseconds.
+
+    Execution:
+      type: object
+      required: [context_id, items, logs]
+      properties:
+        context_id:
+          type: string
+          description: ID of the execution context used. Auto-generated if not provided in the request.
+        items:
+          type: array
+          description: Rich output items from the execution.
+          items:
+            $ref: "#/components/schemas/ExecutionResult"
+        logs:
+          $ref: "#/components/schemas/ExecutionLogs"
+        error:
+          $ref: "#/components/schemas/ExecutionError"
+        execution_count:
+          type: integer
+          description: Incremental execution counter for the session.
+
+    ExecutionResult:
+      type: object
+      properties:
+        is_primary:
+          type: boolean
+          description: Whether this is the primary output item.
+        text:
+          type: string
+        html:
+          type: string
+        markdown:
+          type: string
+        svg:
+          type: string
+        png:
+          type: string
+          description: Base64-encoded PNG image.
+        jpeg:
+          type: string
+          description: Base64-encoded JPEG image.
+        pdf:
+          type: string
+          description: Base64-encoded PDF.
+        latex:
+          type: string
+        json:
+          type: object
+          additionalProperties: true
+        javascript:
+          type: string
+        extra:
+          type: object
+          additionalProperties: true
+
+    ExecutionLogs:
+      type: object
+      properties:
+        stdout:
+          type: array
+          items:
+            type: string
+          description: Lines of standard output.
+        stderr:
+          type: array
+          items:
+            type: string
+          description: Lines of standard error.
+
+    ExecutionError:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Error type name.
+          example: NameError
+        value:
+          type: string
+          description: Error message.
+          example: "name 'x' is not defined"
+        traceback:
+          type: string
+          description: Full traceback string.
+
+    StreamEvent:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: integer
+          enum: [0, 1, 2, 3]
+          description: "Event type: 0 = stdout, 1 = stderr, 2 = exit, 3 = error."
+        data:
+          type: string
+          description: Line of output text.
+        code:
+          type: integer
+          description: Process exit code (only present on exit events).
+
+    Context:
+      type: object
+      required: [id, language, cwd]
+      properties:
+        id:
+          type: string
+          description: Unique context identifier.
+          example: V1StGXR8_Z5jdHi6B-myT
+        language:
+          type: integer
+          enum: [1, 2]
+          description: "Language runtime: 1 = python, 2 = typescript."
+        cwd:
+          type: string
+          description: Working directory for the session.
+          example: /home/user
+
+    CreateContextRequest:
+      type: object
+      properties:
+        language:
+          type: string
+          enum: [python, py, python3, typescript, ts, javascript, js, bun, node]
+          description: Language runtime to use.
+        cwd:
+          type: string
+          description: Working directory for the session.
+          default: /home/user
+
+    ListContextsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Context"

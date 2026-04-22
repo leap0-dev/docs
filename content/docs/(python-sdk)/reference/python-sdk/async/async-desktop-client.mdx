@@ -1,0 +1,516 @@
+---
+title: AsyncDesktopClient
+description: Auto-generated reference for AsyncDesktopClient.
+---
+
+Source: [`leap0/_async/desktop.py`](https://github.com/leap0-dev/leap0-python/blob/main/leap0/_async/desktop.py)
+
+## Signature
+
+```python
+AsyncDesktopClient(transport: AsyncTransport, *, sandbox_domain: str | None = None)
+```
+
+## Overview
+
+Control a sandbox desktop through asynchronous APIs.
+
+Attributes:
+    None.
+
+## Methods
+
+### `desktop_url`
+
+```python
+desktop_url(sandbox: SandboxRef) -> str
+```
+
+Build the browser URL for the desktop viewer.
+
+Args:
+    sandbox: Sandbox ID or object.
+
+Returns:
+    str: Result returned by this operation.
+
+### `display_info`
+
+```python
+async display_info(sandbox: SandboxRef, http_timeout: float | None = None) -> DesktopDisplayInfo
+```
+
+Get display information for the desktop.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopDisplayInfo: Result returned by this operation.
+
+### `screen`
+
+```python
+async screen(sandbox: SandboxRef, http_timeout: float | None = None) -> DesktopDisplayInfo
+```
+
+Get the current desktop screen geometry.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopDisplayInfo: Result returned by this operation.
+
+### `resize_screen`
+
+```python
+async resize_screen(sandbox: SandboxRef, *, width: int, height: int, http_timeout: float | None = None) -> DesktopDisplayInfo
+```
+
+Resize the virtual display (width: 320-7680, height: 320-4320).
+
+Args:
+    sandbox: Sandbox ID or object.
+    width: Parameter for this operation.
+    height: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopDisplayInfo: Result returned by this operation.
+
+### `windows`
+
+```python
+async windows(sandbox: SandboxRef, http_timeout: float | None = None) -> list[DesktopWindow]
+```
+
+List open desktop windows.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    list[DesktopWindow]: Result returned by this operation.
+
+### `screenshot`
+
+```python
+async screenshot(sandbox: SandboxRef, *, image_format: str | None = None, quality: int | None = None, x: int | None = None, y: int | None = None, width: int | None = None, height: int | None = None, http_timeout: float | None = None) -> bytes
+```
+
+Take a screenshot and return the image as bytes.
+
+Args:
+    sandbox: Sandbox ID or object.
+    image_format: ``"png"``, ``"jpg"``, or ``"jpeg"`` (default ``"png"``).
+    quality: JPEG quality (1-100).
+    x: Left edge of capture region.
+    y: Top edge of capture region.
+    width: Region width in pixels.
+    height: Region height in pixels.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    bytes: Result returned by this operation.
+
+### `screenshot_region`
+
+```python
+async screenshot_region(sandbox: SandboxRef, *, x: int, y: int, width: int, height: int, image_format: str | None = None, quality: int | None = None, http_timeout: float | None = None) -> bytes
+```
+
+Take a screenshot of a specific region and return the image as bytes.
+
+Args:
+    sandbox: Sandbox ID or object.
+    x: Parameter for this operation.
+    y: Parameter for this operation.
+    width: Parameter for this operation.
+    height: Parameter for this operation.
+    image_format: Parameter for this operation.
+    quality: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    bytes: Result returned by this operation.
+
+### `pointer_position`
+
+```python
+async pointer_position(sandbox: SandboxRef, http_timeout: float | None = None) -> DesktopPointerPosition
+```
+
+Get the current pointer position.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopPointerPosition: Result returned by this operation.
+
+### `move_pointer`
+
+```python
+async move_pointer(sandbox: SandboxRef, *, x: int, y: int, http_timeout: float | None = None) -> DesktopPointerPosition
+```
+
+Move the mouse pointer to the given coordinates.
+
+Args:
+    sandbox: Sandbox ID or object.
+    x: Parameter for this operation.
+    y: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopPointerPosition: Result returned by this operation.
+
+### `click`
+
+```python
+async click(sandbox: SandboxRef, *, x: int | None = None, y: int | None = None, button: int | None = None, http_timeout: float | None = None) -> DesktopPointerPosition
+```
+
+Click the mouse. Clicks at the current position if coordinates are omitted.
+
+Args:
+    sandbox: Sandbox ID or object.
+    x: X coordinate.
+    y: Y coordinate.
+    button: 1=left, 2=middle, 3=right (default 1).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopPointerPosition: Result returned by this operation.
+
+### `drag`
+
+```python
+async drag(sandbox: SandboxRef, *, from_x: int, from_y: int, to_x: int, to_y: int, button: int | None = None, http_timeout: float | None = None) -> DesktopPointerPosition
+```
+
+Drag from one position to another.
+
+Args:
+    sandbox: Sandbox ID or object.
+    from_x: Parameter for this operation.
+    from_y: Parameter for this operation.
+    to_x: Parameter for this operation.
+    to_y: Parameter for this operation.
+    button: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopPointerPosition: Result returned by this operation.
+
+### `scroll`
+
+```python
+async scroll(sandbox: SandboxRef, *, direction: str, amount: int | None = None, http_timeout: float | None = None) -> DesktopPointerPosition
+```
+
+Scroll the mouse wheel.
+
+Args:
+    sandbox: Sandbox ID or object.
+    direction: ``"up"``, ``"down"``, ``"left"``, or ``"right"``.
+    amount: Number of scroll steps (1-100, default 1).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopPointerPosition: Result returned by this operation.
+
+### `type_text`
+
+```python
+async type_text(sandbox: SandboxRef, *, text: str, http_timeout: float | None = None) -> bool
+```
+
+Type text through the desktop input service.
+
+Args:
+    sandbox: Sandbox ID or object.
+    text: Text to type.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    bool: Result returned by this operation.
+
+### `press_key`
+
+```python
+async press_key(sandbox: SandboxRef, *, key: str, http_timeout: float | None = None) -> bool
+```
+
+Press a single key by X11 keysym name (e.g. ``"Return"``, ``"Escape"``).
+
+Args:
+    sandbox: Sandbox ID or object.
+    key: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    bool: Result returned by this operation.
+
+### `hotkey`
+
+```python
+async hotkey(sandbox: SandboxRef, *, keys: list[str], http_timeout: float | None = None) -> bool
+```
+
+Send a multi-key hotkey combination.
+
+Args:
+    sandbox: Sandbox ID or object.
+    keys: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    bool: Result returned by this operation.
+
+### `recording_status`
+
+```python
+async recording_status(sandbox: SandboxRef, http_timeout: float | None = None) -> DesktopRecordingStatus
+```
+
+Get the current screen recording status.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopRecordingStatus: Result returned by this operation.
+
+### `start_recording`
+
+```python
+async start_recording(sandbox: SandboxRef, http_timeout: float | None = None) -> DesktopRecordingStatus
+```
+
+Start desktop recording.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopRecordingStatus: Result returned by this operation.
+
+### `stop_recording`
+
+```python
+async stop_recording(sandbox: SandboxRef, http_timeout: float | None = None) -> DesktopRecordingStatus
+```
+
+Stop the active screen recording.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopRecordingStatus: Result returned by this operation.
+
+### `recordings`
+
+```python
+async recordings(sandbox: SandboxRef, http_timeout: float | None = None) -> list[DesktopRecordingSummary]
+```
+
+List saved desktop recordings.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    list[DesktopRecordingSummary]: Result returned by this operation.
+
+### `get_recording`
+
+```python
+async get_recording(sandbox: SandboxRef, recording_id: str, http_timeout: float | None = None) -> DesktopRecordingSummary
+```
+
+Get details for a single recording.
+
+Args:
+    sandbox: Sandbox ID or object.
+    recording_id: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopRecordingSummary: Result returned by this operation.
+
+### `download_recording`
+
+```python
+async download_recording(sandbox: SandboxRef, recording_id: str, http_timeout: float | None = None) -> bytes
+```
+
+Download a desktop recording as bytes.
+
+Args:
+    sandbox: Sandbox ID or object.
+    recording_id: Recording identifier.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    bytes: Result returned by this operation.
+
+### `delete_recording`
+
+```python
+async delete_recording(sandbox: SandboxRef, recording_id: str, http_timeout: float | None = None) -> None
+```
+
+Delete a recording. Cannot delete an active recording.
+
+Args:
+    sandbox: Sandbox ID or object.
+    recording_id: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
+
+### `health`
+
+```python
+async health(sandbox: SandboxRef, http_timeout: float | None = None) -> DesktopHealth
+```
+
+Check service health.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopHealth: Result returned by this operation.
+
+### `process_status`
+
+```python
+async process_status(sandbox: SandboxRef, http_timeout: float | None = None) -> DesktopProcessStatusList
+```
+
+Get the status of all desktop processes (xvfb, xfce4, x11vnc, novnc).
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopProcessStatusList: Result returned by this operation.
+
+### `get_process`
+
+```python
+async get_process(sandbox: SandboxRef, process_name: str, http_timeout: float | None = None) -> DesktopProcessStatus
+```
+
+Get status for one desktop process.
+
+Args:
+    sandbox: Sandbox ID or object.
+    process_name: Desktop process name.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopProcessStatus: Result returned by this operation.
+
+### `restart_process`
+
+```python
+async restart_process(sandbox: SandboxRef, process_name: str, http_timeout: float | None = None) -> DesktopProcessRestart
+```
+
+Restart a desktop process.
+
+Args:
+    sandbox: Sandbox ID or object.
+    process_name: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopProcessRestart: Result returned by this operation.
+
+### `process_logs`
+
+```python
+async process_logs(sandbox: SandboxRef, process_name: str, http_timeout: float | None = None) -> DesktopProcessLogs
+```
+
+Get logs for one desktop process.
+
+Args:
+    sandbox: Sandbox ID or object.
+    process_name: Desktop process name.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopProcessLogs: Result returned by this operation.
+
+### `process_errors`
+
+```python
+async process_errors(sandbox: SandboxRef, process_name: str, http_timeout: float | None = None) -> DesktopProcessErrors
+```
+
+Get stderr logs for a desktop process.
+
+Args:
+    sandbox: Sandbox ID or object.
+    process_name: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    DesktopProcessErrors: Result returned by this operation.
+
+### `status_stream`
+
+```python
+async status_stream(sandbox: SandboxRef, *, deadline: float | None = None, http_timeout: float | None = None) -> AsyncIterator[DesktopProcessStatusList]
+```
+
+Subscribe to a live SSE stream of process status updates.
+
+Args:
+    sandbox: Sandbox ID or object. deadline: Absolute ``time.monotonic()`` deadline.  When set, a :class:`Leap0TimeoutError` is raised once the deadline is exceeded.  ``None`` means no deadline. http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    deadline: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    AsyncIterator[DesktopProcessStatusList]: Result returned by this operation.
+
+### `wait_until_ready`
+
+```python
+async wait_until_ready(sandbox: SandboxRef, *, timeout: float = 60.0, http_timeout: float | None = None) -> None
+```
+
+Block until all desktop processes are running.
+
+Connects to the SSE status stream and waits for the aggregate
+status to become ``"running"`` (all four desktop processes alive).
+Automatically retries the stream connection on transient errors
+using exponential back-off, bounded by *timeout* seconds total.
+
+Args:
+    sandbox: Sandbox ID or object.
+    timeout: Maximum seconds to wait (default 60).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Raises:
+    Leap0TimeoutError: If the desktop does not become ready within *timeout* seconds.
+
+Returns:
+    None: Result returned by this operation.

@@ -1,0 +1,4 @@
+{
+  "title": "System Tools",
+  "pages": ["firewall", "metadata-service", "object-storage", "telemetry"]
+}

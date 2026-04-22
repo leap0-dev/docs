@@ -1,0 +1,28 @@
+---
+title: Code Interpreter API
+description: Reference and overview for persistent code execution inside a sandbox.
+slug: /code-interpreter/api
+---
+
+import { env } from "@/env";
+
+The Code Interpreter API runs inside a sandbox and is exposed at <code>{`https://<sandbox_id>.${env.LEAP0_SANDBOX_DOMAIN}`}</code>.
+
+Use it to execute Python and TypeScript code in persistent interpreter sessions, either synchronously or through streaming responses.
+
+## Base URL
+
+<code>{`https://<sandbox_id>.${env.LEAP0_SANDBOX_DOMAIN}`}</code>
+
+## What It's For
+
+- Run Python code in a persistent session
+- Run TypeScript code in a persistent session
+- Stream execution results back to your app
+- Keep interpreter state alive between calls
+
+## Related APIs
+
+- [Leap0 API](/api) for sandbox lifecycle and filesystems
+- [Metadata Service API](/metadata-service/api) for in-guest metadata
+- [Desktop API](/desktop/api) for GUI automation

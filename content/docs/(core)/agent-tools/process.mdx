@@ -1,0 +1,55 @@
+---
+title: Process
+description: Execute commands inside a sandbox.
+slug: process
+---
+
+import { Tabs, TabItem } from "@/components/mdx-compat";
+
+Process endpoints let you execute one-shot commands inside a running sandbox.
+
+## Execute a command
+
+Run a shell command and wait for the result. The command runs inside `/bin/sh -c`.
+
+<Tabs syncKey="language">
+  <TabItem label="Python">
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+result = sandbox.process.execute(
+    command="echo Hello from Leap0",
+    cwd="/home/user",
+    timeout=30,
+)
+
+print(result.exit_code)
+print(result.stdout)
+print(result.stderr)
+```
+
+  </TabItem>
+  <TabItem label="JavaScript & TypeScript">
+    ```js
+    import { Leap0Client } from "leap0"
+
+    const client = new Leap0Client()
+    const sandbox = await client.sandboxes.create()
+
+    const result = await sandbox.process.execute({
+      command: "echo Hello from Leap0",
+      cwd: "/home/user",
+      timeout: 30,
+    })
+
+    console.log(result.exitCode) // 0
+    console.log(result.stdout)   // Hello from Leap0
+    console.log(result.stderr)   // ""
+    await client.close()
+    ```
+
+  </TabItem>
+</Tabs>

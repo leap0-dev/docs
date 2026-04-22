@@ -1,0 +1,32 @@
+---
+title: API Keys
+description: Create and manage API keys for sandbox and template operations.
+slug: api-keys
+---
+
+API keys authenticate all requests to the Leap0 API. Each key is scoped to an organization and grants full access to sandboxes, templates, and snapshots within that organization.
+
+:::note[Key visibility]
+API keys are shown only once at creation time. Copy and store the key securely because it cannot be retrieved later.
+:::
+
+## Create an API key
+
+Create API keys in the [Leap0 Dashboard](https://app.leap0.dev). Navigate to **Settings > API Keys** and click **Create Key**.
+
+## Supported headers
+
+Pass your API key in either of these headers. The `Bearer` prefix is optional.
+
+| Header                | Example                           |
+| --------------------- | --------------------------------- |
+| `authorization`       | `Bearer <api_key>` or `<api_key>` |
+| `leap0-authorization` | `Bearer <api_key>` or `<api_key>` |
+
+Use `leap0-authorization` when the `authorization` header is already consumed by another layer (e.g. a proxy, gateway, or a service running inside the sandbox).
+
+## Organization scope
+
+API keys are scoped to a single organization. All resources created with a key (sandboxes, templates, snapshots) belong to that organization. Keys cannot access resources in other organizations.
+
+See <a href="limits">Limits</a> for all organization quotas.

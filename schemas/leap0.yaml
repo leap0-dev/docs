@@ -1,0 +1,3697 @@
+openapi: 3.1.0
+info:
+  title: Leap0 API
+  description: Leap0 is secure infrastructure for running AI-generated code. Manage sandboxes, filesystems, git operations, and templates.
+  version: 1.0.0
+
+servers:
+  - url: https://api.leap0.dev
+    description: Production
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Sandbox
+    description: Create, inspect, and delete sandboxes.
+  - name: Snapshot
+    description: Save running sandboxes and restore new sandboxes from saved state.
+  - name: Template
+    description: Upload and manage container image templates.
+  - name: Filesystem
+    description: Perform filesystem operations inside a sandbox.
+  - name: Git
+    description: Perform git operations inside a sandbox.
+  - name: Process
+    description: Execute commands and manage shell sessions inside a sandbox.
+  - name: PTY
+    description: Create and manage interactive terminal sessions inside a sandbox.
+  - name: LSP
+    description: Start and interact with language servers (Python, TypeScript) inside a sandbox.
+  - name: SSH
+    description: Manage SSH access to sandboxes.
+  - name: Presigned URL
+    description: Create temporary public URLs that route to a specific sandbox port.
+paths:
+  # ──────────────────────────────────────────────
+  # Sandbox CRUD
+  # ──────────────────────────────────────────────
+  /v1/sandbox/:
+    post:
+      operationId: createSandbox
+      summary: Create a sandbox
+      description: |
+        Create a new sandbox from a template. The sandbox will start booting immediately.
+        A maximum of 3 sandboxes per organization is enforced.
+      tags: [Sandbox]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SandboxCreateRequest"
+      responses:
+        "201":
+          description: Sandbox created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxCreateResponse"
+        "400":
+          description: Validation error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "401":
+          description: Unauthorized – invalid or missing API key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Conflict – sandbox limit reached.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/sandbox/{sandboxID}/:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    get:
+      operationId: getSandbox
+      summary: Get sandbox status
+      description: Returns the current status of a sandbox.
+      tags: [Sandbox]
+      responses:
+        "200":
+          description: Sandbox status retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxStatusResponse"
+        "401":
+          description: Unauthorized - invalid or missing API key, or private registry authentication failed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deleteSandbox
+      summary: Delete a sandbox
+      description: |
+        Delete a sandbox. Running sandboxes are terminated first. Paused sandboxes are
+        deleted directly. Requests fail while the sandbox is in a transition state.
+      tags: [Sandbox]
+      responses:
+        "204":
+          description: Sandbox deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - sandbox is currently transitioning.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/sandbox/{sandboxID}/pause:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: pauseSandbox
+      summary: Pause a sandbox
+      description: |
+        Pause a running sandbox. The sandbox's VM state, memory, and disk are captured
+        and uploaded, the sandbox is marked as paused, and the VM is terminated. The
+        sandbox can later be resumed via the invoke route or the resume endpoint, which
+        restores it from the saved state. Unlike `POST /snapshot/create` with `kill_sandbox_after`, this does **not**
+        create a named snapshot.
+      tags: [Sandbox]
+      responses:
+        "201":
+          description: Sandbox paused successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxCreateResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - sandbox is not running.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/sandbox/{sandboxID}/mounts:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: addSandboxMount
+      summary: Add an object storage mount
+      description: |
+        Attach a new object storage mount to a running sandbox. Credentials remain on
+        the runner and are not exposed inside the sandbox.
+      tags: [Sandbox]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MountRequest"
+      responses:
+        "201":
+          description: Mount added successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mount"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - sandbox mount limit reached.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/sandbox/{sandboxID}/mounts/{mountID}:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+      - $ref: "#/components/parameters/mountID"
+    patch:
+      operationId: updateSandboxMount
+      summary: Update an object storage mount
+      description: |
+        Update an existing object storage mount on a running sandbox. Changing
+        `bucket`, `mount_path`, or `read_only` causes the mount to be remounted.
+        Setting `prefix`, `access_key_id`, or `secret_access_key` to an empty string
+        clears that value.
+      tags: [Sandbox]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MountUpdateRequest"
+      responses:
+        "200":
+          description: Mount updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mount"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - updated mount configuration is not allowed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteSandboxMount
+      summary: Delete an object storage mount
+      description: Detach an existing object storage mount from a running sandbox.
+      tags: [Sandbox]
+      responses:
+        "204":
+          description: Mount deleted successfully.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/presigned-url:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: createPresignedURL
+      summary: Create a presigned URL
+      description: |
+        Create a temporary public URL for a specific sandbox port. The returned `token`
+        is only returned once and is stored server-side as a SHA-256 hash.
+
+        The URL resolves to `https://<token>.leap0.app` in production, or the matching
+        environment-specific presigned domain in non-production stacks.
+      tags: [Presigned URL]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PresignedURLCreateRequest"
+      responses:
+        "201":
+          description: Presigned URL created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PresignedURLResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/presigned-url/{id}:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+      - $ref: "#/components/parameters/presignedURLID"
+    delete:
+      operationId: deletePresignedURL
+      summary: Delete a presigned URL
+      description: Revoke a previously issued presigned URL for a sandbox.
+      tags: [Presigned URL]
+      responses:
+        "204":
+          description: Presigned URL deleted.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/system/user-home-dir:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    get:
+      operationId: getSandboxUserHomeDir
+      summary: Get sandbox user home directory
+      description: Returns the resolved home directory for the sandbox user.
+      tags: [Sandbox]
+      responses:
+        "200":
+          description: Sandbox user home directory retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxUserHomeDirResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/system/workdir:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    get:
+      operationId: getSandboxWorkdir
+      summary: Get sandbox workdir
+      description: Returns the configured working directory used for the sandbox init command.
+      tags: [Sandbox]
+      responses:
+        "200":
+          description: Sandbox workdir retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxWorkdirResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/snapshot/create:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: createSnapshot
+      summary: Create a snapshot
+      description: |
+        Create a snapshot from a running sandbox. The snapshot captures the sandbox's
+        memory image, VM state, writable disk diff, and resource configuration.
+        The source sandbox resumes after the snapshot is stored unless
+        `kill_sandbox_after` is set.
+      tags: [Snapshot]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SnapshotCreateRequest"
+      responses:
+        "201":
+          description: Snapshot created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnapshotCreateResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - snapshot name already exists or is being created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/snapshot/restore:
+    post:
+      operationId: restoreSnapshot
+      summary: Restore a snapshot
+      description: |
+        Create a new sandbox from a previously saved snapshot. The restored sandbox
+        reuses the snapshot's template, CPU, memory, and disk settings. `timeout`
+        auto-pause behavior and network policy can be overridden at restore time.
+      tags: [Sandbox]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SnapshotRestoreRequest"
+      responses:
+        "201":
+          description: Sandbox restored from snapshot successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxCreateResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          description: Too many requests - organization sandbox limit reached.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Service unavailable - no runner capacity available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/snapshot/{snapshotID}:
+    parameters:
+      - $ref: "#/components/parameters/snapshotID"
+    delete:
+      operationId: deleteSnapshot
+      summary: Delete a snapshot
+      description: |
+        Delete a stored snapshot and its artifacts. Deletion fails if the snapshot is
+        still referenced by an active sandbox.
+      tags: [Snapshot]
+      responses:
+        "204":
+          description: Snapshot deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - snapshot is in use by an active sandbox.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/sandboxes:
+    get:
+      operationId: listSandboxes
+      summary: List sandboxes
+      description: |
+        List sandboxes for the authenticated organization. Results can be filtered by
+        state and sorted by creation time or current state.
+      tags: [Sandbox]
+      parameters:
+        - name: state
+          in: query
+          required: false
+          description: Filter results by sandbox state.
+          schema:
+            type: string
+            enum: [starting, snapshotting, running, paused, unpausing, deleting]
+        - name: sort
+          in: query
+          required: false
+          description: Field used to sort results.
+          schema:
+            type: string
+            enum: [created_at, state]
+            default: created_at
+        - name: order-by
+          in: query
+          required: false
+          description: Sort direction.
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: page
+          in: query
+          required: false
+          description: 1-based results page.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page-size
+          in: query
+          required: false
+          description: Number of items per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Paginated sandbox summaries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListSandboxesResponse"
+        "400":
+          description: Invalid query parameters.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ValidationErrorResponse"
+                  - $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/snapshots:
+    get:
+      operationId: listSnapshots
+      summary: List snapshots
+      description: |
+        List snapshots for the authenticated organization. Results can be filtered by
+        snapshot name and sorted by creation time or template ID.
+      tags: [Snapshot]
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: Filter results by snapshot name.
+          schema:
+            type: string
+            maxLength: 64
+        - name: sort
+          in: query
+          required: false
+          description: Field used to sort results.
+          schema:
+            type: string
+            enum: [created_at, template_id]
+            default: created_at
+        - name: order-by
+          in: query
+          required: false
+          description: Sort direction.
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: page
+          in: query
+          required: false
+          description: 1-based results page.
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page-size
+          in: query
+          required: false
+          description: Number of items per page.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Paginated snapshot summaries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListSnapshotsResponse"
+        "400":
+          description: Invalid query parameters.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ValidationErrorResponse"
+                  - $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  # Template
+  # ──────────────────────────────────────────────
+  /v1/template:
+    post:
+      operationId: uploadTemplate
+      summary: Upload a template
+      description: |
+        Upload a container image as a template. The image is pulled, converted to a rootfs,
+        and stored for later use when creating sandboxes. A maximum of 25 templates per
+        organization is enforced.
+      tags: [Template]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadTemplateRequest"
+      responses:
+        "201":
+          description: Template uploaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadTemplateResponse"
+        "400":
+          description: Validation error or invalid image.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ValidationErrorResponse"
+                  - $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          description: Conflict – template name already exists or template limit reached.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/template/{templateID}:
+    parameters:
+      - name: templateID
+        in: path
+        required: true
+        description: Unique template identifier.
+        schema:
+          type: string
+    patch:
+      operationId: renameTemplate
+      summary: Rename a template
+      tags: [Template]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenameTemplateRequest"
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid request payload.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ValidationErrorResponse"
+                  - $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - template cannot be renamed or the name already exists.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteTemplate
+      summary: Delete a template
+      tags: [Template]
+      responses:
+        "204":
+          description: No Content
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - template cannot be deleted or is still in use.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ──────────────────────────────────────────────
+  # Filesystem
+  # ──────────────────────────────────────────────
+  /v1/sandbox/{sandboxID}/filesystem/ls:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemLS
+      summary: List directory contents
+      description: List files and directories at the given path inside the sandbox.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LSRequest"
+      responses:
+        "200":
+          description: Directory listing.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LSResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/filesystem/stat:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemStat
+      summary: Get file or directory info
+      description: Returns metadata about a file or directory at the given path.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatRequest"
+      responses:
+        "200":
+          description: File info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileInfo"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/filesystem/mkdir:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemMkdir
+      summary: Create a directory
+      description: Create a directory at the given path. Optionally create parent directories recursively.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MkdirRequest"
+      responses:
+        "204":
+          description: Directory created.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/filesystem/write-file:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+      - name: path
+        in: query
+        required: true
+        schema:
+          type: string
+        description: Absolute file path inside the sandbox.
+      - name: permissions
+        in: query
+        required: false
+        schema:
+          type: string
+        description: Optional octal file mode (e.g. "0755").
+    post:
+      operationId: filesystemWriteFile
+      summary: Write a file
+      description: Write a single file to the sandbox. The raw file bytes are sent as the request body.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "204":
+          description: File written.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/filesystem/write-files:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemWriteFiles
+      summary: Write multiple files
+      description: Write multiple files in a single request. Send as multipart/form-data where each part's name is the file path and body is the raw file bytes.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+                format: binary
+      responses:
+        "204":
+          description: Files written.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/filesystem/read-file:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemReadFile
+      summary: Read a file
+      description: Read a file from the sandbox. Returns the raw file bytes in the response body.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadFileRequest"
+      responses:
+        "200":
+          description: Raw file content.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/filesystem/read-files:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemReadFiles
+      summary: Read multiple files
+      description: Read multiple files. Returns multipart/form-data where each part's name is the file path and body is the raw file bytes.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadFilesRequest"
+      responses:
+        "200":
+          description: Multipart response with each file as a part.
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                  format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/filesystem/delete:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemDelete
+      summary: Delete a file or directory
+      description: Delete a file or directory at the given path. Set `recursive` to true to delete directories with contents.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteRequest"
+      responses:
+        "204":
+          description: File or directory deleted.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/filesystem/set-permissions:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemSetPermissions
+      summary: Set file permissions
+      description: Set the mode, owner, and/or group of a file or directory.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetPermissionsRequest"
+      responses:
+        "204":
+          description: Permissions updated.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/filesystem/glob:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemGlob
+      summary: Glob
+      description: Search for files matching a glob pattern under the given path.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GlobRequest"
+      responses:
+        "200":
+          description: List of matching file paths.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GlobResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/filesystem/grep:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemGrep
+      summary: Grep
+      description: Search for a text pattern inside files. Use `include` to filter by file extension (e.g. `*.go`).
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GrepRequest"
+      responses:
+        "200":
+          description: Search results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrepResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/filesystem/edit-file:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemEditFile
+      summary: Edit a file (find and replace)
+      description: Apply one or more find-and-replace edits within a single file.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditFileRequest"
+      responses:
+        "200":
+          description: Edit result with diff and replacement count.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditFileResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/filesystem/edit-files:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemEditFiles
+      summary: Edit multiple files (find and replace)
+      description: Find and replace text across multiple files at once.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditFilesRequest"
+      responses:
+        "200":
+          description: Per-file replacement results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditFilesResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/filesystem/move:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemMove
+      summary: Move or rename a file or directory
+      description: Move or rename a file or directory. Set `overwrite` to true to replace the destination if it exists.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MoveRequest"
+      responses:
+        "204":
+          description: File moved.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/filesystem/copy:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemCopy
+      summary: Copy a file or directory
+      description: Copy a file or directory from one path to another. Set `recursive` to true for directories.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CopyRequest"
+      responses:
+        "204":
+          description: File or directory copied.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Destination already exists.
+
+  /v1/sandbox/{sandboxID}/filesystem/exists:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemExists
+      summary: Exists
+      description: Check if a path exists.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExistsRequest"
+      responses:
+        "200":
+          description: Existence check result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExistsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/filesystem/tree:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: filesystemTree
+      summary: Tree
+      description: Get a hierarchical directory tree.
+      tags: [Filesystem]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TreeRequest"
+      responses:
+        "200":
+          description: Directory tree.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TreeResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  # Git
+  # ──────────────────────────────────────────────
+  /v1/sandbox/{sandboxID}/git/clone:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitClone
+      summary: Clone a repository
+      description: Clone a git repository into the sandbox filesystem.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitCloneRequest"
+      responses:
+        "200":
+          description: Clone result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/status:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitStatus
+      summary: Get repository status
+      description: Run `git status` on a repository inside the sandbox.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitPathRequest"
+      responses:
+        "200":
+          description: Status output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/branches:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitBranches
+      summary: List branches
+      description: List all branches in a repository inside the sandbox.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitBranchesRequest"
+      responses:
+        "200":
+          description: Branches output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/diff-unstaged:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitDiffUnstaged
+      summary: Show unstaged diff
+      description: Show changes in the working tree that are not yet staged.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitContextRequest"
+      responses:
+        "200":
+          description: Unstaged diff output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/diff-staged:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitDiffStaged
+      summary: Show staged diff
+      description: Show changes that are currently staged for commit.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitContextRequest"
+      responses:
+        "200":
+          description: Staged diff output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/diff:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitDiff
+      summary: Diff against target
+      description: Show differences between the current repository state and a target branch, tag, or commit.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitDiffRequest"
+      responses:
+        "200":
+          description: Diff output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/reset:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitReset
+      summary: Unstage changes
+      description: Unstage all currently staged changes in the repository.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitPathRequest"
+      responses:
+        "200":
+          description: Reset output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/log:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitLog
+      summary: Show commit log
+      description: Show commit history with optional max count and date filtering.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitLogRequest"
+      responses:
+        "200":
+          description: Log output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/show:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitShow
+      summary: Show revision contents
+      description: Show the contents of a specific revision, such as a commit, branch, or tag.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitShowRequest"
+      responses:
+        "200":
+          description: Revision output.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/create-branch:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitCreateBranch
+      summary: Create a branch
+      description: Create a new branch in a repository. Optionally check it out immediately.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitCreateBranchRequest"
+      responses:
+        "200":
+          description: Branch created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/checkout-branch:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitCheckoutBranch
+      summary: Checkout a branch
+      description: Switch to a different branch. Optionally create it if it doesn't exist.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitCheckoutBranchRequest"
+      responses:
+        "200":
+          description: Branch checked out.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/delete-branch:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitDeleteBranch
+      summary: Delete a branch
+      description: Delete a branch from the repository.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitDeleteBranchRequest"
+      responses:
+        "200":
+          description: Branch deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/add:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitAdd
+      summary: Stage files
+      description: Stage files for commit (`git add`).
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitAddRequest"
+      responses:
+        "200":
+          description: Files staged.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/commit:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitCommit
+      summary: Create a commit
+      description: Commit staged changes with a message.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitCommitRequest"
+      responses:
+        "200":
+          description: Commit created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitCommitResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/push:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitPush
+      summary: Push commits
+      description: Push local commits to a remote repository.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitPushPullRequest"
+      responses:
+        "200":
+          description: Push result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/git/pull:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: gitPull
+      summary: Pull changes
+      description: Pull changes from a remote repository.
+      tags: [Git]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GitPushPullRequest"
+      responses:
+        "200":
+          description: Pull result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GitResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  # Process – Execute
+  # ──────────────────────────────────────────────
+  /v1/sandbox/{sandboxID}/process/execute:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: processExecute
+      summary: Execute a command
+      description: Run a one-shot command inside the sandbox, optionally applying environment variables to that spawned process only, and wait for the result.
+      tags: [Process]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecuteRequest"
+      responses:
+        "200":
+          description: Command executed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecuteResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  # PTY
+  # ──────────────────────────────────────────────
+  /v1/sandbox/{sandboxID}/pty:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    get:
+      operationId: listPtySessions
+      summary: List PTY sessions
+      description: List all interactive terminal sessions in the sandbox.
+      tags: [PTY]
+      responses:
+        "200":
+          description: PTY sessions retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PtyListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createPtySession
+      summary: Create PTY session
+      description: Create a new interactive terminal session. A shell process is spawned inside the sandbox.
+      tags: [PTY]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PtyCreateRequest"
+      responses:
+        "201":
+          description: PTY session created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PtySessionInfo"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/pty/{sessionID}:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+      - $ref: "#/components/parameters/sessionID"
+    get:
+      operationId: getPtySession
+      summary: Get PTY session
+      description: Get information about a PTY session.
+      tags: [PTY]
+      responses:
+        "200":
+          description: PTY session info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PtySessionInfo"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      operationId: deletePtySession
+      summary: Delete PTY session
+      description: Kill the shell process and delete the PTY session.
+      tags: [PTY]
+      responses:
+        "204":
+          description: PTY session deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/pty/{sessionID}/connect:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+      - $ref: "#/components/parameters/sessionID"
+    get:
+      operationId: connectPtySession
+      summary: Connect to PTY session (WebSocket)
+      description: |
+        Upgrade to a WebSocket connection for interactive terminal I/O.
+        Send terminal input as binary WebSocket messages. Receive terminal output
+        as binary WebSocket messages. The connection stays alive until closed by
+        either side or the sandbox is deleted.
+      tags: [PTY]
+      responses:
+        "101":
+          description: WebSocket connection established.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/pty/{sessionID}/resize:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+      - $ref: "#/components/parameters/sessionID"
+    post:
+      operationId: resizePtySession
+      summary: Resize PTY session
+      description: Change the terminal dimensions of a PTY session.
+      tags: [PTY]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PtyResizeRequest"
+      responses:
+        "200":
+          description: PTY session resized.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PtySessionInfo"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  # LSP
+  # ──────────────────────────────────────────────
+  /v1/sandbox/{sandboxID}/lsp/start:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: lspStart
+      summary: Start LSP server
+      description: |
+        Start a language server for the given language and project. Sends the LSP
+        `initialize` and `initialized` handshake automatically. Supported languages:
+        `python` (pyright), `typescript`/`javascript` (typescript-language-server).
+      tags: [LSP]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LspServerRequest"
+      responses:
+        "200":
+          description: LSP server started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LspSuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/lsp/stop:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: lspStop
+      summary: Stop LSP server
+      description: Send `shutdown` and `exit` to the language server and terminate the process.
+      tags: [LSP]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LspServerRequest"
+      responses:
+        "200":
+          description: LSP server stopped.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LspSuccessResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/lsp/completions:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: lspCompletions
+      summary: Get completions
+      description: Request code completions at a given position in a document.
+      tags: [LSP]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LspCompletionRequest"
+      responses:
+        "200":
+          description: JSON-RPC 2.0 response from the language server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LspJsonRpcResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/lsp/document-symbols:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: lspDocumentSymbols
+      summary: Get document symbols
+      description: Request all symbols (functions, classes, variables) in a document.
+      tags: [LSP]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LspDocumentRequest"
+      responses:
+        "200":
+          description: JSON-RPC 2.0 response from the language server.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LspJsonRpcResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/lsp/did-open:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: lspDidOpen
+      summary: Notify document opened
+      description: Notify the language server that a document was opened. Must be called before requesting completions or symbols.
+      tags: [LSP]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LspDidOpenRequest"
+      responses:
+        "204":
+          description: Notification sent.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /v1/sandbox/{sandboxID}/lsp/did-close:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: lspDidClose
+      summary: Notify document closed
+      description: Notify the language server that a document was closed.
+      tags: [LSP]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LspDocumentRequest"
+      responses:
+        "204":
+          description: Notification sent.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ──────────────────────────────────────────────
+  # SSH
+  # ──────────────────────────────────────────────
+  /v1/sandbox/{sandboxID}/ssh/access:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: createSshAccess
+      summary: Create SSH access
+      description: Create SSH access credentials for a sandbox.
+      tags: [SSH]
+      responses:
+        "201":
+          description: SSH access created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SshCreateAccessDto"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/sandbox/{sandboxID}/ssh/{sshID}:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+      - $ref: "#/components/parameters/sshID"
+    delete:
+      operationId: deleteSshAccess
+      summary: Delete SSH access
+      description: Remove a specific SSH access credential from a sandbox.
+      tags: [SSH]
+      responses:
+        "204":
+          description: SSH access deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/ssh/{sshID}/validate:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+      - $ref: "#/components/parameters/sshID"
+    post:
+      operationId: validateSshAccess
+      summary: Validate SSH access
+      description: Check whether a specific SSH access credential is valid and not expired.
+      tags: [SSH]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SshAccessValidateRequest"
+      responses:
+        "200":
+          description: Validation result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SshAccessValidationDto"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /v1/sandbox/{sandboxID}/ssh/{sshID}/regen:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+      - $ref: "#/components/parameters/sshID"
+    post:
+      operationId: regenSshAccess
+      summary: Regenerate SSH access
+      description: Regenerate a specific SSH access credential for a sandbox. The old credential is invalidated.
+      tags: [SSH]
+      responses:
+        "200":
+          description: SSH access regenerated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SshAccessDto"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  # ──────────────────────────────────────────────
+  # Security Schemes
+  # ──────────────────────────────────────────────
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        API key passed as a Bearer token in the `Authorization` header.
+        Alternatively, use the `leap0-authorization` header.
+
+  # ──────────────────────────────────────────────
+  # Parameters
+  # ──────────────────────────────────────────────
+  parameters:
+    sandboxID:
+      name: sandboxID
+      in: path
+      required: true
+      description: Unique sandbox identifier.
+      schema:
+        type: string
+    mountID:
+      name: mountID
+      in: path
+      required: true
+      description: Unique mount identifier.
+      schema:
+        type: string
+    sshID:
+      name: sshID
+      in: path
+      required: true
+      description: Unique SSH credential identifier.
+      schema:
+        type: string
+    sessionID:
+      name: sessionID
+      in: path
+      required: true
+      description: Unique session identifier.
+      schema:
+        type: string
+    snapshotID:
+      name: snapshotID
+      in: path
+      required: true
+      description: Unique snapshot identifier.
+      schema:
+        type: string
+    presignedURLID:
+      name: id
+      in: path
+      required: true
+      description: Presigned URL resource identifier.
+      schema:
+        type: string
+  # ──────────────────────────────────────────────
+  # Reusable Responses
+  # ──────────────────────────────────────────────
+  responses:
+    BadRequest:
+      description: Bad request – validation error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationErrorResponse"
+    Unauthorized:
+      description: Unauthorized – invalid or missing API key.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  # ──────────────────────────────────────────────
+  # Schemas
+  # ──────────────────────────────────────────────
+  schemas:
+    # ── Error ──
+    ErrorResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+
+    ValidationErrorResponse:
+      type: object
+      required: [message, errors]
+      properties:
+        message:
+          type: string
+          description: Summary message, e.g. "Invalid request".
+        errors:
+          type: array
+          items:
+            type: object
+            required: [field, error]
+            properties:
+              field:
+                type: string
+                description: JSON field name that failed validation (e.g. "path", "command").
+              error:
+                type: string
+                description: Human-readable description of the validation failure.
+
+    # ── Sandbox ──
+    SandboxCreateRequest:
+      type: object
+      required: [template_name]
+      properties:
+        template_name:
+          type: string
+          description: Name of the template to create the sandbox from.
+          example: my-template
+        env_vars:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables to set in the sandbox.
+        mounts:
+          type: array
+          maxItems: 8
+          description: Read-only object storage mounts to attach before boot. They are exposed inside the sandbox through a lazy FUSE mount, while credentials stay on the runner and are not exposed inside the sandbox.
+          items:
+            $ref: "#/components/schemas/MountRequest"
+        vcpu:
+          type: integer
+          minimum: 1
+          maximum: 8
+          default: 1
+          description: Number of virtual CPUs. Defaults to 1 if not provided.
+          example: 2
+        memory:
+          type: integer
+          format: int64
+          minimum: 512
+          maximum: 8192
+          default: 1024
+          description: Memory in MiB. Must be an even number. Defaults to 1024 if not provided.
+          example: 1024
+        timeout:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 28800
+          description: Sandbox timeout in seconds. Defaults to 300 if not provided.
+          example: 600
+        auto_pause:
+          type: boolean
+          default: false
+          description: Automatically pause the sandbox into a snapshot when it reaches its timeout.
+        network_policy:
+          nullable: true
+          $ref: "#/components/schemas/NetworkPolicy"
+
+    SandboxCreateResponse:
+      type: object
+      required: [id, template_id, vcpu, memory, disk, timeout, state, auto_pause, created_at]
+      properties:
+        id:
+          type: string
+          description: Unique sandbox identifier.
+          example: sbx-abc123
+        template_id:
+          type: string
+          description: Template the sandbox was created from.
+        mounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Mount"
+          description: Object storage mounts attached to the sandbox. Credentials are omitted from responses.
+        vcpu:
+          type: integer
+          minimum: 1
+          description: Number of virtual CPUs assigned to the sandbox.
+        memory:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Memory assigned to the sandbox, in MiB.
+        disk:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Writable disk size assigned to the sandbox, in MiB.
+        timeout:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 28800
+          description: Sandbox timeout in seconds.
+        state:
+          type: string
+          enum: [starting, running, snapshotting, paused, unpausing, deleting, deleted]
+          description: Current state of the sandbox.
+        auto_pause:
+          type: boolean
+          description: Whether the sandbox is configured to auto-pause on timeout.
+        network_policy:
+          nullable: true
+          $ref: "#/components/schemas/NetworkPolicy"
+        created_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of when the sandbox was created.
+
+    SandboxListItem:
+      type: object
+      required: [id, template_id, pod_id, state, created_at]
+      properties:
+        id:
+          type: string
+          description: Unique sandbox identifier.
+          example: sbx-abc123
+        template_id:
+          type: string
+          description: Template the sandbox was created from.
+        pod_id:
+          type: string
+          description: Runner pod handling the sandbox. Empty when not yet assigned.
+        state:
+          type: string
+          enum: [starting, snapshotting, running, paused, unpausing, deleting]
+          description: Current state of the sandbox.
+        launch_time:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of when the sandbox VM launched.
+        state_change_time:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of the last sandbox state change.
+        timeout_at:
+          type: integer
+          format: int64
+          description: Unix timestamp, in seconds, when the sandbox will time out.
+        created_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of when the sandbox was created.
+
+    ListSandboxesResponse:
+      type: object
+      required: [items, total_items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SandboxListItem"
+        total_items:
+          type: integer
+          minimum: 0
+          description: Total number of matching sandboxes before pagination.
+
+    # ── Snapshot ──
+    SnapshotCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Optional snapshot name. If omitted, Leap0 generates one.
+          example: workspace-warm
+        kill_sandbox_after:
+          type: boolean
+          default: false
+          description: Terminate the source sandbox after the snapshot is stored.
+
+    SnapshotCreateResponse:
+      type: object
+      required: [id, name, template_id, vcpu, memory, disk, created_at]
+      properties:
+        id:
+          type: string
+          description: Unique snapshot identifier.
+          example: snap-abc123
+        name:
+          type: string
+          description: Snapshot name.
+          example: workspace-warm
+        template_id:
+          type: string
+          description: Template the snapshot was created from.
+        vcpu:
+          type: integer
+          minimum: 1
+          description: Number of virtual CPUs stored with the snapshot.
+        memory:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Memory stored with the snapshot, in MiB.
+        disk:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Writable disk size stored with the snapshot, in MiB.
+        network_policy:
+          nullable: true
+          $ref: "#/components/schemas/NetworkPolicy"
+        created_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of when the snapshot was created.
+
+    ListSnapshotsResponse:
+      type: object
+      required: [items, total_items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SnapshotCreateResponse"
+        total_items:
+          type: integer
+          minimum: 0
+          description: Total number of matching snapshots before pagination.
+
+    SnapshotRestoreRequest:
+      type: object
+      required: [snapshot_name]
+      properties:
+        snapshot_name:
+          type: string
+          description: Name of the snapshot to restore.
+          example: workspace-warm
+        timeout:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 28800
+          description: Sandbox timeout in seconds. Defaults to 300 if not provided.
+          example: 1800
+        auto_pause:
+          type: boolean
+          default: false
+          description: Enable auto-pause for the restored sandbox.
+        network_policy:
+          nullable: true
+          $ref: "#/components/schemas/NetworkPolicy"
+
+    SandboxStatusResponse:
+      type: object
+      required: [id, template_id, vcpu, memory, disk, timeout, state, auto_pause, created_at]
+      properties:
+        id:
+          type: string
+          description: Unique sandbox identifier.
+        template_id:
+          type: string
+          description: Template the sandbox was created from.
+        mounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Mount"
+          description: Object storage mounts currently attached to the sandbox. Credentials are omitted from responses.
+        vcpu:
+          type: integer
+          minimum: 1
+          description: Number of virtual CPUs assigned to the sandbox.
+        memory:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Memory assigned to the sandbox, in MiB.
+        disk:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Writable disk size assigned to the sandbox, in MiB.
+        timeout:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 28800
+          description: Sandbox timeout in seconds.
+        state:
+          type: string
+          enum: [starting, running, snapshotting, paused, unpausing, deleting, deleted]
+          description: Current state of the sandbox.
+        auto_pause:
+          type: boolean
+          description: Whether the sandbox is configured to auto-pause on timeout.
+        created_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of when the sandbox was created.
+
+    SandboxUserHomeDirResponse:
+      type: object
+      required: [user_home_dir]
+      properties:
+        user_home_dir:
+          type: string
+          description: Resolved home directory for the sandbox user.
+          example: /home/user
+
+    SandboxWorkdirResponse:
+      type: object
+      required: [workdir]
+      properties:
+        workdir:
+          type: string
+          description: Configured working directory for the sandbox init command.
+          example: /workspace
+
+    PresignedURLCreateRequest:
+      type: object
+      required: [port]
+      properties:
+        port:
+          type: integer
+          minimum: 1
+          maximum: 65535
+          description: Sandbox port exposed through the public URL.
+          example: 8080
+        expires_in:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Optional TTL in seconds. Defaults to 3600.
+          example: 900
+
+    PresignedURLResponse:
+      type: object
+      required: [id, token, url, sandbox_id, port, expires_at, created_at]
+      properties:
+        id:
+          type: string
+          description: Unique presigned URL identifier.
+          example: psu-abc123
+        token:
+          type: string
+          description: Raw token. Only returned once at creation time.
+        url:
+          type: string
+          format: uri
+          description: Fully qualified HTTPS URL.
+          example: https://abcdef1234567890.leap0.app
+        sandbox_id:
+          type: string
+          description: Sandbox the URL routes to.
+        port:
+          type: integer
+          minimum: 1
+          maximum: 65535
+          description: Sandbox port exposed by the URL.
+        expires_at:
+          type: string
+          format: date-time
+          description: When the presigned URL expires.
+        created_at:
+          type: string
+          format: date-time
+          description: When the presigned URL was created.
+
+    # ── Filesystem ──
+    FileInfo:
+      type: object
+      required:
+        - name
+        - path
+        - is_dir
+        - size
+        - mode
+        - mtime
+        - owner
+        - group
+        - is_symlink
+      properties:
+        name:
+          type: string
+          description: File or directory name.
+        path:
+          type: string
+          description: Full path.
+        is_dir:
+          type: boolean
+          description: Whether this entry is a directory.
+        size:
+          type: integer
+          format: uint64
+          description: File size in bytes.
+        mode:
+          type: string
+          description: "Octal permission string (e.g. `755`)."
+        mtime:
+          type: integer
+          format: int64
+          description: Last modification time as Unix timestamp (seconds).
+        owner:
+          type: string
+          description: File owner.
+        group:
+          type: string
+          description: File group.
+        is_symlink:
+          type: boolean
+          description: Whether this entry is a symbolic link.
+        link_target:
+          type: string
+          description: Target path if this entry is a symbolic link.
+
+    LSResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/FileInfo"
+          description: List of file and directory entries.
+
+    GlobResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            type: string
+          description: List of matching file paths.
+
+    GrepResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchMatch"
+          description: List of search matches.
+
+    EditFilesResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/EditResult"
+          description: Per-file replacement results.
+
+    SearchMatch:
+      type: object
+      required: [path, line, content]
+      properties:
+        path:
+          type: string
+          description: File path containing the match.
+        line:
+          type: integer
+          format: uint64
+          description: Line number of the match.
+        content:
+          type: string
+          description: Content of the matching line.
+
+    EditResult:
+      type: object
+      required: [file, success]
+      properties:
+        file:
+          type: string
+          description: File path.
+        success:
+          type: boolean
+          description: Whether the replacement succeeded.
+        error:
+          type: string
+          description: Error message if the replacement failed.
+
+    LSRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Directory path to list.
+          example: /home/user
+        recursive:
+          type: boolean
+          default: false
+          description: List contents recursively.
+        exclude:
+          type: array
+          items:
+            type: string
+          description: "Glob patterns to exclude (e.g. `node_modules`, `.git`)."
+
+    StatRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to the file or directory.
+
+    MkdirRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Directory path to create.
+        recursive:
+          type: boolean
+          default: false
+          description: Create parent directories as needed.
+        permissions:
+          type: string
+          nullable: true
+          description: "Octal permission string (e.g. `755`). Defaults to `755`."
+          default: "755"
+
+    ReadFileRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to the file to read.
+        offset:
+          type: integer
+          format: uint64
+          description: Byte offset to start reading from.
+        limit:
+          type: integer
+          format: uint32
+          description: Maximum number of bytes to read.
+        head:
+          type: integer
+          format: uint32
+          description: Return only the first N lines of the file. Mutually exclusive with `tail`.
+        tail:
+          type: integer
+          format: uint32
+          description: Return only the last N lines of the file. Mutually exclusive with `head`.
+
+    ReadFilesRequest:
+      type: object
+      required: [paths]
+      properties:
+        paths:
+          type: array
+          minItems: 1
+          items:
+            type: string
+          description: List of file paths to read.
+
+    DeleteRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to delete.
+        recursive:
+          type: boolean
+          default: false
+          description: Recursively delete directory contents.
+
+    SetPermissionsRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to the file or directory.
+        mode:
+          type: string
+          nullable: true
+          description: "Octal permission string (e.g. `755`)."
+        owner:
+          type: string
+          nullable: true
+          description: New owner name.
+        group:
+          type: string
+          nullable: true
+          description: New group name.
+
+    GlobRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Base directory to search from.
+        pattern:
+          type: string
+          nullable: true
+          description: Glob pattern to match file names against.
+        exclude:
+          type: array
+          items:
+            type: string
+          description: "Glob patterns to exclude (e.g. `node_modules`, `.git`)."
+
+    GrepRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Base directory to search from.
+        pattern:
+          type: string
+          nullable: true
+          description: Text pattern to search for within files.
+        include:
+          type: string
+          nullable: true
+          description: "File pattern filter e.g. *.go"
+        exclude:
+          type: array
+          items:
+            type: string
+          description: "Glob patterns to exclude (e.g. `node_modules`, `.git`)."
+
+    EditFileRequest:
+      type: object
+      required: [path, edits]
+      properties:
+        path:
+          type: string
+          description: Path to the file.
+        edits:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/FileEdit"
+          description: List of find-and-replace edits to apply.
+
+    FileEdit:
+      type: object
+      required: [find]
+      properties:
+        find:
+          type: string
+          description: Text to find.
+        replace:
+          type: string
+          nullable: true
+          description: Replacement text.
+
+    EditFileResponse:
+      type: object
+      required: [diff, replacements]
+      properties:
+        diff:
+          type: string
+          description: Unified diff of the changes made.
+        replacements:
+          type: integer
+          description: Total number of replacements made.
+
+    EditFilesRequest:
+      type: object
+      required: [files, find]
+      properties:
+        files:
+          type: array
+          minItems: 1
+          items:
+            type: string
+          description: List of file paths to perform replacements in.
+        find:
+          type: string
+          description: Text to find in the files.
+        replace:
+          type: string
+          nullable: true
+          description: Replacement text.
+
+    MoveRequest:
+      type: object
+      required: [src_path, dst_path]
+      properties:
+        src_path:
+          type: string
+          description: Source path.
+        dst_path:
+          type: string
+          description: Destination path.
+        overwrite:
+          type: boolean
+          default: false
+          description: Overwrite destination if it exists.
+
+    CopyRequest:
+      type: object
+      required: [src_path, dst_path]
+      properties:
+        src_path:
+          type: string
+          description: Source path.
+        dst_path:
+          type: string
+          description: Destination path.
+        recursive:
+          type: boolean
+          default: false
+          description: Copy directory contents recursively.
+        overwrite:
+          type: boolean
+          default: false
+          description: Overwrite destination if it exists.
+
+    ExistsRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to check.
+
+    ExistsResponse:
+      type: object
+      required: [exists]
+      properties:
+        exists:
+          type: boolean
+          description: Whether the path exists.
+
+    TreeRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Root directory path for the tree.
+        exclude:
+          type: array
+          items:
+            type: string
+          description: "Glob patterns to exclude (e.g. `node_modules`, `.git`)."
+        max_depth:
+          type: integer
+          description: Maximum depth to traverse.
+
+    TreeResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/TreeEntry"
+          description: Hierarchical directory tree entries.
+
+    TreeEntry:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+          description: File or directory name.
+        type:
+          type: string
+          enum: [file, directory]
+          description: Whether this entry is a file or directory.
+        children:
+          type: array
+          items:
+            $ref: "#/components/schemas/TreeEntry"
+          description: Child entries (only present for directories).
+
+    # ── Git ──
+    GitResult:
+      type: object
+      required: [output, exit_code]
+      properties:
+        output:
+          type: string
+          description: Command output text.
+        exit_code:
+          type: integer
+          format: int32
+          description: Exit code of the git command.
+
+    GitCommitResponse:
+      type: object
+      required: [sha, result]
+      properties:
+        sha:
+          type: string
+          description: SHA of the created commit.
+        result:
+          $ref: "#/components/schemas/GitResult"
+
+    GitCloneRequest:
+      type: object
+      required: [url, path]
+      properties:
+        url:
+          type: string
+          description: Repository URL to clone.
+          example: https://github.com/user/repo.git
+        path:
+          type: string
+          description: Destination path inside the sandbox.
+          example: /home/user/repo
+        branch:
+          type: string
+          nullable: true
+          description: Branch to clone.
+        commit_id:
+          type: string
+          nullable: true
+          description: Specific commit to checkout after cloning.
+        depth:
+          type: integer
+          format: uint32
+          description: Shallow clone depth.
+        username:
+          type: string
+          nullable: true
+          description: Username for authentication.
+        password:
+          type: string
+          nullable: true
+          description: Password or token for authentication.
+
+    GitPathRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+
+    GitContextRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        context_lines:
+          type: integer
+          format: uint32
+          description: Number of context lines to include in the diff output. Defaults to 3.
+
+    GitDiffRequest:
+      type: object
+      required: [path, target]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        target:
+          type: string
+          description: Branch, tag, or commit to compare against.
+        context_lines:
+          type: integer
+          format: uint32
+          description: Number of context lines to include in the diff output. Defaults to 3.
+
+    GitLogRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        max_count:
+          type: integer
+          format: uint32
+          description: Maximum number of commits to show. Defaults to 10.
+        start_timestamp:
+          type: string
+          nullable: true
+          description: Start timestamp filter for commit history.
+        end_timestamp:
+          type: string
+          nullable: true
+          description: End timestamp filter for commit history.
+
+    GitShowRequest:
+      type: object
+      required: [path, revision]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        revision:
+          type: string
+          description: Revision to show, such as a commit SHA, branch, or tag.
+
+    GitBranchesRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        branch_type:
+          type: string
+          nullable: true
+          enum: [local, remote, all]
+          description: Whether to list local, remote, or all branches.
+        contains:
+          type: string
+          nullable: true
+          description: Only include branches that contain the given commit SHA.
+        not_contains:
+          type: string
+          nullable: true
+          description: Only include branches that do not contain the given commit SHA.
+
+    GitCreateBranchRequest:
+      type: object
+      required: [path, name]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        name:
+          type: string
+          description: Name of the new branch.
+        checkout:
+          type: boolean
+          description: Checkout the branch after creating it.
+        base_branch:
+          type: string
+          nullable: true
+          description: Optional base branch or revision to create the branch from.
+
+    GitCheckoutBranchRequest:
+      type: object
+      required: [path, branch]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        branch:
+          type: string
+          description: Branch name to checkout.
+        create:
+          type: boolean
+          description: Create the branch if it doesn't exist.
+
+    GitDeleteBranchRequest:
+      type: object
+      required: [path, name]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        name:
+          type: string
+          description: Branch name to delete.
+        force:
+          type: boolean
+          description: Force delete even if the branch is not fully merged.
+
+    GitAddRequest:
+      type: object
+      required: [path, files]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        files:
+          type: array
+          minItems: 1
+          items:
+            type: string
+          description: List of file paths to stage.
+
+    GitCommitRequest:
+      type: object
+      required: [path, message]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        message:
+          type: string
+          description: Commit message.
+        author:
+          type: string
+          nullable: true
+          description: Author name for the commit.
+        email:
+          type: string
+          nullable: true
+          description: Author email for the commit.
+        allow_empty:
+          type: boolean
+          description: Allow creating an empty commit.
+
+    GitPushPullRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+          description: Path to the git repository.
+        remote:
+          type: string
+          nullable: true
+          description: Remote name (defaults to `origin`).
+        branch:
+          type: string
+          nullable: true
+          description: Branch name.
+        set_upstream:
+          type: boolean
+          description: Set upstream tracking reference (push only).
+        rebase:
+          type: boolean
+          description: Rebase instead of merge (pull only).
+        username:
+          type: string
+          nullable: true
+          description: Username for authentication.
+        password:
+          type: string
+          nullable: true
+          description: Password or token for authentication.
+
+    # ── Template ──
+    UploadTemplateRequest:
+      type: object
+      required: [name, uri]
+      properties:
+        name:
+          type: string
+          description: Template name. Must not start with a system prefix or contain whitespace.
+          example: my-python-app
+        uri:
+          type: string
+          maxLength: 500
+          description: Container image URI to pull and convert.
+          example: docker.io/library/python:3.12
+        credentials:
+          $ref: "#/components/schemas/RegistryCredentials"
+
+    RegistryCredentials:
+      type: object
+      required: [type]
+      description: Credentials for pulling from a private container registry.
+      properties:
+        type:
+          type: string
+          enum: [basic, aws, gcp, azure]
+          description: Authentication type.
+        username:
+          type: string
+          description: Username (required when `type` is `basic`).
+        password:
+          type: string
+          description: Password (required when `type` is `basic`).
+        aws_access_key_id:
+          type: string
+          description: AWS access key ID (required when `type` is `aws`).
+        aws_secret_access_key:
+          type: string
+          description: AWS secret access key (required when `type` is `aws`).
+        aws_region:
+          type: string
+          description: AWS region (optional, for ECR).
+        gcp_service_account_json:
+          type: string
+          description: GCP service account JSON key (required when `type` is `gcp`).
+        azure_client_id:
+          type: string
+          description: Azure client ID (required when `type` is `azure`).
+        azure_client_secret:
+          type: string
+          description: Azure client secret (required when `type` is `azure`).
+        azure_tenant_id:
+          type: string
+          description: Azure tenant ID (required when `type` is `azure`).
+      oneOf:
+        - properties:
+            type:
+              enum: [basic]
+          required: [username, password]
+        - properties:
+            type:
+              enum: [aws]
+          required: [aws_access_key_id, aws_secret_access_key]
+        - properties:
+            type:
+              enum: [gcp]
+          required: [gcp_service_account_json]
+        - properties:
+            type:
+              enum: [azure]
+          required: [azure_client_id, azure_client_secret, azure_tenant_id]
+
+    RenameTemplateRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: New template name.
+
+    UploadTemplateResponse:
+      type: object
+      required: [id, name, digest, image_config, is_system, created_at]
+      properties:
+        id:
+          type: string
+          description: The created template ID.
+          example: tpl-abc123
+        name:
+          type: string
+          description: The created template name.
+          example: my-python-app
+        digest:
+          type: string
+          description: The container image digest used for this template.
+          example: sha256:0123456789abcdef
+        image_config:
+          type: object
+          required: [entrypoint, cmd]
+          properties:
+            entrypoint:
+              type: array
+              items:
+                type: string
+              nullable: true
+            cmd:
+              type: array
+              items:
+                type: string
+              nullable: true
+            working_dir:
+              type: string
+            user:
+              type: string
+              description: The OS user that the container process runs as.
+              example: user
+            env:
+              type: object
+              nullable: true
+              additionalProperties:
+                type: string
+        is_system:
+          type: boolean
+          description: Whether this template is a system template.
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          description: When the template was created.
+          example: 2026-02-08T12:34:56Z
+
+    # ── Process ──
+    ExecuteRequest:
+      type: object
+      required: [command]
+      properties:
+        command:
+          type: string
+          description: Shell command to execute.
+          example: "python3 --version"
+        cwd:
+          type: string
+          nullable: true
+          description: Working directory for the command.
+          example: /home/user
+        envs:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables applied only to the spawned process for this request.
+          example:
+            NAME: leap0
+            PLACE: sandbox
+        timeout:
+          type: integer
+          description: Timeout in seconds (default 30).
+          example: 30
+
+    ExecuteResponse:
+      type: object
+      required: [exit_code, stdout, stderr]
+      properties:
+        exit_code:
+          type: integer
+          description: Process exit code.
+          example: 0
+        stdout:
+          type: string
+          description: Standard output captured from the process.
+          example: "Python 3.12.12\n"
+        stderr:
+          type: string
+          description: Standard error captured from the process.
+          example: ""
+
+    # ── PTY ──
+    PtyCreateRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+          description: Optional session ID. Auto-generated if not provided.
+          example: my-terminal
+        cwd:
+          type: string
+          nullable: true
+          description: Starting directory.
+          example: /home/user
+        envs:
+          type: object
+          additionalProperties:
+            type: string
+          description: Environment variables.
+          example:
+            TERM: xterm-256color
+        cols:
+          type: integer
+          description: Terminal columns.
+          example: 120
+        rows:
+          type: integer
+          description: Terminal rows.
+          example: 40
+        lazy_start:
+          type: boolean
+          description: Defer shell process start until first WebSocket connection.
+          default: false
+
+    PtySessionInfo:
+      type: object
+      required:
+        - id
+        - cwd
+        - envs
+        - cols
+        - rows
+        - created_at
+        - active
+        - lazy_start
+      properties:
+        id:
+          type: string
+          example: my-terminal
+        cwd:
+          type: string
+          example: /home/user
+        envs:
+          type: object
+          additionalProperties:
+            type: string
+        cols:
+          type: integer
+          example: 120
+        rows:
+          type: integer
+          example: 40
+        created_at:
+          type: string
+          format: date-time
+        active:
+          type: boolean
+        lazy_start:
+          type: boolean
+
+    PtyListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PtySessionInfo"
+
+    PtyResizeRequest:
+      type: object
+      required: [cols, rows]
+      properties:
+        cols:
+          type: integer
+          description: New terminal columns.
+          example: 200
+        rows:
+          type: integer
+          description: New terminal rows.
+          example: 50
+
+    # ── LSP ──
+    LspServerRequest:
+      type: object
+      required: [language_id, path_to_project]
+      properties:
+        language_id:
+          type: string
+          description: "Language identifier: `python`, `typescript`, or `javascript`."
+          example: python
+        path_to_project:
+          type: string
+          description: Path to the project directory inside the sandbox.
+          example: /home/user/project
+
+    LspSuccessResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    LspJsonRpcResponse:
+      type: object
+      description: JSON-RPC 2.0 response envelope returned by LSP request endpoints.
+      required: [jsonrpc]
+      properties:
+        jsonrpc:
+          type: string
+          enum: ["2.0"]
+        id:
+          oneOf:
+            - type: integer
+            - type: string
+            - type: "null"
+          description: Request identifier echoed by the language server.
+        result:
+          description: Method-specific success payload.
+        error:
+          $ref: "#/components/schemas/LspJsonRpcError"
+      oneOf:
+        - required: [result]
+        - required: [error]
+
+    LspJsonRpcError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: integer
+          description: JSON-RPC error code.
+          example: -32602
+        message:
+          type: string
+          description: Human-readable error message.
+          example: Invalid params
+        data:
+          description: Optional method-specific error data.
+
+    LspCompletionRequest:
+      type: object
+      required: [language_id, path_to_project, uri, position]
+      properties:
+        language_id:
+          type: string
+          example: python
+        path_to_project:
+          type: string
+          example: /home/user/project
+        uri:
+          type: string
+          description: Document URI.
+          example: "file:///home/user/project/main.py"
+        position:
+          $ref: "#/components/schemas/LspPosition"
+        context:
+          $ref: "#/components/schemas/LspCompletionContext"
+
+    LspCompletionContext:
+      type: object
+      properties:
+        trigger_kind:
+          type: integer
+          description: Completion trigger kind.
+          example: 1
+        trigger_character:
+          type: string
+          description: Trigger character when completion was invoked by a specific character.
+          example: "."
+
+    LspDocumentRequest:
+      type: object
+      required: [language_id, path_to_project, uri]
+      properties:
+        language_id:
+          type: string
+          example: python
+        path_to_project:
+          type: string
+          example: /home/user/project
+        uri:
+          type: string
+          example: "file:///home/user/project/main.py"
+
+    LspDidOpenRequest:
+      type: object
+      required: [language_id, path_to_project, uri]
+      properties:
+        language_id:
+          type: string
+          example: python
+        path_to_project:
+          type: string
+          example: /home/user/project
+        uri:
+          type: string
+          example: "file:///home/user/project/main.py"
+        text:
+          type: string
+          nullable: true
+          description: Full document text.
+        version:
+          type: integer
+          description: Document version number.
+          example: 1
+
+    LspPosition:
+      type: object
+      required: [line, character]
+      properties:
+        line:
+          type: integer
+          description: Zero-based line number.
+          example: 10
+        character:
+          type: integer
+          description: Zero-based character offset.
+          example: 3
+
+    # ── Network Policy ──
+    NetworkPolicy:
+      type: object
+      required: [mode]
+      description: Network egress policy for a sandbox. When omitted, defaults to allow-all.
+      properties:
+        mode:
+          type: string
+          enum: [allow-all, deny-all, custom]
+          description: Policy mode. `allow-all` permits all egress, `deny-all` blocks all egress, `custom` uses the allow/deny lists.
+        allow_domains:
+          type: array
+          maxItems: 50
+          items:
+            type: string
+          description: Domain names to allow outbound access to (custom mode only).
+        allow_cidrs:
+          type: array
+          maxItems: 10
+          items:
+            type: string
+            format: cidr
+          description: CIDR ranges to allow outbound access to (custom mode only).
+        transforms:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/TransformRule"
+          description: Per-domain request transforms, such as credential brokering.
+
+    TransformRule:
+      type: object
+      required: [domain]
+      description: A per-domain request transform rule for credential brokering or header manipulation.
+      properties:
+        domain:
+          type: string
+          description: Domain pattern to match (e.g. `api.openai.com`).
+        inject_headers:
+          type: object
+          additionalProperties:
+            type: string
+          description: Headers to inject into matching requests.
+        strip_headers:
+          type: array
+          items:
+            type: string
+          description: Header names to strip from matching requests.
+
+    MountRequest:
+      type: object
+      required: [type, bucket, mount_path, endpoint]
+      description: Attach a read-only standard S3 bucket to a directory inside the sandbox. The runner keeps the credentials and serves object metadata and file reads lazily over vsock-backed FUSE; credentials are not sent into the sandbox guest. Omit credentials for public buckets.
+      properties:
+        type:
+          type: string
+          enum: [object-storage]
+          description: Mount implementation type.
+        bucket:
+          type: string
+          description: Bucket name in the S3-compatible object storage provider.
+          example: project-assets
+        mount_path:
+          type: string
+          description: Absolute sandbox path where the bucket contents will appear.
+          example: /data/assets
+        endpoint:
+          type: string
+          format: uri
+          description: Full S3-compatible endpoint URL.
+          example: https://storage.example.com
+        prefix:
+          type: string
+          description: Optional key prefix within the bucket. Must end with a trailing slash when provided.
+          example: docs/
+        read_only:
+          type: boolean
+          description: Whether the mount is read-only. Object storage mounts are currently read-only.
+          default: true
+        access_key_id:
+          type: string
+          description: Access key id for the S3 bucket. Omit for public buckets.
+        secret_access_key:
+          type: string
+          description: Secret access key for the S3 bucket. Omit for public buckets.
+
+    MountUpdateRequest:
+      type: object
+      description: |
+        Update an existing object storage mount. Any omitted field keeps its current
+        value. `id` and `type` are immutable and cannot be changed. Set `prefix`,
+        `access_key_id`, or `secret_access_key` to an empty string to clear them.
+      properties:
+        bucket:
+          type: string
+          description: Bucket name in the S3-compatible object storage provider.
+          example: project-assets
+        mount_path:
+          type: string
+          description: Absolute sandbox path where the bucket contents will appear.
+          example: /data/assets
+        endpoint:
+          type: string
+          format: uri
+          description: Full S3-compatible endpoint URL.
+          example: https://storage.example.com
+        prefix:
+          type: string
+          description: Optional object prefix to expose as the visible mount root. Use an empty string to clear it.
+          example: builds/
+        read_only:
+          type: boolean
+          description: Whether the mount should be attached read-only inside the sandbox.
+        access_key_id:
+          type: string
+          description: Access key id for the S3 bucket. Use an empty string to clear it.
+        secret_access_key:
+          type: string
+          description: Secret access key for the S3 bucket. Use an empty string to clear it.
+
+    Mount:
+      type: object
+      required: [id, type, bucket, mount_path]
+      description: Non-secret object storage mount metadata returned by the API.
+      properties:
+        id:
+          type: string
+          description: Unique mount identifier generated by the platform.
+          example: mnt-abc123
+        type:
+          type: string
+          enum: [object-storage]
+        bucket:
+          type: string
+        mount_path:
+          type: string
+        prefix:
+          type: string
+        read_only:
+          type: boolean
+
+    # ── SSH ──
+    SshCreateAccessDto:
+      type: object
+      required: [id, sandbox_id, password, expires_at, created_at, updated_at, ssh_command]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the SSH access. Used as the SSH username.
+        sandbox_id:
+          type: string
+          description: ID of the sandbox this SSH access is for.
+        password:
+          type: string
+          description: SSH password. Used as the password when connecting via SSH.
+        expires_at:
+          type: string
+          format: date-time
+          description: When the SSH access expires.
+        created_at:
+          type: string
+          format: date-time
+          description: When the SSH access was created.
+        updated_at:
+          type: string
+          format: date-time
+          description: When the SSH access was last updated.
+        ssh_command:
+          type: string
+          description: SSH command to connect to the sandbox.
+
+    SshAccessDto:
+      type: object
+      required: [id, sandbox_id, password, expires_at, created_at, updated_at, ssh_command]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the SSH access. Used as the SSH username.
+        sandbox_id:
+          type: string
+          description: ID of the sandbox this SSH access is for.
+        password:
+          type: string
+          description: SSH password. Used as the password when connecting via SSH.
+        expires_at:
+          type: string
+          format: date-time
+          description: When the SSH access expires.
+        created_at:
+          type: string
+          format: date-time
+          description: When the SSH access was created.
+        updated_at:
+          type: string
+          format: date-time
+          description: When the SSH access was last updated.
+        ssh_command:
+          type: string
+          description: SSH command to connect to the sandbox.
+
+    SshAccessValidateRequest:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          description: SSH access password to validate.
+
+    SshAccessValidationDto:
+      type: object
+      required: [valid, sandbox_id]
+      properties:
+        valid:
+          type: boolean
+          description: Whether the SSH access credentials are valid.
+        sandbox_id:
+          type: string
+          description: ID of the sandbox this SSH access is for.
