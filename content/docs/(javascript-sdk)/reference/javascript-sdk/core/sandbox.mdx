@@ -73,6 +73,54 @@ Deletes the sandbox.
 
 - `Leap0Error`: If deleting the sandbox fails.
 
+### `addMount`
+
+```ts
+async addMount(mount: ObjectStorageMount, options?: { timeout?: number }): Promise<ObjectStorageMountSummary>
+```
+
+Adds an object storage mount to the sandbox.
+
+#### Parameters
+
+- `mount`: Object storage mount configuration.
+- `options`: Optional request settings.
+
+#### Returns
+
+- The created mount summary.
+
+### `updateMount`
+
+```ts
+async updateMount(mountID: string, mount: ObjectStorageMountUpdate, options?: { timeout?: number }): Promise<ObjectStorageMountSummary>
+```
+
+Updates an existing object storage mount on the sandbox.
+
+#### Parameters
+
+- `mountID`: Mount identifier.
+- `mount`: Partial mount update payload.
+- `options`: Optional request settings.
+
+#### Returns
+
+- The updated mount summary.
+
+### `deleteMount`
+
+```ts
+async deleteMount(mountID: string, options?: { timeout?: number }): Promise<void>
+```
+
+Deletes an object storage mount from the sandbox.
+
+#### Parameters
+
+- `mountID`: Mount identifier.
+- `options`: Optional request settings.
+
 ### `createPresignedUrl`
 
 ```ts

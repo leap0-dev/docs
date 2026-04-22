@@ -124,3 +124,27 @@ async get_workdir(http_timeout: float | None = None) -> str
 ```
 
 Fetch the configured working directory for the sandbox.
+
+### `add_mount`
+
+```python
+async add_mount(mount: ObjectStorageMountRequestDict, http_timeout: float | None = None) -> ObjectStorageMount
+```
+
+Attach an object storage mount to this sandbox.
+
+### `update_mount`
+
+```python
+async update_mount(mount_id: str, mount: ObjectStorageMountUpdateDict, http_timeout: float | None = None) -> ObjectStorageMount
+```
+
+Update an existing object storage mount on this sandbox.
+
+### `delete_mount`
+
+```python
+async delete_mount(mount_id: str, http_timeout: float | None = None) -> None
+```
+
+Delete an object storage mount from this sandbox.

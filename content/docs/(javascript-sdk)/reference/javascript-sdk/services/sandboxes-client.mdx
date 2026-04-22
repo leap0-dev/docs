@@ -115,6 +115,57 @@ Deletes a sandbox by ID.
 - `sandbox`: Sandbox ID or sandbox-like object.
 - `options`: Optional request settings such as timeout and query params.
 
+### `addMount`
+
+```ts
+async addMount(sandbox: SandboxRef, mount: ObjectStorageMount, options: RequestOptions = {}): Promise<ObjectStorageMountSummary>
+```
+
+Adds an object storage mount to a running sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `mount`: Object storage mount configuration.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The created mount summary.
+
+### `updateMount`
+
+```ts
+async updateMount(sandbox: SandboxRef, mountID: string, mount: ObjectStorageMountUpdate, options: RequestOptions = {}): Promise<ObjectStorageMountSummary>
+```
+
+Updates an existing object storage mount on a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `mountID`: Mount identifier.
+- `mount`: Partial mount update payload.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The updated mount summary.
+
+### `deleteMount`
+
+```ts
+async deleteMount(sandbox: SandboxRef, mountID: string, options: RequestOptions = {}): Promise<void>
+```
+
+Deletes an object storage mount from a sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `mountID`: Mount identifier.
+- `options`: Optional request settings such as timeout and query params.
+
 ### `getUserHomeDir`
 
 ```ts

@@ -23,7 +23,7 @@ Attributes:
 ### `create`
 
 ```python
-async create(*, template_name: str = DEFAULT_TEMPLATE_NAME, vcpu: int = DEFAULT_VCPU, memory: int = DEFAULT_MEMORY_MIB, timeout: int = DEFAULT_TIMEOUT, auto_pause: bool = False, otel_export: bool = False, env_vars: dict[str, str] | None = None, network_policy: NetworkPolicyDict | None = None, http_timeout: float | None = None) -> AsyncSandboxT | SandboxData | SandboxStatus
+async create(*, template_name: str = DEFAULT_TEMPLATE_NAME, vcpu: int = DEFAULT_VCPU, memory: int = DEFAULT_MEMORY_MIB, timeout: int = DEFAULT_TIMEOUT, auto_pause: bool = False, otel_export: bool = False, env_vars: dict[str, str] | None = None, network_policy: NetworkPolicyDict | None = None, mounts: list[ObjectStorageMountRequestDict] | None = None, http_timeout: float | None = None) -> AsyncSandboxT | SandboxData | SandboxStatus
 ```
 
 Create a new sandbox from a template.
@@ -39,6 +39,7 @@ Args:
         also forwards ``OTEL_EXPORTER_OTLP_HEADERS`` when present.
     env_vars: Environment variables to set inside the sandbox.
     network_policy: Outbound network policy for the sandbox.
+    mounts: Object storage mounts to attach before boot.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
@@ -144,6 +145,24 @@ async create_presigned_url(sandbox: SandboxRef, *, port: int, expires_in: int | 
 
 ```python
 async delete_presigned_url(sandbox: SandboxRef, presigned_url_id: str, http_timeout: float | None = None) -> None
+```
+
+### `add_mount`
+
+```python
+async add_mount(sandbox: SandboxRef, mount: ObjectStorageMountRequestDict, http_timeout: float | None = None) -> ObjectStorageMount
+```
+
+### `update_mount`
+
+```python
+async update_mount(sandbox: SandboxRef, mount_id: str, mount: ObjectStorageMountUpdateDict, http_timeout: float | None = None) -> ObjectStorageMount
+```
+
+### `delete_mount`
+
+```python
+async delete_mount(sandbox: SandboxRef, mount_id: str, http_timeout: float | None = None) -> None
 ```
 
 ### `invoke_url`
