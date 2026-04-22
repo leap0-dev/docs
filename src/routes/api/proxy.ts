@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { env } from "@/lib/content";
 import { coreOpenAPI } from "@/lib/openapi";
+import { env } from "@/env";
 
 const proxy = coreOpenAPI.createProxy({
   allowedOrigins: [new URL(env.LEAP0_API_URL).origin],

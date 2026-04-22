@@ -1,6 +1,8 @@
 import { createEnv } from "@t3-oss/env-core";
 import { z } from "zod";
 
+export const githubOrgUrl = "https://github.com/leap0-dev";
+
 export const env = createEnv({
   clientPrefix: "LEAP0_",
   client: {
@@ -25,5 +27,3 @@ export const env = createEnv({
   },
   emptyStringAsUndefined: true,
 });
-
-export const docsBaseUrl = "";

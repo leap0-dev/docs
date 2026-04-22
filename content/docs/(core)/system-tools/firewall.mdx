@@ -5,79 +5,6 @@ slug: firewall
 ---
 
 import { Tabs, TabItem } from "@/components/mdx-compat";
-import { CodeSnippet } from "@/components/code-snippet";
-
-export const firewallJsAllowAll = [
-  'import { Leap0Client, NetworkPolicyMode } from "leap0"',
-  "",
-  "const client = new Leap0Client()",
-  "const sandbox = await client.sandboxes.create({",
-  "  vcpu: 2,",
-  "  memory: 2048,",
-  "  networkPolicy: { mode: NetworkPolicyMode.ALLOW_ALL },",
-  "})",
-  "",
-  "console.log(sandbox.id, sandbox.networkPolicy)",
-  "await client.close()",
-].join("\n");
-
-export const firewallJsDenyAll = [
-  'import { Leap0Client, NetworkPolicyMode } from "leap0"',
-  "",
-  "const client = new Leap0Client()",
-  "const sandbox = await client.sandboxes.create({",
-  "  vcpu: 2,",
-  "  memory: 2048,",
-  "  networkPolicy: { mode: NetworkPolicyMode.DENY_ALL },",
-  "})",
-  "",
-  "console.log(sandbox.id, sandbox.networkPolicy)",
-  "await client.close()",
-].join("\n");
-
-export const firewallJsCustomDomains = [
-  'import { Leap0Client, NetworkPolicyMode } from "leap0"',
-  "",
-  "const client = new Leap0Client()",
-  "const sandbox = await client.sandboxes.create({",
-  "  vcpu: 2,",
-  "  memory: 2048,",
-  "  networkPolicy: {",
-  "    mode: NetworkPolicyMode.CUSTOM,",
-  '    allowDomains: ["api.openai.com", "pypi.org"],',
-  '    allowCidrs: ["10.0.0.0/24"],',
-  "  },",
-  "})",
-  "",
-  "console.log(sandbox.id, sandbox.networkPolicy)",
-  "await client.close()",
-].join("\n");
-
-export const firewallJsCustomTransforms = [
-  'import { Leap0Client, NetworkPolicyMode } from "leap0"',
-  "",
-  "const client = new Leap0Client()",
-  "const sandbox = await client.sandboxes.create({",
-  "  vcpu: 2,",
-  "  memory: 2048,",
-  "  networkPolicy: {",
-  "    mode: NetworkPolicyMode.CUSTOM,",
-  '    allowDomains: ["api.openai.com"],',
-  "    transforms: [",
-  "      {",
-  '        domain: "api.openai.com",',
-  "        injectHeaders: {",
-  '          Authorization: "Bearer sk-proj-...",',
-  "        },",
-  '        stripHeaders: ["X-Debug"],',
-  "      },",
-  "    ],",
-  "  },",
-  "})",
-  "",
-  "console.log(sandbox.id, sandbox.networkPolicy)",
-  "await client.close()",
-].join("\n");
 
 Control what a sandbox can reach over the network using the `network_policy` field when creating or restoring a sandbox.
 
@@ -113,7 +40,19 @@ print(sandbox.id, sandbox.network_policy)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={firewallJsAllowAll} />
+```ts
+import { Leap0Client, NetworkPolicyMode } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  networkPolicy: { mode: NetworkPolicyMode.ALLOW_ALL },
+});
+
+console.log(sandbox.id, sandbox.networkPolicy);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -139,7 +78,19 @@ print(sandbox.id, sandbox.network_policy)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={firewallJsDenyAll} />
+```ts
+import { Leap0Client, NetworkPolicyMode } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  networkPolicy: { mode: NetworkPolicyMode.DENY_ALL },
+});
+
+console.log(sandbox.id, sandbox.networkPolicy);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -169,7 +120,23 @@ print(sandbox.id, sandbox.network_policy)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={firewallJsCustomDomains} />
+```ts
+import { Leap0Client, NetworkPolicyMode } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  networkPolicy: {
+    mode: NetworkPolicyMode.CUSTOM,
+    allowDomains: ["api.openai.com", "pypi.org"],
+    allowCidrs: ["10.0.0.0/24"],
+  },
+});
+
+console.log(sandbox.id, sandbox.networkPolicy);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -209,7 +176,31 @@ print(sandbox.id, sandbox.network_policy)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={firewallJsCustomTransforms} />
+```ts
+import { Leap0Client, NetworkPolicyMode } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  networkPolicy: {
+    mode: NetworkPolicyMode.CUSTOM,
+    allowDomains: ["api.openai.com"],
+    transforms: [
+      {
+        domain: "api.openai.com",
+        injectHeaders: {
+          Authorization: "Bearer sk-proj-...",
+        },
+        stripHeaders: ["X-Debug"],
+      },
+    ],
+  },
+});
+
+console.log(sandbox.id, sandbox.networkPolicy);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -222,3 +213,4 @@ A unique, per-sandbox CA is added to the system certificates. Standard environme
 ## Snapshots
 
 Network policy is persisted with snapshots. When restoring a snapshot, the policy from the snapshot is used by default. You can override it by passing a new `network_policy` in the restore request.
+```

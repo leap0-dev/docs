@@ -5,7 +5,7 @@ slug: sandboxes
 ---
 
 import { TabItem, Tabs } from "@/components/mdx-compat";
-import { docsBaseUrl, env } from "@/lib/content";
+import { env } from "@/env";
 import sandboxLifecycleChart from "./sandbox-lifecycle.mmd?raw";
 
 A sandbox is an isolated runtime environment.
@@ -23,7 +23,7 @@ Every sandbox runs in its own Firecracker microVM:
 - Sandboxes run on the Linux 6.1 LTS kernel.
 - Each sandbox gets dedicated network boundaries with egress policy enforcement. Control outbound access with `network_policy`.
 
-See <a href={`${docsBaseUrl}/firewall`}>Firewall</a> for egress configuration details.
+See <a href="/firewall">Firewall</a> for egress configuration details.
 
 ## Lifecycle
 

@@ -2,9 +2,22 @@
 import { server } from "fumadocs-mdx/runtime/server";
 
 const create = server<{ docs: any }>();
-const docEntries = import.meta.glob("../../content/docs/**/*.mdx", { eager: true });
-const metaEntries = import.meta.glob("../../content/docs/**/meta.json", {
+const docEntries = import.meta.glob("../../content/docs/**/*.{mdx,md}", {
   eager: true,
+  query: {
+    collection: "docs",
+  },
+});
+const rawDocEntries = import.meta.glob("../../content/docs/**/*.mdx", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+const metaEntries = import.meta.glob("../../content/docs/**/*.{json,yaml}", {
+  eager: true,
+  query: {
+    collection: "docs",
+  },
   import: "default",
 });
 
@@ -23,3 +36,5 @@ export const docs = await create.docs(
   normalizeEntries(metaEntries),
   normalizeEntries(docEntries),
 );
+
+export const rawDocs = normalizeEntries(rawDocEntries) as Record<string, string>;

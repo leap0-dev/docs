@@ -19,7 +19,6 @@ import { baseOptions } from "@/lib/layout.shared";
 import { TabPreferencesProvider } from "@/components/tab-preferences-provider";
 import { parseTabPreferences } from "@/lib/tab-preferences";
 import { filterSidebarTree, getSidebarSection } from "@/lib/sidebar-tree";
-import { gitConfig } from "@/lib/shared";
 import { SidebarReferenceDropdown } from "@/components/sidebar-reference-dropdown";
 
 export const Route = createFileRoute("/")({
@@ -62,7 +61,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
           <MarkdownCopyButton markdownUrl={markdownUrl} />
           <OpenOptionsButton
             markdownUrl={markdownUrl}
-            githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/content/docs/${path}`}
+            githubUrl={`https://github.com/leap0-dev/docs/blob/main/content/docs/${path}`}
           />
         </div>
         <DocsBody>

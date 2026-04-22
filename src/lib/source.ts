@@ -3,7 +3,6 @@ import type { DocsCollectionEntry } from "fumadocs-mdx/runtime/server";
 import { docs } from "./server-collections";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 import { openapiPlugin, openapiSource } from "fumadocs-openapi/server";
-import { docsContentRoute, docsRoute } from "./shared";
 import {
   codeInterpreterOpenAPI,
   coreOpenAPI,
@@ -34,7 +33,7 @@ export const source = loader({
     desktopAPI,
     metadataServiceAPI,
   }),
-  baseUrl: docsRoute,
+  baseUrl: "/",
   slugs(file) {
     if (file.data.type !== "docs" || !("slug" in file.data)) return undefined;
 
@@ -49,24 +48,10 @@ export const source = loader({
 });
 
 export function getPageMarkdownUrl(page: InferPageType<typeof source>) {
-  const segments = [...page.slugs, "content.md"];
+  const path = page.slugs.join("/");
 
   return {
-    segments,
-    url: `${docsContentRoute}/${segments.join("/")}`,
+    path,
+    url: `/${path}.mdx`,
   };
-}
-
-export async function getLLMText(page: InferPageType<typeof source>) {
-  if (page.data.type !== "docs") {
-    return `# ${page.data.title} (${page.url})
-
-${page.data.description ?? ""}`;
-  }
-
-  const processed = await page.data.getText("processed");
-
-  return `# ${page.data.title} (${page.url})
-
-${processed}`;
 }

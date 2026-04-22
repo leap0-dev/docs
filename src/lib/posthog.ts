@@ -1,5 +1,5 @@
 import posthog from "posthog-js";
-import { env } from "@/lib/content";
+import { env } from "@/env";
 
 let initialized = false;
 

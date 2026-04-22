@@ -5,43 +5,6 @@ slug: telemetry
 ---
 
 import { Tabs, TabItem } from "@/components/mdx-compat";
-import { CodeSnippet } from "@/components/code-snippet";
-
-export const telemetryJsSdkOtelExample = [
-  'import { Leap0Client } from "leap0"',
-  "",
-  'process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "https://otel.example.com"',
-  'process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123"',
-  "",
-  "const client = new Leap0Client({ sdkOtelEnabled: true })",
-  "const sandbox = await client.sandboxes.create({",
-  "  vcpu: 2,",
-  "  memory: 2048,",
-  "  timeout: 30,",
-  "  otelExport: true,",
-  "})",
-  "",
-  "console.log(sandbox.id)",
-  "await client.close()",
-].join("\n");
-
-export const telemetryJsSandboxExport = [
-  'import { Leap0Client } from "leap0"',
-  "",
-  'process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "https://otel.example.com"',
-  'process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123"',
-  "",
-  "const client = new Leap0Client()",
-  "const sandbox = await client.sandboxes.create({",
-  "  vcpu: 2,",
-  "  memory: 2048,",
-  "  timeout: 30,",
-  "  otelExport: true,",
-  "})",
-  "",
-  "console.log(sandbox.id)",
-  "await client.close()",
-].join("\n");
 
 Every sandbox runs an [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/) that collects host metrics, logs, traces, and spans and pushes them to an OTLP HTTP endpoint that you configure via environment variables. Your code can also send its own OTLP telemetry to the local collector, which forwards it alongside the host data.
 
@@ -77,7 +40,23 @@ This is separate from sandbox telemetry: use `otelExport: true` in the JavaScrip
 
 ### JavaScript SDK and sandbox example
 
-<CodeSnippet lang="js" code={telemetryJsSdkOtelExample} />
+```ts
+import { Leap0Client } from "leap0";
+
+process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "https://otel.example.com";
+process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123";
+
+const client = new Leap0Client({ sdkOtelEnabled: true });
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  timeout: 30,
+  otelExport: true,
+});
+
+console.log(sandbox.id);
+await client.close();
+```
 
 ## Resource attributes
 
@@ -119,6 +98,22 @@ print(sandbox.id)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={telemetryJsSandboxExport} />
+```ts
+import { Leap0Client } from "leap0";
+
+process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "https://otel.example.com";
+process.env.OTEL_EXPORTER_OTLP_HEADERS = "x-api-key=abc123";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  vcpu: 2,
+  memory: 2048,
+  timeout: 30,
+  otelExport: true,
+});
+
+console.log(sandbox.id);
+await client.close();
+```
   </TabItem>
 </Tabs>

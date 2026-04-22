@@ -1,7 +1,7 @@
 import { BookOpenText, Braces, MonitorSmartphone, SquareCode } from "lucide-react";
 import type { BaseLayoutProps, LayoutTab } from "fumadocs-ui/layouts/shared";
 import { Leap0Brand } from "@/components/leap0-brand";
-import { githubOrgUrl } from "./shared";
+import { githubOrgUrl } from "@/env";
 
 function BrandTitle({ href = "/", className }: { href?: string; className?: string }) {
   return (

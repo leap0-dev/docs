@@ -4,76 +4,7 @@ description: Create and manage interactive terminal sessions inside a sandbox.
 slug: pty
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { CodeSnippet } from '@/components/code-snippet';
-export const ptyJsCreate = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const session = await sandbox.pty.create({
-id: "my-terminal",
-cols: 120,
-rows: 40,
-cwd: "/home/user",
-envs: { TERM: "xterm-256color" },
-})
-
-console.log(session.id, session.cwd, session.cols, session.rows)
-await client.close()`;
-
-export const ptyJsLazyCreate = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const session = await sandbox.pty.create({
-id: "lazy-terminal",
-cwd: "/workspace",
-cols: 120,
-rows: 40,
-lazyStart: true,
-})
-
-console.log(session.id, session.lazyStart)
-await client.close()`;
-
-export const ptyJsWebSocket = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const pty = sandbox.pty.connect("my-terminal")
-
-pty.send("ls -la\n")
-const output = await pty.recv()
-console.log(output)
-
-pty.close()
-await client.close()`;
-
-export const ptyJsResize = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const session = await sandbox.pty.resize("my-terminal", 200, 50)
-
-console.log(session.cols, session.rows)
-await client.close()`;
-
-export const ptyJsList = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const sessions = await sandbox.pty.list()
-
-sessions.forEach((session) => console.log(session.id, session.active))
-await client.close()`;
-
-export const ptyJsDelete = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.pty.delete("my-terminal")
-await client.close()`;
+import { Tabs, TabItem } from "@/components/mdx-compat";
 
 PTY endpoints let you create interactive terminal sessions with a persistent shell process. Connect via WebSocket for real-time bidirectional I/O, similar to SSH or a browser-based terminal.
 
@@ -104,7 +35,22 @@ print(session.id, session.cwd, session.cols, session.rows)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={ptyJsCreate} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const session = await sandbox.pty.create({
+  id: "my-terminal",
+  cols: 120,
+  rows: 40,
+  cwd: "/home/user",
+  envs: { TERM: "xterm-256color" },
+});
+
+console.log(session.id, session.cwd, session.cols, session.rows);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -133,7 +79,22 @@ print(session.id, session.lazy_start)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={ptyJsLazyCreate} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const session = await sandbox.pty.create({
+  id: "lazy-terminal",
+  cwd: "/workspace",
+  cols: 120,
+  rows: 40,
+  lazyStart: true,
+});
+
+console.log(session.id, session.lazyStart);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -160,7 +121,20 @@ finally:
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={ptyJsWebSocket} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const pty = sandbox.pty.connect("my-terminal");
+
+pty.send("ls -la\n");
+const output = await pty.recv();
+console.log(output);
+
+pty.close();
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -182,7 +156,16 @@ print(session.cols, session.rows)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={ptyJsResize} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const session = await sandbox.pty.resize("my-terminal", 200, 50);
+
+console.log(session.cols, session.rows);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -202,7 +185,16 @@ for session in sandbox.pty.list():
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={ptyJsList} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const sessions = await sandbox.pty.list();
+
+sessions.forEach((session) => console.log(session.id, session.active));
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -223,6 +215,14 @@ sandbox.pty.delete("my-terminal")
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={ptyJsDelete} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.pty.delete("my-terminal");
+await client.close();
+```
   </TabItem>
 </Tabs>

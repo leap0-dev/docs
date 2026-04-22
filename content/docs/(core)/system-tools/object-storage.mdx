@@ -5,7 +5,6 @@ slug: object-storage
 ---
 
 import { TabItem, Tabs } from "@/components/mdx-compat";
-import { docsBaseUrl } from "@/lib/content";
 
 Object storage mounts let a sandbox access bucket contents as files.
 Leap0 mounts the bucket inside the sandbox with `s3fs` without exposing the storage credentials in the sandbox.
@@ -244,4 +243,4 @@ await client.close();
 - Credentials are not returned by the API and are not exposed inside the guest.
 - A sandbox can attach up to 8 object storage mounts.
 
-See <a href={`${docsBaseUrl}/api`}>API Reference</a> for the full request and response schema.
+See <a href="/api">API Reference</a> for the full request and response schema.

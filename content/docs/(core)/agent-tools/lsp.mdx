@@ -4,83 +4,7 @@ description: Start and interact with language servers for code intelligence insi
 slug: lsp
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { CodeSnippet } from '@/components/code-snippet';
-export const lspJsStart = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-console.log(await sandbox.lsp.start("python", "/home/user/project"))
-await client.close()`;
-
-export const lspJsDidOpen = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.lsp.didOpenPath(
-"python",
-"/home/user/project",
-"/home/user/project/main.py",
-"import os\nos.path.",
-1,
-)
-
-await client.close()`;
-
-export const lspJsCompletions = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const response = await sandbox.lsp.completionsPath(
-"python",
-"/home/user/project",
-"/home/user/project/main.py",
-1,
-8,
-)
-
-const items = response.result ?? []
-items.slice(0, 5).forEach((item) => console.log(item.label))
-await client.close()`;
-
-export const lspJsDocumentSymbols = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const response = await sandbox.lsp.documentSymbolsPath(
-"python",
-"/home/user/project",
-"/home/user/project/main.py",
-)
-
-for (const symbol of response.result ?? []) {
-console.log(symbol.name, symbol.kind)
-}
-
-await client.close()`;
-
-export const lspJsDidClose = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.lsp.didClosePath(
-"python",
-"/home/user/project",
-"/home/user/project/main.py",
-)
-
-await client.close()`;
-
-export const lspJsStop = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.lsp.stop("python", "/home/user/project")
-await client.close()`;
+import { Tabs, TabItem } from "@/components/mdx-compat";
 
 LSP endpoints let you start language servers inside a sandbox and interact with them for code completions, document symbols, and document lifecycle notifications. Supported languages: **Python** (pyright) and **TypeScript/JavaScript** (typescript-language-server).
 
@@ -106,7 +30,15 @@ print(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={lspJsStart} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+console.log(await sandbox.lsp.start("python", "/home/user/project"));
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -133,7 +65,22 @@ sandbox.lsp.did_open_path(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={lspJsDidOpen} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.lsp.didOpenPath(
+  "python",
+  "/home/user/project",
+  "/home/user/project/main.py",
+  "import os\nos.path.",
+  1,
+);
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -164,7 +111,23 @@ for item in items[:5]:
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={lspJsCompletions} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const response = await sandbox.lsp.completionsPath(
+  "python",
+  "/home/user/project",
+  "/home/user/project/main.py",
+  1,
+  8,
+);
+
+const items = response.result ?? [];
+items.slice(0, 5).forEach((item) => console.log(item.label));
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -192,7 +155,23 @@ for symbol in response.result or []:
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={lspJsDocumentSymbols} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const response = await sandbox.lsp.documentSymbolsPath(
+  "python",
+  "/home/user/project",
+  "/home/user/project/main.py",
+);
+
+for (const symbol of response.result ?? []) {
+  console.log(symbol.name, symbol.kind);
+}
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -217,7 +196,16 @@ sandbox.lsp.did_close_path(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={lspJsDidClose} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.lsp.didClosePath("python", "/home/user/project", "/home/user/project/main.py");
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -241,6 +229,14 @@ sandbox.lsp.stop(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={lspJsStop} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.lsp.stop("python", "/home/user/project");
+await client.close();
+```
   </TabItem>
 </Tabs>

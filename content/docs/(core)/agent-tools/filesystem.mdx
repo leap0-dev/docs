@@ -4,207 +4,7 @@ description: Run filesystem operations inside a sandbox.
 slug: filesystem
 ---
 
-import { Tabs, TabItem } from '@/components/mdx-compat';
-import { CodeSnippet } from '@/components/code-snippet';
-export const filesystemJsLs = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const result = await sandbox.filesystem.ls("/workspace", {
-recursive: false,
-exclude: ["node_modules", ".git"],
-})
-
-console.log(result.items.length)
-await client.close()`;
-
-export const filesystemJsStat = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const info = await sandbox.filesystem.stat("/workspace/main.py")
-
-console.log(info.size)
-await client.close()`;
-
-export const filesystemJsMkdir = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.filesystem.mkdir("/workspace/src", {
-recursive: true,
-permissions: "755",
-})
-
-await client.close()`;
-
-export const filesystemJsWriteFile = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.filesystem.writeFile(
-"/workspace/hello.txt",
-"Hello, world!",
-{ permissions: "644" },
-)
-
-await client.close()`;
-
-export const filesystemJsWriteFiles = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.filesystem.writeFiles({
-"/workspace/a.txt": "a",
-"/workspace/b.txt": "b",
-})
-
-await client.close()`;
-
-export const filesystemJsReadFile = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-console.log(await sandbox.filesystem.readFile("/workspace/main.py"))
-console.log(await sandbox.filesystem.readFile("/workspace/main.py", { head: 20 }))
-console.log(await sandbox.filesystem.readFile("/workspace/main.py", { tail: 10 }))
-
-await client.close()`;
-
-export const filesystemJsReadFiles = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const files = await sandbox.filesystem.readFiles([
-"/workspace/a.txt",
-"/workspace/b.txt",
-])
-
-for (const [path, content] of Object.entries(files)) {
-console.log(path, content)
-}
-
-await client.close()`;
-
-export const filesystemJsDelete = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.filesystem.delete("/workspace/old", true)
-await client.close()`;
-
-export const filesystemJsSetPermissions = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.filesystem.setPermissions("/workspace/script.sh", {
-mode: "755",
-owner: "root",
-group: "root",
-})
-
-await client.close()`;
-
-export const filesystemJsGlob = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const matches = await sandbox.filesystem.glob("/workspace", "\*.ts", {
-exclude: ["node_modules"],
-})
-
-console.log(matches.length)
-await client.close()`;
-
-export const filesystemJsGrep = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const matches = await sandbox.filesystem.grep("/workspace", "TODO", {
-include: "\*.py",
-exclude: ["node_modules", ".git"],
-})
-
-console.log(matches.length)
-await client.close()`;
-
-export const filesystemJsEditFile = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const result = await sandbox.filesystem.editFile("/workspace/main.py", [
-{ find: "hello", replace: "hi" },
-{ find: "world", replace: "earth" },
-])
-
-console.log(result.diff)
-console.log(result.replacements)
-await client.close()`;
-
-export const filesystemJsEditFiles = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const results = await sandbox.filesystem.editFiles({
-paths: ["/workspace/a.py", "/workspace/b.py"],
-find: "old_name",
-replace: "new_name",
-})
-
-console.log(results.items?.length ?? 0)
-await client.close()`;
-
-export const filesystemJsMove = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.filesystem.move(
-"/workspace/old.txt",
-"/workspace/new.txt",
-false,
-)
-
-await client.close()`;
-
-export const filesystemJsCopy = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-await sandbox.filesystem.copy(
-"/home/user/file.txt",
-"/home/user/file-copy.txt",
-{ recursive: false, overwrite: false },
-)
-
-await client.close()`;
-
-export const filesystemJsExists = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-
-console.log(await sandbox.filesystem.exists("/workspace/main.py"))
-await client.close()`;
-
-export const filesystemJsTree = `import { Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create()
-const tree = await sandbox.filesystem.tree("/workspace", {
-exclude: ["node_modules", ".git"],
-maxDepth: 3,
-})
-
-console.log(tree.items)
-await client.close()`;
+import { Tabs, TabItem } from "@/components/mdx-compat";
 
 Filesystem endpoints let you list, read, write, move, copy, delete, and search files inside a running sandbox. File content is transferred as raw binary bytes.
 
@@ -231,7 +31,19 @@ print(len(result.items))
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsLs} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const result = await sandbox.filesystem.ls("/workspace", {
+  recursive: false,
+  exclude: ["node_modules", ".git"],
+});
+
+console.log(result.items.length);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -253,7 +65,16 @@ print(info.size)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsStat} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const info = await sandbox.filesystem.stat("/workspace/main.py");
+
+console.log(info.size);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -278,7 +99,19 @@ sandbox.filesystem.mkdir(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsMkdir} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.mkdir("/workspace/src", {
+  recursive: true,
+  permissions: "755",
+});
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -303,7 +136,16 @@ sandbox.filesystem.write_bytes(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsWriteFile} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.writeFile("/workspace/hello.txt", "Hello, world!", { permissions: "644" });
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -329,7 +171,19 @@ sandbox.filesystem.write_files_bytes(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsWriteFiles} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.writeFiles({
+  "/workspace/a.txt": "a",
+  "/workspace/b.txt": "b",
+});
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -355,7 +209,18 @@ print(sandbox.filesystem.read_bytes(path="/workspace/main.py", tail=10))
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsReadFile} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+console.log(await sandbox.filesystem.readFile("/workspace/main.py"));
+console.log(await sandbox.filesystem.readFile("/workspace/main.py", { head: 20 }));
+console.log(await sandbox.filesystem.readFile("/workspace/main.py", { tail: 10 }));
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -381,7 +246,19 @@ for path, content in files.items():
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsReadFiles} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const files = await sandbox.filesystem.readFiles(["/workspace/a.txt", "/workspace/b.txt"]);
+
+for (const [path, content] of Object.entries(files)) {
+  console.log(path, content);
+}
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -402,7 +279,15 @@ sandbox.filesystem.delete(path="/workspace/old", recursive=True)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsDelete} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.delete("/workspace/old", true);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -428,7 +313,20 @@ sandbox.filesystem.set_permissions(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsSetPermissions} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.setPermissions("/workspace/script.sh", {
+  mode: "755",
+  owner: "root",
+  group: "root",
+});
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -455,7 +353,18 @@ print(len(matches))
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsGlob} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const matches = await sandbox.filesystem.glob("/workspace", "*.ts", {
+  exclude: ["node_modules"],
+});
+
+console.log(matches.length);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -483,7 +392,19 @@ print(len(matches))
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsGrep} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const matches = await sandbox.filesystem.grep("/workspace", "TODO", {
+  include: "*.py",
+  exclude: ["node_modules", ".git"],
+});
+
+console.log(matches.length);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -513,7 +434,20 @@ print(result.replacements)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsEditFile} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const result = await sandbox.filesystem.editFile("/workspace/main.py", [
+  { find: "hello", replace: "hi" },
+  { find: "world", replace: "earth" },
+]);
+
+console.log(result.diff);
+console.log(result.replacements);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -540,7 +474,20 @@ print(len(results))
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsEditFiles} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const results = await sandbox.filesystem.editFiles({
+  paths: ["/workspace/a.py", "/workspace/b.py"],
+  find: "old_name",
+  replace: "new_name",
+});
+
+console.log(results.items?.length ?? 0);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -565,7 +512,16 @@ sandbox.filesystem.move(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsMove} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.move("/workspace/old.txt", "/workspace/new.txt", false);
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -591,7 +547,19 @@ sandbox.filesystem.copy(
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsCopy} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+await sandbox.filesystem.copy("/home/user/file.txt", "/home/user/file-copy.txt", {
+  recursive: false,
+  overwrite: false,
+});
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -612,7 +580,15 @@ print(sandbox.filesystem.exists(path="/workspace/main.py"))
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsExists} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+console.log(await sandbox.filesystem.exists("/workspace/main.py"));
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -639,6 +615,18 @@ print(tree.items)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={filesystemJsTree} />
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+const tree = await sandbox.filesystem.tree("/workspace", {
+  exclude: ["node_modules", ".git"],
+  maxDepth: 3,
+});
+
+console.log(tree.items);
+await client.close();
+```
   </TabItem>
 </Tabs>

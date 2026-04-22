@@ -5,46 +5,7 @@ slug: presigned-urls
 ---
 
 import { TabItem, Tabs } from "@/components/mdx-compat";
-import { CodeSnippet } from "@/components/code-snippet";
-import { env } from "@/lib/content";
-
-export const presignedUrlPythonExample = `from leap0 import Leap0Client
-
-client = Leap0Client()
-sandbox = client.sandboxes.create()
-
-presigned_url = sandbox.create_presigned_url(port=8080, expires_in=900)
-
-print(presigned_url.id)
-print(presigned_url.url)
-print(presigned_url.token)`;
-
-export const presignedUrlTsExample = `import { Leap0Client } from "leap0";
-
-const client = new Leap0Client();
-const sandbox = await client.sandboxes.create();
-
-const presignedUrl = await sandbox.createPresignedUrl(8080, 900);
-
-console.log(presignedUrl.id);
-console.log(presignedUrl.url);
-console.log(presignedUrl.token);`;
-
-export const deletePresignedUrlPythonExample = `from leap0 import Leap0Client
-
-client = Leap0Client()
-sandbox = client.sandboxes.create()
-
-presigned_url = sandbox.create_presigned_url(port=8080)
-sandbox.delete_presigned_url(presigned_url.id)`;
-
-export const deletePresignedUrlTsExample = `import { Leap0Client } from "leap0";
-
-const client = new Leap0Client();
-const sandbox = await client.sandboxes.create();
-
-const presignedUrl = await sandbox.createPresignedUrl(8080);
-await sandbox.deletePresignedUrl(presignedUrl.id);`;
+import { env } from "@/env";
 
 A presigned URL is a temporary public hostname that routes traffic to a specific port inside a sandbox.
 
@@ -58,10 +19,36 @@ Create a presigned URL with:
 
 <Tabs syncKey="language">
   <TabItem label="Python">
-    <CodeSnippet lang="python" code={presignedUrlPythonExample} />
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+
+presigned_url = sandbox.create_presigned_url(port=8080, expires_in=900)
+
+print(presigned_url.id)
+print(presigned_url.url)
+print(presigned_url.token)
+```
+
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="ts" code={presignedUrlTsExample} />
+
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+const presignedUrl = await sandbox.createPresignedUrl(8080, 900);
+
+console.log(presignedUrl.id);
+console.log(presignedUrl.url);
+console.log(presignedUrl.token);
+```
+
   </TabItem>
 </Tabs>
 
@@ -71,10 +58,30 @@ Revoke a URL with:
 
 <Tabs syncKey="language">
   <TabItem label="Python">
-    <CodeSnippet lang="python" code={deletePresignedUrlPythonExample} />
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+
+presigned_url = sandbox.create_presigned_url(port=8080)
+sandbox.delete_presigned_url(presigned_url.id)
+```
+
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="ts" code={deletePresignedUrlTsExample} />
+
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+const presignedUrl = await sandbox.createPresignedUrl(8080);
+await sandbox.deletePresignedUrl(presignedUrl.id);
+```
+
   </TabItem>
 </Tabs>
 

@@ -5,151 +5,6 @@ slug: code-interpreter
 ---
 
 import { Tabs, TabItem } from "@/components/mdx-compat";
-import { CodeSnippet } from "@/components/code-snippet";
-import { docsBaseUrl } from "@/lib/content";
-
-export const codeInterpreterJsCreateContext = `import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create({
-templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
-})
-const context = await sandbox.codeInterpreter.createContext("python", "/home/user")
-
-console.log(context.id, context.language)
-await client.close()`;
-
-export const codeInterpreterJsListContexts = `import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create({
-templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
-})
-
-for (const context of await sandbox.codeInterpreter.listContexts()) {
-console.log(context.id, context.language, context.cwd)
-}
-
-await client.close()`;
-
-export const codeInterpreterJsGetContext = `import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create({
-templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
-})
-const context = await sandbox.codeInterpreter.getContext("<context_id>")
-
-console.log(context)
-await client.close()`;
-
-export const codeInterpreterJsDeleteContext = `import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create({
-templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
-})
-
-await sandbox.codeInterpreter.deleteContext("<context_id>")
-await client.close()`;
-
-export const codeInterpreterJsExecute = `import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create({
-templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
-})
-
-const first = await sandbox.codeInterpreter.execute({
-code: "prices = [10, 20, 30, 40, 50]",
-language: "python",
-})
-
-const second = await sandbox.codeInterpreter.execute({
-code: "sum(prices) / len(prices)",
-language: "python",
-contextId: first.contextId,
-})
-
-for (const item of second.items) {
-if (item.text) console.log(item.text)
-}
-
-await client.close()`;
-
-export const codeInterpreterJsExecuteStream = `import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create({
-templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
-})
-
-for await (const event of sandbox.codeInterpreter.executeStream({
-code:
-"import time\n" +
-"for i in range(5):\n" +
-" print(f'Step {i}')\n" +
-" time.sleep(1)",
-language: "python",
-timeoutMs: 60000,
-})) {
-if (event.type === "stdout") console.log(event.data)
-if (event.type === "exit") console.log("Done (exit code " + event.code + ")")
-}
-
-await client.close()`;
-
-export const codeInterpreterJsCharts = `import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0"
-
-const client = new Leap0Client()
-const sandbox = await client.sandboxes.create({
-templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
-})
-
-const result = await sandbox.codeInterpreter.execute({
-code:
-"import matplotlib.pyplot as plt\n" +
-"import numpy as np\n\n" +
-"x = np.linspace(0, 2 \* np.pi, 100)\n" +
-"plt.figure(figsize=(8, 4))\n" +
-"plt.plot(x, np.sin(x), label='sin(x)')\n" +
-"plt.plot(x, np.cos(x), label='cos(x)')\n" +
-"plt.legend()\n" +
-"plt.title('Trigonometric Functions')\n" +
-"plt.show()",
-language: "python",
-})
-
-for (const item of result.items) {
-if (item.png) console.log("PNG image:", item.png.length, "base64 chars")
-if (item.svg) console.log("SVG image:", item.svg.length, "chars")
-}
-
-await client.close()`;
-
-Execute code inside a running sandbox. The interpreter keeps a persistent REPL process alive so that variables, imports, and working directory survive across calls. Send code, get back stdout, stderr, rich results (text, images, HTML, JSON), and structured errors. For a full endpoint reference, see the <a href={`${docsBaseUrl}/code-interpreter/api`}>Code Interpreter API</a>.
-
-Two runtimes are available:
-
-| Alias                                                 | Runtime                  | Notes                                                                                    |
-| ----------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------- |
-| `python`, `py`, `python3`                             | Python 3.12              | 50+ pre-installed data-science packages. Matplotlib charts auto-captured as PNG and SVG. |
-| `typescript`, `ts`, `javascript`, `js`, `bun`, `node` | Bun v1.3.10 (TypeScript) | Last expression is returned as a result. State accumulates across calls.                 |
-
-:::note[Sandbox template requirement]
-Code Interpreter requires a sandbox created with the `system/code-interpreter:v0.1.0` template. Sandboxes created with other templates do not include the interpreter runtimes. See <a href={`${docsBaseUrl}/sandboxes`}>Sandboxes</a> for how to create one.
-:::
-
-Code interpreter endpoints are served **inside** the sandbox. Reach them through the sandbox invoke URL, not the management API. See <a href={`${docsBaseUrl}/sandboxes#invoke-a-sandbox`}>Invoke a sandbox</a> for background.
-
-## Contexts
-
-A context is a session that owns one REPL process per language. State (variables, imports, cwd) lives for the lifetime of the context.
-
-- Omit `context_id` when executing to get an auto-created context.
-- Pass a `context_id` to accumulate state across multiple execute calls.
-- A context is locked to the language of its first execution. Sending a different language returns a `400` error.
-- Deleting a context kills the underlying REPL processes immediately.
 
 ### Create a context
 
@@ -171,7 +26,18 @@ print(context.id, context.language)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={codeInterpreterJsCreateContext} />
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+const context = await sandbox.codeInterpreter.createContext("python", "/home/user");
+
+console.log(context.id, context.language);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -198,7 +64,20 @@ for context in sandbox.code_interpreter.list_contexts():
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={codeInterpreterJsListContexts} />
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+for (const context of await sandbox.codeInterpreter.listContexts()) {
+  console.log(context.id, context.language, context.cwd);
+}
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -220,7 +99,18 @@ print(context)
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={codeInterpreterJsGetContext} />
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+const context = await sandbox.codeInterpreter.getContext("<context_id>");
+
+console.log(context);
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -241,7 +131,17 @@ sandbox.code_interpreter.delete_context("<context_id>")
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={codeInterpreterJsDeleteContext} />
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+await sandbox.codeInterpreter.deleteContext("<context_id>");
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -278,7 +178,31 @@ for item in second.items:
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={codeInterpreterJsExecute} />
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+const first = await sandbox.codeInterpreter.execute({
+  code: "prices = [10, 20, 30, 40, 50]",
+  language: "python",
+});
+
+const second = await sandbox.codeInterpreter.execute({
+  code: "sum(prices) / len(prices)",
+  language: "python",
+  contextId: first.contextId,
+});
+
+for (const item of second.items) {
+  if (item.text) console.log(item.text);
+}
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -292,55 +216,6 @@ for item in second.items:
 | `language`   | string  | No       | `python`       | Any supported alias.                |
 | `context_id` | string  | No       | auto-generated | Reuse an existing session.          |
 | `timeout_ms` | integer | No       | `30000`        | Max execution time in milliseconds. |
-
-### Response shape
-
-```json
-{
-  "context_id": "V1StGXR8_Z5jdHi6B-myT",
-  "items": [
-    {
-      "is_primary": true,
-      "text": "30.0"
-    }
-  ],
-  "logs": {
-    "stdout": ["some printed output"],
-    "stderr": []
-  },
-  "error": null,
-  "execution_count": 2
-}
-```
-
-`items` - ordered list of rich outputs. The last expression in Python and TypeScript is automatically captured as a result with `is_primary: true`. Each result can carry any combination of the following fields:
-
-| Field        | Type   | When present                                                  |
-| ------------ | ------ | ------------------------------------------------------------- |
-| `text`       | string | Always, for any non-null result.                              |
-| `png`        | string | Base64-encoded PNG - matplotlib charts, PIL images.           |
-| `svg`        | string | SVG markup - matplotlib vector output, custom `_repr_svg_()`. |
-| `html`       | string | Objects with `_repr_html_()` (pandas DataFrames, etc.).       |
-| `markdown`   | string | Objects with `_repr_markdown_()`.                             |
-| `json`       | object | Objects with `_repr_json_()`.                                 |
-| `jpeg`       | string | Base64-encoded JPEG.                                          |
-| `pdf`        | string | Base64-encoded PDF.                                           |
-| `latex`      | string | LaTeX markup.                                                 |
-| `javascript` | string | JavaScript output.                                            |
-
-`logs` - arrays of stdout and stderr lines captured during execution.
-
-`error` - `null` on success, otherwise:
-
-```json
-{
-  "name": "ZeroDivisionError",
-  "value": "division by zero",
-  "traceback": "Traceback (most recent call last):\n  File \"<code>\", line 1, in <module>\nZeroDivisionError: division by zero\n"
-}
-```
-
-`execution_count` - increments with each call in the context. Useful for ordering outputs.
 
 ## Stream execution
 
@@ -370,7 +245,29 @@ time.sleep(1)""",
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={codeInterpreterJsExecuteStream} />
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+for await (const event of sandbox.codeInterpreter.executeStream({
+  code:
+    "import time\n" +
+    "for i in range(5):\n" +
+    " print(f'Step {i}')\n" +
+    " time.sleep(1)",
+  language: "python",
+  timeoutMs: 60000,
+})) {
+  if (event.type === "stdout") console.log(event.data);
+  if (event.type === "exit") console.log("Done (exit code " + event.code + ")");
+}
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -390,9 +287,11 @@ Each `data:` line in the SSE stream is a JSON object:
 Example stream for `print("hello")`:
 
 ```
+
 data: {"type":"stdout","data":"hello"}
 
 data: {"type":"exit","code":0}
+
 ```
 
 ## Generating charts
@@ -430,7 +329,35 @@ for item in result.items:
 
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="js" code={codeInterpreterJsCharts} />
+```ts
+import { DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME, Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
+});
+
+const result = await sandbox.codeInterpreter.execute({
+  code:
+    "import matplotlib.pyplot as plt\n" +
+    "import numpy as np\n\n" +
+    "x = np.linspace(0, 2 * np.pi, 100)\n" +
+    "plt.figure(figsize=(8, 4))\n" +
+    "plt.plot(x, np.sin(x), label='sin(x)')\n" +
+    "plt.plot(x, np.cos(x), label='cos(x)')\n" +
+    "plt.legend()\n" +
+    "plt.title('Trigonometric Functions')\n" +
+    "plt.show()",
+  language: "python",
+});
+
+for (const item of result.items) {
+  if (item.png) console.log("PNG image:", item.png.length, "base64 chars");
+  if (item.svg) console.log("SVG image:", item.svg.length, "chars");
+}
+
+await client.close();
+```
   </TabItem>
 </Tabs>
 
@@ -451,18 +378,4 @@ The Python runtime ships with these packages ready to import:
 | Scientific computing | numba, xarray                                |
 | NLP                  | nltk, gensim, spacy, textblob                |
 | Utilities            | pytz, joblib, pytest                         |
-
-## Language-specific behavior
-
-### Python
-
-- The last expression in a code block is evaluated and returned as a result with `is_primary: true`.
-- `print()` output appears in `logs.stdout`.
-- Objects that implement rich display methods (`_repr_html_`, `_repr_png_`, etc.) produce rich results automatically. This includes pandas DataFrames, PIL images, and any custom class that defines these methods.
-- A `display()` function is available globally for explicitly emitting rich results mid-execution.
-
-### TypeScript (Bun)
-
-- Code is transpiled and executed via Bun v1.3.10 in a subprocess. Each execution writes to a temp file that includes all accumulated state from prior calls in the same context.
-- The last expression is captured as a result when it is not a statement keyword (`const`, `let`, `if`, `for`, `function`, etc.).
-- `console.log()` writes to stdout. `console.error()` and `console.warn()` write to stderr.
+```

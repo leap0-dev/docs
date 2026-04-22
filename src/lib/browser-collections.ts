@@ -2,7 +2,11 @@
 import { browser } from "fumadocs-mdx/runtime/browser";
 
 const create = browser<any, any>();
-const docsEntries = import.meta.glob("../../content/docs/**/*.mdx");
+const docsEntries = import.meta.glob("../../content/docs/**/*.{mdx,md}", {
+  query: {
+    collection: "docs",
+  },
+});
 
 const normalizedDocsEntries = Object.fromEntries(
   Object.entries(docsEntries).map(([path, loader]) => [
