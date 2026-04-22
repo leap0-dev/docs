@@ -11,10 +11,6 @@ import sandboxLifecycleChart from "./sandbox-lifecycle.mmd?raw";
 A sandbox is an isolated runtime environment.
 Create one from a template, invoke it over HTTP or WebSocket, then delete it when you are done.
 
-See <a href={`${docsBaseUrl}/templates`}>Templates</a> for how to define the runtime a sandbox is created from.
-See <a href={`${docsBaseUrl}/snapshots`}>Snapshots</a> for how to save a running sandbox and restore it later.
-See <a href={`${docsBaseUrl}/object-storage`}>Object Storage</a> for how to mount S3-compatible buckets into a sandbox.
-
 ## Why use sandboxes?
 
 Sandboxes exist for security. They let agents execute arbitrary code, access files, and use the network without compromising your credentials, local files, or host system. This isolation is essential when agents run autonomously.
