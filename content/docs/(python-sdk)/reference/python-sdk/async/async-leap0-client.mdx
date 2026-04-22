@@ -48,7 +48,7 @@ async create_sandbox(**kwargs: object) -> AsyncSandbox
 Create a sandbox.
 
 Args:
-    **kwargs: Keyword arguments forwarded to ``client.sandboxes.create``.
+    kwargs: Parameter for this operation.
 
 Returns:
     AsyncSandbox: Sandbox object with bound service clients.
@@ -60,3 +60,6 @@ async close() -> None
 ```
 
 Close the client and release resources.
+
+Returns:
+    None: Result returned by this operation.

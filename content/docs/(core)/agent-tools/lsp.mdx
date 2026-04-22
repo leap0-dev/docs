@@ -36,7 +36,12 @@ import { Leap0Client } from "leap0";
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create();
 
-console.log(await sandbox.lsp.start("python", "/home/user/project"));
+console.log(
+  await sandbox.lsp.start({
+    languageId: "python",
+    pathToProject: "/home/user/project",
+  }),
+);
 await client.close();
 ```
   </TabItem>
@@ -71,13 +76,13 @@ import { Leap0Client } from "leap0";
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create();
 
-await sandbox.lsp.didOpenPath(
-  "python",
-  "/home/user/project",
-  "/home/user/project/main.py",
-  "import os\nos.path.",
-  1,
-);
+await sandbox.lsp.didOpenPath({
+  languageId: "python",
+  pathToProject: "/home/user/project",
+  path: "/home/user/project/main.py",
+  text: "import os\nos.path.",
+  version: 1,
+});
 
 await client.close();
 ```
@@ -116,13 +121,13 @@ import { Leap0Client } from "leap0";
 
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create();
-const response = await sandbox.lsp.completionsPath(
-  "python",
-  "/home/user/project",
-  "/home/user/project/main.py",
-  1,
-  8,
-);
+const response = await sandbox.lsp.completionsPath({
+  languageId: "python",
+  pathToProject: "/home/user/project",
+  path: "/home/user/project/main.py",
+  line: 1,
+  character: 8,
+});
 
 const items = response.result ?? [];
 items.slice(0, 5).forEach((item) => console.log(item.label));
@@ -160,11 +165,11 @@ import { Leap0Client } from "leap0";
 
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create();
-const response = await sandbox.lsp.documentSymbolsPath(
-  "python",
-  "/home/user/project",
-  "/home/user/project/main.py",
-);
+const response = await sandbox.lsp.documentSymbolsPath({
+  languageId: "python",
+  pathToProject: "/home/user/project",
+  path: "/home/user/project/main.py",
+});
 
 for (const symbol of response.result ?? []) {
   console.log(symbol.name, symbol.kind);
@@ -202,7 +207,11 @@ import { Leap0Client } from "leap0";
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create();
 
-await sandbox.lsp.didClosePath("python", "/home/user/project", "/home/user/project/main.py");
+await sandbox.lsp.didClosePath({
+  languageId: "python",
+  pathToProject: "/home/user/project",
+  path: "/home/user/project/main.py",
+});
 
 await client.close();
 ```
@@ -235,7 +244,10 @@ import { Leap0Client } from "leap0";
 const client = new Leap0Client();
 const sandbox = await client.sandboxes.create();
 
-await sandbox.lsp.stop("python", "/home/user/project");
+await sandbox.lsp.stop({
+  languageId: "python",
+  pathToProject: "/home/user/project",
+});
 await client.close();
 ```
   </TabItem>

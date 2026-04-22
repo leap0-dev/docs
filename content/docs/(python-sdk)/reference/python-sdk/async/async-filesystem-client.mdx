@@ -32,15 +32,15 @@ async ls(sandbox: SandboxRef, *, path: str, recursive: bool = False, exclude: li
 
 List directory entries.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            path: Directory path to list.
-            recursive: List recursively.
-            exclude: Glob patterns to exclude.
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Directory path to list.
+    recursive: List recursively.
+    exclude: Glob patterns to exclude.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    LsResult: Result returned by this operation.
 
 ### `stat`
 
@@ -56,7 +56,7 @@ Args:
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    FileInfo: Result returned by this operation.
 
 ### `mkdir`
 
@@ -73,6 +73,9 @@ Args:
     permissions: Octal permission string (e.g. ``"755"``).
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
+Returns:
+    None: Result returned by this operation.
+
 ### `write_bytes`
 
 ```python
@@ -82,19 +85,14 @@ async write_bytes(sandbox: SandboxRef, *, path: str, content: bytes, permissions
 Write raw bytes to a single file path.
 
 Args:
-    sandbox: Sandbox ID or object.
-    path: Destination file path.
-    content: Raw file bytes.
-    permissions: Optional octal permission string.
-
+    sandbox: Sandbox ID or object. path: Destination file path. content: Raw file bytes. permissions: Optional octal permission string.
+    path: Path used by this operation.
+    content: Parameter for this operation.
+    permissions: Parameter for this operation.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
-Example:
-    ```python
-    await sandbox.filesystem.write_bytes(
-        path="/workspace/logo.png",
-        content=image_bytes,
-    )
-    ```
+
+Returns:
+    None: Result returned by this operation.
 
 ### `write_file`
 
@@ -104,22 +102,16 @@ async write_file(sandbox: SandboxRef, *, path: str, content: str, encoding: str 
 
 Write text to a single file path.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            path: Destination file path.
-            content: Text content to write.
-            encoding: Text encoding used before upload.
-            permissions: Optional octal permission string.
+Args:
+    sandbox: Sandbox ID or object. path: Destination file path. content: Text content to write. encoding: Text encoding used before upload. permissions: Optional octal permission string.
+    path: Path used by this operation.
+    content: Parameter for this operation.
+    encoding: Parameter for this operation.
+    permissions: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call. Example: ```python await sandbox.filesystem.write_file( path="/workspace/app.py", content="print('hello')
 
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
-        Example:
-            ```python
-            await sandbox.filesystem.write_file(
-                path="/workspace/app.py",
-                content="print('hello')
-",
-            )
-            ```
+Returns:
+    None: Result returned by this operation.
 
 ### `write_files_bytes`
 
@@ -130,16 +122,12 @@ async write_files_bytes(sandbox: SandboxRef, *, files: dict[str, bytes], http_ti
 Write multiple files in a single request.
 
 Args:
-    sandbox: Sandbox ID or object.
-    files: Mapping of file path to raw bytes content.
-
+    sandbox: Sandbox ID or object. files: Mapping of file path to raw bytes content.
+    files: Files used by this operation.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
-Example:
-    ```python
-    await sandbox.filesystem.write_files_bytes(
-        files={"/workspace/a.bin": b"a", "/workspace/b.bin": b"b"},
-    )
-    ```
+
+Returns:
+    None: Result returned by this operation.
 
 ### `write_files`
 
@@ -154,6 +142,9 @@ Args:
     files: Mapping of file path to text content.
     encoding: Text encoding used before upload.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
 
 ### `read_bytes`
 
@@ -174,12 +165,7 @@ Args:
 
 Returns:
     bytes: File contents as raw bytes.
-
-Example:
-    ```python
-    content = await sandbox.filesystem.read_bytes(path="/workspace/logo.png")
-    print(content)
-    ```
+    Example: ```python content = await sandbox.filesystem.read_bytes(path="/workspace/logo.png") print(content) ```
 
 ### `read_file`
 
@@ -200,7 +186,7 @@ Args:
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    str: Result returned by this operation.
 
 ### `read_files_bytes`
 
@@ -213,9 +199,10 @@ Read multiple files and return raw bytes keyed by path.
 Args:
     sandbox: Sandbox ID or object.
     paths: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    dict[str, bytes]: Result returned by this operation.
 
 ### `read_files`
 
@@ -248,6 +235,9 @@ Args:
     recursive: Required when deleting a non-empty directory.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
+Returns:
+    None: Result returned by this operation.
+
 ### `set_permissions`
 
 ```python
@@ -257,7 +247,15 @@ async set_permissions(sandbox: SandboxRef, *, path: str, mode: str | None = None
 Set file mode and optionally change owner and group.
 
 Args:
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    mode: Parameter for this operation.
+    owner: Parameter for this operation.
+    group: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
 
 ### `glob`
 
@@ -268,6 +266,10 @@ async glob(sandbox: SandboxRef, *, path: str, pattern: str, exclude: list[str] |
 Find file paths matching a glob pattern.
 
 Args:
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    pattern: Parameter for this operation.
+    exclude: Parameter for this operation.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
@@ -300,8 +302,8 @@ async edit_file(sandbox: SandboxRef, *, path: str, edits: list[FileEdit], http_t
 
 Apply one or more find-and-replace edits to a single file.
 
-        Returns:
-            EditFileResult: Unified diff and replacement count.
+Returns:
+    EditFileResult: Unified diff and replacement count.
 
 Args:
     sandbox: Sandbox ID or object.
@@ -318,6 +320,10 @@ async edit_files(sandbox: SandboxRef, *, paths: list[str], find: str, replace: s
 Replace text across multiple files at once.
 
 Args:
+    sandbox: Sandbox ID or object.
+    paths: Parameter for this operation.
+    find: Parameter for this operation.
+    replace: Parameter for this operation.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
@@ -336,6 +342,10 @@ Args:
     src_path: Parameter for this operation.
     dst_path: Parameter for this operation.
     overwrite: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
 
 ### `copy`
 
@@ -353,6 +363,9 @@ Args:
     overwrite: Overwrite the destination if it already exists.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
+Returns:
+    None: Result returned by this operation.
+
 ### `exists`
 
 ```python
@@ -362,6 +375,8 @@ async exists(sandbox: SandboxRef, *, path: str, http_timeout: float | None = Non
 Check whether a path exists in the sandbox.
 
 Args:
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
@@ -380,7 +395,7 @@ Args:
     path: Root directory path.
     max_depth: Maximum traversal depth.
     exclude: Glob patterns to exclude.
-
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
 Returns:
     TreeResult: Recursive directory tree rooted at ``path``.

@@ -60,7 +60,7 @@ Args:
     path_to_project: Project path inside the sandbox.
 
 Returns:
-    object: Result returned by this operation.
+    LspResponse: Result returned by this operation.
 
 ### `did_open`
 
@@ -81,6 +81,9 @@ Args:
     version: Parameter for this operation.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
+Returns:
+    None: Result returned by this operation.
+
 ### `did_open_path`
 
 ```python
@@ -98,6 +101,9 @@ Args:
     version: Document version number.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
+Returns:
+    None: Result returned by this operation.
+
 ### `did_close`
 
 ```python
@@ -111,6 +117,10 @@ Args:
     language_id: Language identifier for the LSP operation.
     path_to_project: Project path inside the sandbox.
     uri: Document URI.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
 
 ### `did_close_path`
 
@@ -121,7 +131,14 @@ did_close_path(sandbox: SandboxRef, *, language_id: str, path_to_project: str, p
 Like :meth:`did_close` but accepts a file path instead of a URI.
 
 Args:
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    language_id: Language identifier for the LSP operation.
+    path_to_project: Project path inside the sandbox.
+    path: Path used by this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
 
 ### `completions`
 
@@ -132,6 +149,12 @@ completions(sandbox: SandboxRef, *, language_id: str, path_to_project: str, uri:
 Request completions from the language server.
 
 Args:
+    sandbox: Sandbox ID or object.
+    language_id: Language identifier for the LSP operation.
+    path_to_project: Project path inside the sandbox.
+    uri: Document URI.
+    line: Zero-based line number.
+    character: Zero-based character offset.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
@@ -145,11 +168,17 @@ completions_path(sandbox: SandboxRef, *, language_id: str, path_to_project: str,
 
 Like :meth:`completions` but accepts a file path instead of a URI.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    language_id: Language identifier for the LSP operation.
+    path_to_project: Project path inside the sandbox.
+    path: Path used by this operation.
+    line: Zero-based line number.
+    character: Zero-based character offset.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    LspJsonRpcResponse: Result returned by this operation.
 
 ### `document_symbols`
 
@@ -160,6 +189,10 @@ document_symbols(sandbox: SandboxRef, *, language_id: str, path_to_project: str,
 Request document symbols from the language server.
 
 Args:
+    sandbox: Sandbox ID or object.
+    language_id: Language identifier for the LSP operation.
+    path_to_project: Project path inside the sandbox.
+    uri: Document URI.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
@@ -173,8 +206,12 @@ document_symbols_path(sandbox: SandboxRef, *, language_id: str, path_to_project:
 
 Like :meth:`document_symbols` but accepts a file path instead of a URI.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    language_id: Language identifier for the LSP operation.
+    path_to_project: Project path inside the sandbox.
+    path: Path used by this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    LspJsonRpcResponse: Result returned by this operation.

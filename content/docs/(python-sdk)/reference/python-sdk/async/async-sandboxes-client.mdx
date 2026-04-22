@@ -34,9 +34,7 @@ Args:
     memory: Memory in MiB (512 to 8192, must be even).
     timeout: Sandbox timeout in seconds (1 to 28800).
     auto_pause: Whether the sandbox should auto-pause on timeout.
-    otel_export: Inject OpenTelemetry exporter environment into the sandbox.
-        Requires ``OTEL_EXPORTER_OTLP_ENDPOINT`` in the local environment and
-        also forwards ``OTEL_EXPORTER_OTLP_HEADERS`` when present.
+    otel_export: Inject OpenTelemetry exporter environment into the sandbox. Requires ``OTEL_EXPORTER_OTLP_ENDPOINT`` in the local environment and also forwards ``OTEL_EXPORTER_OTLP_HEADERS`` when present.
     env_vars: Environment variables to set inside the sandbox.
     network_policy: Outbound network policy for the sandbox.
     mounts: Object storage mounts to attach before boot.
@@ -87,6 +85,9 @@ async create_snapshot(sandbox: SandboxRef, *, name: str | None = None, kill_sand
 
 Create a snapshot from a running sandbox.
 
+Returns:
+    Snapshot: Result returned by this operation.
+
 ### `get`
 
 ```python
@@ -112,6 +113,10 @@ Terminate and delete a sandbox.
 
 Args:
     sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
 
 ### `get_user_home_dir`
 
@@ -149,11 +154,17 @@ Returns:
 async create_presigned_url(sandbox: SandboxRef, *, port: int, expires_in: int | None = None, http_timeout: float | None = None) -> PresignedURL
 ```
 
+Returns:
+    PresignedURL: Result returned by this operation.
+
 ### `delete_presigned_url`
 
 ```python
 async delete_presigned_url(sandbox: SandboxRef, presigned_url_id: str, http_timeout: float | None = None) -> None
 ```
+
+Returns:
+    None: Result returned by this operation.
 
 ### `add_mount`
 
@@ -161,17 +172,26 @@ async delete_presigned_url(sandbox: SandboxRef, presigned_url_id: str, http_time
 async add_mount(sandbox: SandboxRef, mount: ObjectStorageMountRequestDict, http_timeout: float | None = None) -> ObjectStorageMount
 ```
 
+Returns:
+    ObjectStorageMount: Result returned by this operation.
+
 ### `update_mount`
 
 ```python
 async update_mount(sandbox: SandboxRef, mount_id: str, mount: ObjectStorageMountUpdateDict, http_timeout: float | None = None) -> ObjectStorageMount
 ```
 
+Returns:
+    ObjectStorageMount: Result returned by this operation.
+
 ### `delete_mount`
 
 ```python
 async delete_mount(sandbox: SandboxRef, mount_id: str, http_timeout: float | None = None) -> None
 ```
+
+Returns:
+    None: Result returned by this operation.
 
 ### `invoke_url`
 
@@ -187,7 +207,7 @@ Args:
     port: Port number for the generated URL.
 
 Returns:
-    object: Result returned by this operation.
+    str: Result returned by this operation.
 
 ### `websocket_url`
 
@@ -203,4 +223,4 @@ Args:
     port: Port number for the generated URL.
 
 Returns:
-    object: Result returned by this operation.
+    str: Result returned by this operation.

@@ -54,8 +54,8 @@ status(sandbox: SandboxRef, *, path: str, http_timeout: float | None = None) -> 
 
 Get the current repository status.
 
-        Returns:
-            GitResult: Git status output and exit status.
+Returns:
+    GitResult: Git status output and exit status.
 
 Args:
     sandbox: Sandbox ID or object.
@@ -70,16 +70,16 @@ branches(sandbox: SandboxRef, *, path: str, branch_type: str = 'local', contains
 
 List branches in the repository.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            path: Path to the git repo.
-            branch_type: Filter by ``"local"``, ``"remote"``, or ``"all"``.
-            contains: Only branches containing this commit SHA.
-            not_contains: Exclude branches containing this commit SHA.
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path to the git repo.
+    branch_type: Filter by ``"local"``, ``"remote"``, or ``"all"``.
+    contains: Only branches containing this commit SHA.
+    not_contains: Exclude branches containing this commit SHA.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `diff_unstaged`
 
@@ -89,11 +89,14 @@ diff_unstaged(sandbox: SandboxRef, *, path: str, context_lines: int | None = Non
 
 Show working tree changes that are not staged yet.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    context_lines: Number of context lines to include.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `diff_staged`
 
@@ -103,11 +106,14 @@ diff_staged(sandbox: SandboxRef, *, path: str, context_lines: int | None = None,
 
 Show changes that are already staged for the next commit.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    context_lines: Number of context lines to include.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `diff`
 
@@ -117,11 +123,15 @@ diff(sandbox: SandboxRef, *, path: str, target: str, context_lines: int | None =
 
 Compare the current state against a branch, tag, or commit.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    target: Branch, tag, or commit to compare against.
+    context_lines: Number of context lines to include.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `reset`
 
@@ -134,9 +144,10 @@ Unstage all currently staged changes.
 Args:
     sandbox: Sandbox ID or object.
     path: Path used by this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `log`
 
@@ -146,16 +157,16 @@ log(sandbox: SandboxRef, *, path: str, max_count: int | None = None, start_times
 
 Show commit history with optional limits and date filters.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            path: Path to the git repo.
-            max_count: Maximum number of commits to return (default 10).
-            start_timestamp: Start timestamp filter.
-            end_timestamp: End timestamp filter.
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path to the git repo.
+    max_count: Maximum number of commits to return (default 10).
+    start_timestamp: Start timestamp filter.
+    end_timestamp: End timestamp filter.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `show`
 
@@ -169,9 +180,10 @@ Args:
     sandbox: Sandbox ID or object.
     path: Path used by this operation.
     revision: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `create_branch`
 
@@ -181,16 +193,16 @@ create_branch(sandbox: SandboxRef, *, path: str, name: str, checkout: bool | Non
 
 Create a new branch.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            path: Path to the git repo.
-            name: New branch name.
-            checkout: Switch to the new branch immediately.
-            base_branch: Branch from a specific revision.
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path to the git repo.
+    name: New branch name.
+    checkout: Switch to the new branch immediately.
+    base_branch: Branch from a specific revision.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `checkout_branch`
 
@@ -200,11 +212,15 @@ checkout_branch(sandbox: SandboxRef, *, path: str, branch: str, create: bool | N
 
 Switch to an existing branch. Set *create* to create it if it does not exist.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    branch: Branch name.
+    create: Create the branch if it does not exist.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `delete_branch`
 
@@ -219,9 +235,10 @@ Args:
     path: Path used by this operation.
     name: Name used by this operation.
     force: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `add`
 
@@ -231,11 +248,14 @@ add(sandbox: SandboxRef, *, path: str, files: list[str], http_timeout: float | N
 
 Stage files for the next commit.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    files: Files used by this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `commit`
 
@@ -276,7 +296,7 @@ Args:
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.
 
 ### `pull`
 
@@ -286,16 +306,16 @@ pull(sandbox: SandboxRef, *, path: str, remote: str | None = None, branch: str |
 
 Pull commits from a remote. Set *rebase* to rebase instead of merge.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            path: Path to the git repo.
-            remote: Remote name (default ``"origin"``).
-            branch: Branch name.
-            rebase: Rebase instead of merge.
-            set_upstream: Set upstream tracking.
-            username: Auth username.
-            password: Auth password or token.
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    path: Path to the git repo.
+    remote: Remote name (default ``"origin"``).
+    branch: Branch name.
+    rebase: Rebase instead of merge.
+    set_upstream: Set upstream tracking.
+    username: Auth username.
+    password: Auth password or token.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    GitResult: Result returned by this operation.

@@ -171,6 +171,7 @@ print(response.text)
 
 ```js
 import { Leap0Client } from "leap0";
+import WebSocket from "ws";
 
 const apiKey = process.env.LEAP0_API_KEY ?? "<your-api-key>";
 const client = new Leap0Client();
@@ -301,8 +302,15 @@ const ws = new WebSocket(sandbox.websocketUrl("/<your-path>"), {
   headers: { authorization: apiKey },
 });
 
-ws.on("open", () => ws.send("hello"));
-ws.on("message", (data) => console.log(data.toString()));
+await new Promise((resolve, reject) => {
+  ws.on("open", () => ws.send("hello"));
+  ws.on("message", (data) => {
+    console.log(data.toString());
+    ws.close();
+  });
+  ws.on("close", resolve);
+  ws.on("error", reject);
+});
 
 await client.close();
 ```

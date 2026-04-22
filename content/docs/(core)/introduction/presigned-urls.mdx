@@ -30,7 +30,9 @@ presigned_url = sandbox.create_presigned_url(port=8080, expires_in=900)
 
 print(presigned_url.id)
 print(presigned_url.url)
-print(presigned_url.token)
+# Treat the token as a secret. Do not log or commit it.
+token = presigned_url.token
+client.close()
 ```
 
   </TabItem>
@@ -46,7 +48,9 @@ const presignedUrl = await sandbox.createPresignedUrl(8080, 900);
 
 console.log(presignedUrl.id);
 console.log(presignedUrl.url);
-console.log(presignedUrl.token);
+// Treat the token as a secret. Do not log or commit it.
+const token = presignedUrl.token;
+await client.close();
 ```
 
   </TabItem>
@@ -67,6 +71,7 @@ sandbox = client.sandboxes.create()
 
 presigned_url = sandbox.create_presigned_url(port=8080)
 sandbox.delete_presigned_url(presigned_url.id)
+client.close()
 ```
 
   </TabItem>
@@ -80,6 +85,7 @@ const sandbox = await client.sandboxes.create();
 
 const presignedUrl = await sandbox.createPresignedUrl(8080);
 await sandbox.deletePresignedUrl(presignedUrl.id);
+await client.close();
 ```
 
   </TabItem>
@@ -88,6 +94,7 @@ await sandbox.deletePresignedUrl(presignedUrl.id);
 ## Notes
 
 - Presigned URLs are public and do not require an API key.
+- Treat presigned URLs and their one-time tokens as secrets. Avoid logging or committing them.
 - Each URL maps to one sandbox port.
 - Expired URLs stop resolving automatically.
 - If the sandbox is paused, Leap0 resumes it before proxying the request.

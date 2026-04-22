@@ -32,7 +32,7 @@ Args:
     sandbox: Sandbox ID or object.
 
 Returns:
-    object: Result returned by this operation.
+    list[PtySession]: Result returned by this operation.
 
 ### `create`
 
@@ -68,7 +68,7 @@ Args:
     session_id: PTY session identifier.
 
 Returns:
-    object: Result returned by this operation.
+    PtySession: Result returned by this operation.
 
 ### `delete`
 
@@ -82,6 +82,9 @@ Args:
     sandbox: Sandbox ID or object.
     session_id: PTY session identifier.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
 
 ### `resize`
 
@@ -98,7 +101,7 @@ Args:
     rows: Parameter for this operation.
 
 Returns:
-    object: Result returned by this operation.
+    PtySession: Result returned by this operation.
 
 ### `websocket_url`
 
@@ -113,7 +116,7 @@ Args:
     session_id: PTY session identifier.
 
 Returns:
-    object: Result returned by this operation.
+    str: Result returned by this operation.
 
 ### `connect`
 
@@ -132,7 +135,7 @@ Args:
     session_id: PTY session identifier.
     open_timeout: Optional WebSocket open timeout in seconds.
     http_timeout: Deprecated alias for ``open_timeout``.
-    **kwargs: Additional keyword arguments passed to ``websockets.asyncio.client.connect``.
+    kwargs: Parameter for this operation.
 
 Returns:
     AsyncPtyConnection: Open WebSocket-backed PTY connection.

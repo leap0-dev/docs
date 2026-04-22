@@ -43,8 +43,7 @@ Upload a new template from a container image URI.
 Args:
     name: Template name. Must not start with ``system/`` or contain whitespace.
     uri: Container image URI to pull and convert (e.g. ``docker.io/library/python:3.12``).
-    credentials: Optional registry credentials for private images.
-        Supports basic, AWS, GCP, and Azure authentication.
+    credentials: Optional registry credentials for private images. Supports basic, AWS, GCP, and Azure authentication.
 
 Returns:
     Template: Uploaded template metadata.
@@ -62,6 +61,9 @@ Args:
     name: New template name.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
+Returns:
+    None: Result returned by this operation.
+
 ### `delete`
 
 ```python
@@ -73,3 +75,6 @@ Delete a template by ID.
 Args:
     template_id: ID of the template to delete.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.

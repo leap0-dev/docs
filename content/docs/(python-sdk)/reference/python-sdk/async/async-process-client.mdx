@@ -42,12 +42,4 @@ Args:
 
 Returns:
     ProcessResult: Command result including exit code, stdout, and stderr.
-
-Example:
-    ```python
-    result = await sandbox.process.execute(
-        command="ls -la /workspace",
-    )
-    print(result.stdout)
-    print(result.stderr)
-    ```
+    Example: ```python result = await sandbox.process.execute( command="ls -la /workspace", ) print(result.stdout) print(result.stderr) ```

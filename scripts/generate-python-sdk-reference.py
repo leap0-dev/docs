@@ -85,39 +85,155 @@ def slugify(name: str) -> str:
     return "".join(chars)
 
 
-def split_docstring_sections(docstring: str) -> tuple[str, list[str]]:
+SECTION_HEADERS = ("Args:", "Returns:", "Raises:")
+
+
+def is_section_header(line: str) -> bool:
+    return line.lstrip() in SECTION_HEADERS
+
+
+def normalize_section_lines(lines: list[str]) -> list[str]:
+    non_empty = [line for line in lines if line.strip()]
+    if not non_empty:
+        return []
+
+    indent = min(len(line) - len(line.lstrip()) for line in non_empty)
+    return [line[indent:].rstrip() for line in lines]
+
+
+def parse_section_entries(lines: list[str]) -> list[str]:
+    normalized = normalize_section_lines(lines)
+    entries: list[str] = []
+    current: list[str] = []
+
+    for line in normalized:
+        stripped = line.strip()
+        if not stripped:
+            if current:
+                entries.append(" ".join(current))
+                current = []
+            continue
+
+        if line == stripped and current:
+            entries.append(" ".join(current))
+            current = [stripped]
+            continue
+
+        if not current:
+            current = [stripped]
+            continue
+
+        current.append(stripped)
+
+    if current:
+        entries.append(" ".join(current))
+
+    return entries
+
+
+def default_param_description(name: str) -> str:
+    defaults = {
+        "sandbox": "Sandbox ID or object.",
+        "path": "Path used by this operation.",
+        "path_to_project": "Project path inside the sandbox.",
+        "http_timeout": "Optional HTTP request timeout in seconds for this SDK call.",
+        "files": "Files used by this operation.",
+        "language_id": "Language identifier for the LSP operation.",
+        "uri": "Document URI.",
+        "text": "Full document text.",
+        "version": "Document version number.",
+        "line": "Zero-based line number.",
+        "character": "Zero-based character offset.",
+        "remote": 'Remote name (default ``"origin"``).',
+        "branch": "Branch name.",
+        "set_upstream": "Set upstream tracking.",
+        "username": "Auth username.",
+        "password": "Auth password or token.",
+        "message": "Commit message.",
+        "author": "Author name.",
+        "email": "Author email.",
+        "allow_empty": "Allow creating an empty commit.",
+        "context_lines": "Number of context lines to include.",
+        "target": "Branch, tag, or commit to compare against.",
+        "create": "Create the branch if it does not exist.",
+        "name": "Name used by this operation.",
+        "max_count": "Maximum number of results to return.",
+        "start_timestamp": "Start timestamp filter.",
+        "end_timestamp": "End timestamp filter.",
+        "checkout": "Switch to the new branch immediately.",
+        "base_branch": "Base branch or revision.",
+        "url": "Repository URL.",
+        "commit_id": "Specific commit to use for this operation.",
+        "depth": "Shallow clone depth.",
+        "branch_type": 'Filter by ``"local"``, ``"remote"``, or ``"all"``.',
+        "contains": "Only include branches containing this commit SHA.",
+        "not_contains": "Exclude branches containing this commit SHA.",
+        "rebase": "Rebase instead of merge.",
+    }
+    return defaults.get(name, "Parameter for this operation.")
+
+
+def normalize_arg_entries(entries: list[str], parameters: list[str]) -> list[str]:
+    by_name: dict[str, str] = {}
+    for entry in entries:
+        name, _, description = entry.partition(":")
+        param_name = name.strip()
+        if param_name not in parameters or param_name in by_name:
+            continue
+        by_name[param_name] = description.strip() or default_param_description(param_name)
+
+    normalized: list[str] = []
+    for param_name in parameters:
+        description = by_name.get(param_name, default_param_description(param_name))
+        normalized.append(f"{param_name}: {description}")
+    return normalized
+
+
+def normalize_return_entries(entries: list[str], return_type: str) -> list[str]:
+    if not entries:
+        return [f"{return_type}: Result returned by this operation."] if return_type else []
+
+    normalized: list[str] = []
+    for entry in entries:
+        entry_type, _, description = entry.partition(":")
+        if return_type and entry_type.strip() == "object" and description.strip() == "Result returned by this operation.":
+            normalized.append(f"{return_type}: Result returned by this operation.")
+            continue
+        if entry not in normalized:
+            normalized.append(entry)
+    return normalized
+
+
+def split_docstring_sections(docstring: str) -> tuple[str, list[tuple[str, list[str]]]]:
     if not docstring:
         return "", []
 
     lines = docstring.splitlines()
     description: list[str] = []
-    raises: list[str] = []
+    ordered_sections: list[str] = []
+    section_entries: dict[str, list[str]] = {}
     index = 0
 
     while index < len(lines):
         line = lines[index]
-        if line.strip() == "Raises:":
+        header = line.lstrip()
+        if header in SECTION_HEADERS:
+            section_name = header[:-1]
+            if section_name not in section_entries:
+                ordered_sections.append(section_name)
+                section_entries[section_name] = []
+
             index += 1
+            section_lines: list[str] = []
             while index < len(lines):
                 current = lines[index]
-                if not current.strip():
-                    index += 1
-                    continue
-                if not current.startswith((" ", "\t")):
+                if is_section_header(current):
                     break
 
-                entry = [current.strip()]
+                section_lines.append(current)
                 index += 1
-                while index < len(lines):
-                    continuation = lines[index]
-                    if not continuation.strip():
-                        index += 1
-                        continue
-                    if not continuation.startswith(("        ", "\t\t")):
-                        break
-                    entry.append(continuation.strip())
-                    index += 1
-                raises.append(" ".join(entry))
+
+            section_entries[section_name].extend(parse_section_entries(section_lines))
             continue
 
         description.append(line)
@@ -126,7 +242,8 @@ def split_docstring_sections(docstring: str) -> tuple[str, list[str]]:
     while description and not description[-1].strip():
         description.pop()
 
-    return "\n".join(description).strip(), raises
+    sections = [(section_name, section_entries[section_name]) for section_name in ordered_sections if section_entries[section_name]]
+    return "\n".join(description).strip(), sections
 
 
 class ModuleParser:
@@ -171,10 +288,21 @@ class ModuleParser:
                 {
                     "name": name,
                     "signature": signature,
+                    "parameters": self.method_parameters(child),
+                    "return_type": ast.unparse(child.returns) if child.returns is not None else "",
                     "docstring": ast.get_docstring(child, clean=True) or "",
                 }
             )
         return methods
+
+    def method_parameters(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> list[str]:
+        args = list(node.args.posonlyargs) + list(node.args.args) + list(node.args.kwonlyargs)
+        params = [arg.arg for arg in args if arg.arg not in {"self", "cls"}]
+        if node.args.vararg is not None:
+            params.append(node.args.vararg.arg)
+        if node.args.kwarg is not None:
+            params.append(node.args.kwarg.arg)
+        return params
 
     def format_signature(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> str:
         args = node.args
@@ -351,15 +479,33 @@ def build_class_pages(section: str, modules: list[tuple[str, list[str]]], sdk_ro
                 lines.extend(["## Methods", ""])
 
             for method in public_methods:
-                description, raises = split_docstring_sections(str(method["docstring"]))
+                description, sections = split_docstring_sections(str(method["docstring"]))
+                method_parameters = list(method["parameters"])
+                return_type = str(method["return_type"])
                 lines.extend([f"### `{method['name']}`", "", "```python", md_escape(str(method["signature"])), "```", ""])
                 if description:
                     lines.extend([md_escape(description), ""])
-                if raises:
-                    lines.extend(["#### Throws", ""])
-                    for item in raises:
-                        lines.append(f"- {md_escape(item)}")
+
+                rendered_returns = False
+                for section_name, entries in sections:
+                    if section_name == "Args":
+                        entries = normalize_arg_entries(entries, method_parameters)
+                    elif section_name == "Returns":
+                        entries = normalize_return_entries(entries, return_type)
+                        rendered_returns = True
+                    else:
+                        entries = list(dict.fromkeys(entries))
+
+                    if not entries:
+                        continue
+
+                    lines.extend([f"{section_name}:"])
+                    for entry in entries:
+                        lines.append(f"    {md_escape(entry)}")
                     lines.append("")
+
+                if return_type and not rendered_returns:
+                    lines.extend(["Returns:", f"    {md_escape(return_type)}: Result returned by this operation.", ""])
 
             write_page(output_root / section / f"{slugify(class_name)}.mdx", lines)
 

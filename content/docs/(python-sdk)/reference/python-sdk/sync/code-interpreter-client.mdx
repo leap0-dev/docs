@@ -108,6 +108,9 @@ Args:
     context_id: Execution context identifier.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
+Returns:
+    None: Result returned by this operation.
+
 ### `execute`
 
 ```python
@@ -120,8 +123,7 @@ Args:
     sandbox: Sandbox ID or object.
     code: Source code to execute.
     language: Language runtime (default ``"python"``).
-    context_id: Link to an existing context to share state.
-        Auto-generated if omitted.
+    context_id: Link to an existing context to share state. Auto-generated if omitted.
     env_vars: Environment variables for the execution.
     timeout_ms: Execution timeout in milliseconds (default 30000).
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
@@ -141,12 +143,12 @@ Execute code and stream output events via SSE.
         ``"stderr"``, ``"exit"``, or ``"error"``.
 
 Args:
-    sandbox: Sandbox ID or object.
-    code: Source code to execute.
-    language: Language runtime for the operation.
+    sandbox: Sandbox ID or object. code: Source code to execute. language: Language runtime for the operation. context_id: Parameter for this operation. timeout_ms: Execution timeout in milliseconds. http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    code: Parameter for this operation.
+    language: Parameter for this operation.
     context_id: Parameter for this operation.
-    timeout_ms: Execution timeout in milliseconds.
+    timeout_ms: Parameter for this operation.
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
-Yields:
-    object: Items yielded by this operation.
+Returns:
+    Iterator[StreamEvent]: Result returned by this operation.

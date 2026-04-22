@@ -79,6 +79,9 @@ Terminate and delete a sandbox.
 Args:
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
+Returns:
+    None: Result returned by this operation.
+
 ### `create_presigned_url`
 
 ```python
@@ -87,6 +90,9 @@ async create_presigned_url(*, port: int, expires_in: int | None = None, http_tim
 
 Create a temporary public URL for a specific sandbox port.
 
+Returns:
+    PresignedURL: Result returned by this operation.
+
 ### `delete_presigned_url`
 
 ```python
@@ -94,6 +100,9 @@ async delete_presigned_url(presigned_url_id: str, http_timeout: float | None = N
 ```
 
 Delete a previously issued presigned URL.
+
+Returns:
+    None: Result returned by this operation.
 
 ### `invoke_url`
 
@@ -133,6 +142,9 @@ async get_user_home_dir(http_timeout: float | None = None) -> str
 
 Fetch the resolved home directory for the sandbox user.
 
+Returns:
+    str: Result returned by this operation.
+
 ### `get_workdir`
 
 ```python
@@ -140,6 +152,9 @@ async get_workdir(http_timeout: float | None = None) -> str
 ```
 
 Fetch the configured working directory for the sandbox.
+
+Returns:
+    str: Result returned by this operation.
 
 ### `add_mount`
 
@@ -149,6 +164,9 @@ async add_mount(mount: ObjectStorageMountRequestDict, http_timeout: float | None
 
 Attach an object storage mount to this sandbox.
 
+Returns:
+    ObjectStorageMount: Result returned by this operation.
+
 ### `update_mount`
 
 ```python
@@ -157,6 +175,9 @@ async update_mount(mount_id: str, mount: ObjectStorageMountUpdateDict, http_time
 
 Update an existing object storage mount on this sandbox.
 
+Returns:
+    ObjectStorageMount: Result returned by this operation.
+
 ### `delete_mount`
 
 ```python
@@ -164,3 +185,6 @@ async delete_mount(mount_id: str, http_timeout: float | None = None) -> None
 ```
 
 Delete an object storage mount from this sandbox.
+
+Returns:
+    None: Result returned by this operation.

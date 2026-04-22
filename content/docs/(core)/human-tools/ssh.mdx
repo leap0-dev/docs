@@ -76,7 +76,10 @@ const client = new Leap0Client();
 const sandbox = await client.sandboxes.create();
 const access = await client.ssh.createAccess(sandbox);
 
-const validation = await client.ssh.validateAccess(sandbox, access.id, access.password);
+const validation = await client.ssh.validateAccess(sandbox, {
+  id: access.id,
+  password: access.password,
+});
 
 console.log("Valid:", validation.valid);
 console.log("Sandbox:", validation.sandboxId);
@@ -112,7 +115,7 @@ const client = new Leap0Client();
 const sandbox = await client.sandboxes.create();
 const access = await client.ssh.createAccess(sandbox);
 
-const regenerated = await client.ssh.regenerateAccess(sandbox, access.id);
+const regenerated = await client.ssh.regenerateAccess(sandbox, { id: access.id });
 
 console.log("New password:", regenerated.password);
 await client.close();
@@ -145,7 +148,7 @@ const client = new Leap0Client();
 const sandbox = await client.sandboxes.create();
 const access = await client.ssh.createAccess(sandbox);
 
-await client.ssh.deleteAccess(sandbox, access.id);
+await client.ssh.deleteAccess(sandbox, { id: access.id });
 await client.close();
 ```
   </TabItem>

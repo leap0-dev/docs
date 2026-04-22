@@ -8,7 +8,6 @@
     "generate:javascript-sdk-reference": "node ./scripts/generate-javascript-sdk-reference.mjs",
     "predev": "pnpm generate:python-sdk-reference && pnpm generate:javascript-sdk-reference",
     "prebuild": "pnpm generate:python-sdk-reference && pnpm generate:javascript-sdk-reference",
-    "prestart": "pnpm generate:python-sdk-reference && pnpm generate:javascript-sdk-reference",
     "dev": "vite dev",
     "build": "vite build",
     "start": "vite preview",

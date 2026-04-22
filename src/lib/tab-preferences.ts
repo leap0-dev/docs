@@ -10,8 +10,12 @@ export function parseTabPreferences(cookies: Record<string, string>) {
   for (const [name, value] of Object.entries(cookies)) {
     if (!name.startsWith(TAB_PREFERENCE_COOKIE_PREFIX)) continue;
 
-    const syncKey = decodeURIComponent(name.slice(TAB_PREFERENCE_COOKIE_PREFIX.length));
-    preferences[syncKey] = decodeURIComponent(value);
+    try {
+      const syncKey = decodeURIComponent(name.slice(TAB_PREFERENCE_COOKIE_PREFIX.length));
+      if (!syncKey) continue;
+
+      preferences[syncKey] = decodeURIComponent(value);
+    } catch {}
   }
 
   return preferences;

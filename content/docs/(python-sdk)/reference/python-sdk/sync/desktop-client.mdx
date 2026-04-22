@@ -37,7 +37,7 @@ Args:
     sandbox: Sandbox ID or object.
 
 Returns:
-    object: Result returned by this operation.
+    str: Result returned by this operation.
 
 ### `display_info`
 
@@ -49,9 +49,10 @@ Get display information (display name, width, height).
 
 Args:
     sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopDisplayInfo: Result returned by this operation.
 
 ### `screen`
 
@@ -63,9 +64,10 @@ Get the current screen resolution.
 
 Args:
     sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopDisplayInfo: Result returned by this operation.
 
 ### `resize_screen`
 
@@ -75,11 +77,14 @@ resize_screen(sandbox: SandboxRef, *, width: int, height: int, http_timeout: flo
 
 Resize the virtual display (width: 320-7680, height: 320-4320).
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    width: Parameter for this operation.
+    height: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopDisplayInfo: Result returned by this operation.
 
 ### `windows`
 
@@ -91,9 +96,10 @@ List all open windows on the desktop.
 
 Args:
     sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    list[DesktopWindow]: Result returned by this operation.
 
 ### `screenshot`
 
@@ -103,18 +109,18 @@ screenshot(sandbox: SandboxRef, *, image_format: str | None = None, quality: int
 
 Take a screenshot and return the image as bytes.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            image_format: ``"png"``, ``"jpg"``, or ``"jpeg"`` (default ``"png"``).
-            quality: JPEG quality (1-100).
-            x: Left edge of capture region.
-            y: Top edge of capture region.
-            width: Region width in pixels.
-            height: Region height in pixels.
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    image_format: ``"png"``, ``"jpg"``, or ``"jpeg"`` (default ``"png"``).
+    quality: JPEG quality (1-100).
+    x: Left edge of capture region.
+    y: Top edge of capture region.
+    width: Region width in pixels.
+    height: Region height in pixels.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    bytes: Result returned by this operation.
 
 ### `screenshot_region`
 
@@ -124,11 +130,18 @@ screenshot_region(sandbox: SandboxRef, *, x: int, y: int, width: int, height: in
 
 Take a screenshot of a specific region and return the image as bytes.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    x: Parameter for this operation.
+    y: Parameter for this operation.
+    width: Parameter for this operation.
+    height: Parameter for this operation.
+    image_format: Parameter for this operation.
+    quality: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    bytes: Result returned by this operation.
 
 ### `pointer_position`
 
@@ -140,9 +153,10 @@ Get the current mouse pointer position.
 
 Args:
     sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopPointerPosition: Result returned by this operation.
 
 ### `move_pointer`
 
@@ -152,11 +166,14 @@ move_pointer(sandbox: SandboxRef, *, x: int, y: int, http_timeout: float | None 
 
 Move the mouse pointer to the given coordinates.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    x: Parameter for this operation.
+    y: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopPointerPosition: Result returned by this operation.
 
 ### `click`
 
@@ -166,15 +183,15 @@ click(sandbox: SandboxRef, *, x: int | None = None, y: int | None = None, button
 
 Click the mouse. Clicks at the current position if coordinates are omitted.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            x: X coordinate.
-            y: Y coordinate.
-            button: 1=left, 2=middle, 3=right (default 1).
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    x: X coordinate.
+    y: Y coordinate.
+    button: 1=left, 2=middle, 3=right (default 1).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopPointerPosition: Result returned by this operation.
 
 ### `drag`
 
@@ -184,11 +201,17 @@ drag(sandbox: SandboxRef, *, from_x: int, from_y: int, to_x: int, to_y: int, but
 
 Drag from one position to another.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    from_x: Parameter for this operation.
+    from_y: Parameter for this operation.
+    to_x: Parameter for this operation.
+    to_y: Parameter for this operation.
+    button: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopPointerPosition: Result returned by this operation.
 
 ### `scroll`
 
@@ -198,14 +221,14 @@ scroll(sandbox: SandboxRef, *, direction: str, amount: int | None = None, http_t
 
 Scroll the mouse wheel.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            direction: ``"up"``, ``"down"``, ``"left"``, or ``"right"``.
-            amount: Number of scroll steps (1-100, default 1).
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    direction: ``"up"``, ``"down"``, ``"left"``, or ``"right"``.
+    amount: Number of scroll steps (1-100, default 1).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopPointerPosition: Result returned by this operation.
 
 ### `type_text`
 
@@ -218,9 +241,10 @@ Type text using simulated keyboard input (max 50,000 characters).
 Args:
     sandbox: Sandbox ID or object.
     text: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    bool: Result returned by this operation.
 
 ### `press_key`
 
@@ -230,11 +254,13 @@ press_key(sandbox: SandboxRef, *, key: str, http_timeout: float | None = None) -
 
 Press a single key by X11 keysym name (e.g. ``"Return"``, ``"Escape"``).
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    key: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    bool: Result returned by this operation.
 
 ### `hotkey`
 
@@ -247,9 +273,10 @@ Press multiple keys simultaneously (e.g. ``["Control_L", "c"]``).
 Args:
     sandbox: Sandbox ID or object.
     keys: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    bool: Result returned by this operation.
 
 ### `recording_status`
 
@@ -259,11 +286,12 @@ recording_status(sandbox: SandboxRef, http_timeout: float | None = None) -> Desk
 
 Get the current screen recording status.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopRecordingStatus: Result returned by this operation.
 
 ### `start_recording`
 
@@ -275,9 +303,10 @@ Start recording the screen. Returns 409 if a recording is already active.
 
 Args:
     sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopRecordingStatus: Result returned by this operation.
 
 ### `stop_recording`
 
@@ -287,11 +316,12 @@ stop_recording(sandbox: SandboxRef, http_timeout: float | None = None) -> Deskto
 
 Stop the active screen recording.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopRecordingStatus: Result returned by this operation.
 
 ### `recordings`
 
@@ -303,9 +333,10 @@ List all screen recordings.
 
 Args:
     sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    list[DesktopRecordingSummary]: Result returned by this operation.
 
 ### `get_recording`
 
@@ -315,11 +346,13 @@ get_recording(sandbox: SandboxRef, recording_id: str, http_timeout: float | None
 
 Get details for a single recording.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    recording_id: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopRecordingSummary: Result returned by this operation.
 
 ### `download_recording`
 
@@ -332,9 +365,10 @@ Download a recording as MP4 bytes.
 Args:
     sandbox: Sandbox ID or object.
     recording_id: Recording identifier.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    bytes: Result returned by this operation.
 
 ### `delete_recording`
 
@@ -345,7 +379,12 @@ delete_recording(sandbox: SandboxRef, recording_id: str, http_timeout: float | N
 Delete a recording. Cannot delete an active recording.
 
 Args:
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    recording_id: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    None: Result returned by this operation.
 
 ### `health`
 
@@ -357,9 +396,10 @@ Check the health of the desktop environment.
 
 Args:
     sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopHealth: Result returned by this operation.
 
 ### `process_status`
 
@@ -369,11 +409,12 @@ process_status(sandbox: SandboxRef, http_timeout: float | None = None) -> Deskto
 
 Get the status of all desktop processes (xvfb, xfce4, x11vnc, novnc).
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopProcessStatusList: Result returned by this operation.
 
 ### `get_process`
 
@@ -386,9 +427,10 @@ Get the status of a single desktop process by name.
 Args:
     sandbox: Sandbox ID or object.
     process_name: Desktop process name.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopProcessStatus: Result returned by this operation.
 
 ### `restart_process`
 
@@ -398,11 +440,13 @@ restart_process(sandbox: SandboxRef, process_name: str, http_timeout: float | No
 
 Restart a desktop process.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    process_name: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopProcessRestart: Result returned by this operation.
 
 ### `process_logs`
 
@@ -415,9 +459,10 @@ Get stdout logs for a desktop process.
 Args:
     sandbox: Sandbox ID or object.
     process_name: Desktop process name.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopProcessLogs: Result returned by this operation.
 
 ### `process_errors`
 
@@ -427,11 +472,13 @@ process_errors(sandbox: SandboxRef, process_name: str, http_timeout: float | Non
 
 Get stderr logs for a desktop process.
 
-            Args:
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object.
+    process_name: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-    object: Result returned by this operation.
+    DesktopProcessErrors: Result returned by this operation.
 
 ### `status_stream`
 
@@ -441,15 +488,13 @@ status_stream(sandbox: SandboxRef, *, deadline: float | None = None, http_timeou
 
 Subscribe to a live SSE stream of process status updates.
 
-        Args:
-            sandbox: Sandbox ID or object.
-            deadline: Absolute ``time.monotonic()`` deadline.  When set, a
-                :class:`Leap0TimeoutError` is raised once the deadline is
-                exceeded.  ``None`` means no deadline.
-            http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+Args:
+    sandbox: Sandbox ID or object. deadline: Absolute ``time.monotonic()`` deadline.  When set, a :class:`Leap0TimeoutError` is raised once the deadline is exceeded.  ``None`` means no deadline. http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    deadline: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
-Yields:
-    object: Items yielded by this operation.
+Returns:
+    Iterator[DesktopProcessStatusList]: Result returned by this operation.
 
 ### `wait_until_ready`
 
@@ -467,9 +512,10 @@ using exponential back-off, bounded by *timeout* seconds total.
 Args:
     sandbox: Sandbox ID or object.
     timeout: Maximum seconds to wait (default 60).
-
     http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
-#### Throws
+Raises:
+    Leap0TimeoutError: If the desktop does not become ready within *timeout* seconds.
 
-- Leap0TimeoutError: If the desktop does not become ready within *timeout* seconds.
+Returns:
+    None: Result returned by this operation.

@@ -58,7 +58,7 @@ create_sandbox(**kwargs: object) -> Sandbox
 Create a sandbox and return it as a bound sandbox object.
 
 Args:
-    **kwargs: Keyword arguments forwarded to ``client.sandboxes.create``.
+    kwargs: Parameter for this operation.
 
 Returns:
     Sandbox: Sandbox object with bound service clients.
@@ -73,3 +73,6 @@ Close the underlying HTTP transport.
 
 Call this when you are done with the client if you are not using a
 context manager.
+
+Returns:
+    None: Result returned by this operation.
