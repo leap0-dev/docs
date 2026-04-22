@@ -16,7 +16,7 @@ AsyncCodeInterpreterClient(transport: AsyncTransport, *, sandbox_domain: str | N
 Execute code inside a sandbox with asynchronous APIs.
 
 Attributes:
-None.
+    None.
 
 ## Methods
 
@@ -29,10 +29,10 @@ async health(sandbox: SandboxRef, http_timeout: float | None = None) -> bool
 Check service health.
 
 Args:
-sandbox: Sandbox ID or object.
+    sandbox: Sandbox ID or object.
 
 Returns:
-object: Result returned by this operation.
+    object: Result returned by this operation.
 
 ### `create_context`
 
@@ -43,13 +43,13 @@ async create_context(sandbox: SandboxRef, *, language: str = 'python', cwd: str 
 Create a new execution context.
 
 Args:
-sandbox: Sandbox ID or object.
-language: Language runtime (e.g. `"python"`, `"typescript"`).
-cwd: Working directory (default `"/home/user"`).
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    language: Language runtime (e.g. ``"python"``, ``"typescript"``).
+    cwd: Working directory (default ``"/home/user"``).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-CodeContext: Newly created persistent execution context.
+    CodeContext: Newly created persistent execution context.
 
 ### `list_contexts`
 
@@ -60,10 +60,10 @@ async list_contexts(sandbox: SandboxRef, http_timeout: float | None = None) -> l
 List execution contexts.
 
 Args:
-sandbox: Sandbox ID or object.
+    sandbox: Sandbox ID or object.
 
 Returns:
-object: Result returned by this operation.
+    object: Result returned by this operation.
 
 ### `get_context`
 
@@ -72,14 +72,14 @@ async get_context(sandbox: SandboxRef, context_id: str, http_timeout: float | No
 ```
 
 Get a single execution context by ID.
-
+        
                 Returns:
                     CodeContext: Matching execution context.
 
 Args:
-sandbox: Sandbox ID or object.
-context_id: Parameter for this operation.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    context_id: Parameter for this operation.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `delete_context`
 
@@ -90,8 +90,8 @@ async delete_context(sandbox: SandboxRef, context_id: str, http_timeout: float |
 Delete an execution context.
 
 Args:
-sandbox: Sandbox ID or object.
-context_id: Parameter for this operation.
+    sandbox: Sandbox ID or object.
+    context_id: Parameter for this operation.
 
 ### `execute`
 
@@ -102,16 +102,16 @@ async execute(sandbox: SandboxRef, *, code: str, language: str = 'python', conte
 Execute code and wait for the full result.
 
 Args:
-sandbox: Sandbox ID or object.
-code: Source code to execute.
-language: Language runtime (default `"python"`).
-context_id: Link to an existing context to share state. Auto-generated if omitted.
-env_vars: Environment variables for the execution.
-timeout_ms: Execution timeout in milliseconds (default 30000).
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    code: Source code to execute.
+    language: Language runtime (default ``"python"``).
+    context_id: Link to an existing context to share state. Auto-generated if omitted.
+    env_vars: Environment variables for the execution.
+    timeout_ms: Execution timeout in milliseconds (default 30000).
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-CodeExecutionResult: Structured execution output, errors, and logs.
+    CodeExecutionResult: Structured execution output, errors, and logs.
 
 ### `execute_stream`
 
@@ -120,17 +120,17 @@ async execute_stream(sandbox: SandboxRef, *, code: str, language: str = 'python'
 ```
 
 Execute code and stream output events via SSE.
-
+        
                 Yields :class:`StreamEvent` objects with type ``"stdout"``,
                 ``"stderr"``, ``"exit"``, or ``"error"``.
 
 Args:
-sandbox: Sandbox ID or object.
-code: Source code to execute.
-language: Language runtime for the operation.
-context_id: Parameter for this operation.
-timeout_ms: Execution timeout in milliseconds.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    code: Source code to execute.
+    language: Language runtime for the operation.
+    context_id: Parameter for this operation.
+    timeout_ms: Execution timeout in milliseconds.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Yields:
-object: Items yielded by this operation.
+    object: Items yielded by this operation.

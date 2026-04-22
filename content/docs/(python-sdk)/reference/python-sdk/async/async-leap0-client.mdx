@@ -19,9 +19,9 @@ Use this client to create sandboxes and access top-level control-plane
 services. Sandbox-scoped services are exposed through bound sandbox objects.
 
 Attributes:
-sandboxes: Client for sandbox lifecycle operations.
-snapshots: Client for snapshot lifecycle operations.
-templates: Client for template management.
+    sandboxes: Client for sandbox lifecycle operations.
+    snapshots: Client for snapshot lifecycle operations.
+    templates: Client for template management.
 
 ## Methods
 
@@ -34,10 +34,10 @@ async get_sandbox(sandbox_id: str) -> AsyncSandbox
 Get a sandbox by ID.
 
 Args:
-sandbox_id: Sandbox identifier.
+    sandbox_id: Sandbox identifier.
 
 Returns:
-AsyncSandbox: Sandbox object with bound service clients.
+    AsyncSandbox: Sandbox object with bound service clients.
 
 ### `create_sandbox`
 
@@ -48,10 +48,10 @@ async create_sandbox(**kwargs: object) -> AsyncSandbox
 Create a sandbox.
 
 Args:
-\*\*kwargs: Keyword arguments forwarded to `client.sandboxes.create`.
+    **kwargs: Keyword arguments forwarded to ``client.sandboxes.create``.
 
 Returns:
-AsyncSandbox: Sandbox object with bound service clients.
+    AsyncSandbox: Sandbox object with bound service clients.
 
 ### `close`
 

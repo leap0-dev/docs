@@ -16,14 +16,14 @@ AsyncSandbox(client: 'AsyncLeap0Client', data: SandboxData | SandboxStatus)
 Sandbox object with bound asynchronous service clients.
 
 Attributes:
-filesystem: Bound filesystem client.
-git: Bound git client.
-process: Bound process client.
-pty: Bound PTY client.
-lsp: Bound LSP client.
-ssh: Bound SSH client.
-code_interpreter: Bound code interpreter client.
-desktop: Bound desktop client.
+    filesystem: Bound filesystem client.
+    git: Bound git client.
+    process: Bound process client.
+    pty: Bound PTY client.
+    lsp: Bound LSP client.
+    ssh: Bound SSH client.
+    code_interpreter: Bound code interpreter client.
+    desktop: Bound desktop client.
 
 ## Methods
 
@@ -36,7 +36,7 @@ async refresh() -> AsyncSandbox
 Refresh this sandbox object with the latest metadata.
 
 Returns:
-AsyncSandbox: This sandbox object with refreshed metadata.
+    AsyncSandbox: This sandbox object with refreshed metadata.
 
 ### `pause`
 
@@ -47,10 +47,10 @@ async pause(http_timeout: float | None = None) -> AsyncSandbox
 Pause the sandbox and return updated metadata.
 
 Args:
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-AsyncSandbox: This sandbox object with updated metadata.
+    AsyncSandbox: This sandbox object with updated metadata.
 
 ### `delete`
 
@@ -61,7 +61,7 @@ async delete(http_timeout: float | None = None) -> None
 Terminate and delete a sandbox.
 
 Args:
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `create_presigned_url`
 
@@ -88,11 +88,11 @@ invoke_url(path: str = '/', *, port: int | None = None) -> str
 Build an HTTPS URL for this sandbox.
 
 Args:
-path: Request path inside the sandbox application.
-port: Port number for the generated URL.
+    path: Request path inside the sandbox application.
+    port: Port number for the generated URL.
 
 Returns:
-str: Sandbox-scoped HTTPS URL.
+    str: Sandbox-scoped HTTPS URL.
 
 ### `websocket_url`
 
@@ -103,11 +103,11 @@ websocket_url(path: str = '/', *, port: int | None = None) -> str
 Build a websocket URL for this sandbox.
 
 Args:
-path: Request path inside the sandbox application.
-port: Port number for the generated URL.
+    path: Request path inside the sandbox application.
+    port: Port number for the generated URL.
 
 Returns:
-str: Sandbox-scoped websocket URL.
+    str: Sandbox-scoped websocket URL.
 
 ### `get_user_home_dir`
 

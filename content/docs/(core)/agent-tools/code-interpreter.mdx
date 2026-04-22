@@ -85,7 +85,11 @@ templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
 })
 
 for await (const event of sandbox.codeInterpreter.executeStream({
-code: "import time\nfor i in range(5):\n print(f'Step {i}')\n time.sleep(1)",
+code:
+"import time\n" +
+"for i in range(5):\n" +
+" print(f'Step {i}')\n" +
+" time.sleep(1)",
 language: "python",
 timeoutMs: 60000,
 })) {
@@ -101,8 +105,18 @@ const client = new Leap0Client()
 const sandbox = await client.sandboxes.create({
 templateName: DEFAULT_CODE_INTERPRETER_TEMPLATE_NAME,
 })
+
 const result = await sandbox.codeInterpreter.execute({
-code: "import matplotlib.pyplot as plt\nimport numpy as np\n\nx = np.linspace(0, 2 \* np.pi, 100)\nplt.figure(figsize=(8, 4))\nplt.plot(x, np.sin(x), label='sin(x)')\nplt.plot(x, np.cos(x), label='cos(x)')\nplt.legend()\nplt.title('Trigonometric Functions')\nplt.show()",
+code:
+"import matplotlib.pyplot as plt\n" +
+"import numpy as np\n\n" +
+"x = np.linspace(0, 2 \* np.pi, 100)\n" +
+"plt.figure(figsize=(8, 4))\n" +
+"plt.plot(x, np.sin(x), label='sin(x)')\n" +
+"plt.plot(x, np.cos(x), label='cos(x)')\n" +
+"plt.legend()\n" +
+"plt.title('Trigonometric Functions')\n" +
+"plt.show()",
 language: "python",
 })
 

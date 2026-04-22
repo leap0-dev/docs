@@ -50,10 +50,18 @@ export const desktopJsMovePointer = `${preamble}console.log(await sandbox.deskto
 ${close}`;
 
 export const desktopJsClick = `${preamble}await sandbox.desktop.click({ x: 320, y: 240, button: 1 })
+
 await sandbox.desktop.click({ button: 3 })
 ${close}`;
 
-export const desktopJsDrag = `${preamble}console.log(await sandbox.desktop.drag({ fromX: 100, fromY: 200, toX: 400, toY: 200 }))
+export const desktopJsDrag = `${preamble}console.log(
+  await sandbox.desktop.drag({
+    fromX: 100,
+    fromY: 200,
+    toX: 400,
+    toY: 200,
+  }),
+)
 ${close}`;
 
 export const desktopJsScroll = `${preamble}await sandbox.desktop.scroll({ direction: "down", amount: 3 })

@@ -21,9 +21,9 @@ Manage SSH access credentials for a sandbox.
         access = await sandbox.ssh.create_access()
         print(access.command)
         ```
-
+    
 Attributes:
-None.
+    None.
 
 ## Methods
 
@@ -39,11 +39,11 @@ Returns an access ID (used as the SSH username), a password, and the
 full SSH command to connect.
 
 Args:
-sandbox: Sandbox ID or object.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-SshAccess: Generated SSH credential bundle.
+    SshAccess: Generated SSH credential bundle.
 
 ### `delete_access`
 
@@ -54,9 +54,9 @@ async delete_access(sandbox: SandboxRef, *, id: str, http_timeout: float | None 
 Revoke a specific SSH access credential. The credential is invalidated immediately.
 
 Args:
-sandbox: Sandbox ID or object.
-id: SSH credential ID.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    id: SSH credential ID.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 ### `validate_access`
 
@@ -67,13 +67,13 @@ async validate_access(sandbox: SandboxRef, *, id: str, password: str, http_timeo
 Check whether a specific SSH access credential is still valid and not expired.
 
 Args:
-sandbox: Sandbox ID or object.
-id: SSH credential ID.
-password: SSH password.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    id: SSH credential ID.
+    password: SSH password.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-SshValidation: Validation result for the supplied credential pair.
+    SshValidation: Validation result for the supplied credential pair.
 
 ### `regenerate_access`
 
@@ -84,9 +84,9 @@ async regenerate_access(sandbox: SandboxRef, *, id: str, http_timeout: float | N
 Invalidate a specific credential and generate a new one. The expiry is also reset.
 
 Args:
-sandbox: Sandbox ID or object.
-id: SSH credential ID.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    id: SSH credential ID.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-SshAccess: Newly generated SSH credential bundle.
+    SshAccess: Newly generated SSH credential bundle.

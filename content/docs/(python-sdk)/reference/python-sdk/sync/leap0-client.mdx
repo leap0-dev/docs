@@ -20,18 +20,18 @@ services. Sandbox-scoped services are exposed through bound sandbox objects.
 It can be used directly or as a context manager.
 
 Args:
-api_key: API key for authentication. Falls back to `LEAP0_API_KEY`.
-base_url: Control-plane base URL. Falls back to `LEAP0_BASE_URL`.
-sandbox_domain: Sandbox domain suffix. Falls back to
-`LEAP0_SANDBOX_DOMAIN`.
-timeout: Default HTTP timeout in seconds.
-auth_header: Header name used to send the API key.
-bearer: Whether to prefix the API key with `Bearer`.
+    api_key: API key for authentication. Falls back to ``LEAP0_API_KEY``.
+    base_url: Control-plane base URL. Falls back to ``LEAP0_BASE_URL``.
+    sandbox_domain: Sandbox domain suffix. Falls back to
+        ``LEAP0_SANDBOX_DOMAIN``.
+    timeout: Default HTTP timeout in seconds.
+    auth_header: Header name used to send the API key.
+    bearer: Whether to prefix the API key with ``Bearer``.
 
 Attributes:
-sandboxes: Client for sandbox lifecycle operations.
-snapshots: Client for snapshot lifecycle operations.
-templates: Client for template management.
+    sandboxes: Client for sandbox lifecycle operations.
+    snapshots: Client for snapshot lifecycle operations.
+    templates: Client for template management.
 
 ## Methods
 
@@ -44,10 +44,10 @@ get_sandbox(sandbox_id: str) -> Sandbox
 Get a sandbox object with bound service clients by ID.
 
 Args:
-sandbox_id: Sandbox identifier.
+    sandbox_id: Sandbox identifier.
 
 Returns:
-Sandbox: Sandbox object with bound service clients.
+    Sandbox: Sandbox object with bound service clients.
 
 ### `create_sandbox`
 
@@ -58,10 +58,10 @@ create_sandbox(**kwargs: object) -> Sandbox
 Create a sandbox and return it as a bound sandbox object.
 
 Args:
-\*\*kwargs: Keyword arguments forwarded to `client.sandboxes.create`.
+    **kwargs: Keyword arguments forwarded to ``client.sandboxes.create``.
 
 Returns:
-Sandbox: Sandbox object with bound service clients.
+    Sandbox: Sandbox object with bound service clients.
 
 ### `close`
 

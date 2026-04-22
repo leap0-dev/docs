@@ -17,9 +17,9 @@ Execute one-shot shell commands inside a running sandbox.
 
     Use this client for non-interactive command execution where you want the
     full result back as a single response.
-
+    
 Attributes:
-None.
+    None.
 
 ## Methods
 
@@ -31,23 +31,23 @@ async execute(sandbox: SandboxRef, *, command: str, cwd: str | None = None, env:
 
 Run a shell command and wait for the result.
 
-The command runs inside `/bin/sh -c`.
+The command runs inside ``/bin/sh -c``.
 
 Args:
-sandbox: Sandbox ID or object.
-command: Shell command to execute.
-cwd: Working directory.
-env: Optional environment variables applied to the spawned process.
-timeout: Timeout in seconds (default 30).
+    sandbox: Sandbox ID or object.
+    command: Shell command to execute.
+    cwd: Working directory.
+    env: Optional environment variables applied to the spawned process.
+    timeout: Timeout in seconds (default 30).
 
 Returns:
-ProcessResult: Command result including exit code, stdout, and stderr.
+    ProcessResult: Command result including exit code, stdout, and stderr.
 
 Example:
-`python
+    ```python
     result = await sandbox.process.execute(
         command="ls -la /workspace",
     )
     print(result.stdout)
     print(result.stderr)
-    `
+    ```

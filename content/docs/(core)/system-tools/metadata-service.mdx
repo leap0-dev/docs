@@ -5,58 +5,6 @@ slug: metadata-service
 ---
 
 import { Tabs, TabItem } from "@/components/mdx-compat";
-import { CodeSnippet } from "@/components/code-snippet";
-
-export const metadataServiceCurlExample = `TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token \\
-  -H 'X-metadata-token-ttl-seconds: 60')
-
-curl -sf \\
--H "X-metadata-token: $TOKEN" \\
--H 'Accept: application/json' \\
-http://169.254.169.254/latest/meta-data/leap0`;
-
-export const metadataServicePythonExample = `from leap0 import Leap0Client
-
-client = Leap0Client()
-sandbox = client.sandboxes.create(
-mounts=[
-{
-"type": "object-storage",
-"bucket": "cloud-samples-data",
-"endpoint": "https://storage.googleapis.com",
-"mount_path": "/data/assets",
-"prefix": "adc/",
-"read_only": True,
-}
-],
-)
-
-result = sandbox.process.execute(command="""TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H 'X-metadata-token-ttl-seconds: 60') && curl -sf -H \"X-metadata-token: $TOKEN\" -H 'Accept: application/json' http://169.254.169.254/latest/meta-data/leap0""")
-print(result.stdout)
-client.close()`;
-
-export const metadataServiceTsExample = `import { Leap0Client } from "leap0";
-
-const client = new Leap0Client();
-const sandbox = await client.sandboxes.create({
-mounts: [
-{
-type: "object-storage",
-bucket: "cloud-samples-data",
-endpoint: "https://storage.googleapis.com",
-mountPath: "/data/assets",
-prefix: "adc/",
-readOnly: true,
-},
-],
-});
-
-const result = await sandbox.process.execute({
-command: "TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H 'X-metadata-token-ttl-seconds: 60') && curl -sf -H \"X-metadata-token: $TOKEN\" -H 'Accept: application/json' http://169.254.169.254/latest/meta-data/leap0",
-});
-
-console.log(result.stdout);
-await client.close();`;
 
 Leap0 exposes a metadata service inside each sandbox at `169.254.169.254`.
 
@@ -72,15 +20,83 @@ The full response schema is documented in the [Metadata Service API reference](/
 
 The metadata service uses IMDSv2. First request a token, then include it on metadata reads.
 
-<CodeSnippet lang="bash" code={metadataServiceCurlExample} />
+```bash
+TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token \
+  -H 'X-metadata-token-ttl-seconds: 60')
+
+curl -sf \
+  -H "X-metadata-token: $TOKEN" \
+  -H 'Accept: application/json' \
+  http://169.254.169.254/latest/meta-data/leap0
+```
 
 ## Read metadata from a sandbox
 
 <Tabs syncKey="language">
   <TabItem label="Python">
-    <CodeSnippet lang="python" code={metadataServicePythonExample} />
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create(
+    mounts=[
+        {
+            "type": "object-storage",
+            "bucket": "cloud-samples-data",
+            "endpoint": "https://storage.googleapis.com",
+            "mount_path": "/data/assets",
+            "prefix": "adc/",
+            "read_only": True,
+        }
+    ],
+)
+
+result = sandbox.process.execute(
+    command=(
+        "TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token "
+        "-H 'X-metadata-token-ttl-seconds: 60') && "
+        "curl -sf -H 'X-metadata-token: $TOKEN' -H 'Accept: application/json' "
+        "http://169.254.169.254/latest/meta-data/leap0"
+    )
+)
+
+print(result.stdout)
+
+client.close()
+```
+
   </TabItem>
   <TabItem label="JavaScript & TypeScript">
-    <CodeSnippet lang="ts" code={metadataServiceTsExample} />
+
+```ts
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create({
+  mounts: [
+    {
+      type: "object-storage",
+      bucket: "cloud-samples-data",
+      endpoint: "https://storage.googleapis.com",
+      mountPath: "/data/assets",
+      prefix: "adc/",
+      readOnly: true,
+    },
+  ],
+});
+
+const result = await sandbox.process.execute({
+  command:
+    `TOKEN=$(curl -sf -X PUT http://169.254.169.254/latest/api/token -H 'X-metadata-token-ttl-seconds: 60') && ` +
+    `curl -sf -H 'X-metadata-token: $TOKEN' -H 'Accept: application/json' ` +
+    `http://169.254.169.254/latest/meta-data/leap0`,
+});
+
+console.log(result.stdout);
+
+await client.close();
+```
+
   </TabItem>
 </Tabs>

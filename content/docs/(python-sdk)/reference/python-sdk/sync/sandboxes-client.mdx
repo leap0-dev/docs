@@ -19,7 +19,7 @@ Sandboxes are isolated execution environments with their own compute,
 filesystem, and network boundary.
 
 Attributes:
-None.
+    None.
 
 ## Methods
 
@@ -32,21 +32,21 @@ create(*, template_name: str = DEFAULT_TEMPLATE_NAME, vcpu: int = DEFAULT_VCPU, 
 Create a new sandbox from a template.
 
 Args:
-template_name: Name of the template to use.
-vcpu: Number of virtual CPUs (1 to 8).
-memory: Memory in MiB (512 to 8192, must be even).
-timeout: Sandbox timeout in seconds (1 to 28800, default 300).
-auto_pause: Automatically pause the sandbox into a snapshot on timeout.
-otel_export: Inject OpenTelemetry exporter environment into the sandbox.
-Requires `OTEL_EXPORTER_OTLP_ENDPOINT` in the local environment and
-also forwards `OTEL_EXPORTER_OTLP_HEADERS` when present.
-telemetry: Deprecated alias for `otel_export`. Use `otel_export` instead.
-env_vars: Environment variables to set inside the sandbox.
-network_policy: Outbound network policy for the sandbox.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    template_name: Name of the template to use.
+    vcpu: Number of virtual CPUs (1 to 8).
+    memory: Memory in MiB (512 to 8192, must be even).
+    timeout: Sandbox timeout in seconds (1 to 28800, default 300).
+    auto_pause: Automatically pause the sandbox into a snapshot on timeout.
+    otel_export: Inject OpenTelemetry exporter environment into the sandbox.
+        Requires ``OTEL_EXPORTER_OTLP_ENDPOINT`` in the local environment and
+        also forwards ``OTEL_EXPORTER_OTLP_HEADERS`` when present.
+    telemetry: Deprecated alias for ``otel_export``. Use ``otel_export`` instead.
+    env_vars: Environment variables to set inside the sandbox.
+    network_policy: Outbound network policy for the sandbox.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-SandboxT | SandboxData | SandboxStatus: Created sandbox object.
+    SandboxT | SandboxData | SandboxStatus: Created sandbox object.
 
 ### `list`
 
@@ -57,15 +57,15 @@ list(*, state: str | None = None, sort: str = 'created_at', order_by: str = 'des
 List sandboxes for the authenticated organization.
 
 Args:
-state: Optional sandbox state filter.
-sort: Sort field, either `created_at` or `state`.
-order_by: Sort direction, either `asc` or `desc`.
-page: 1-based page number.
-page_size: Page size between 1 and 100.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    state: Optional sandbox state filter.
+    sort: Sort field, either ``created_at`` or ``state``.
+    order_by: Sort direction, either ``asc`` or ``desc``.
+    page: 1-based page number.
+    page_size: Page size between 1 and 100.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-SandboxListResponse: Paginated sandbox summaries.
+    SandboxListResponse: Paginated sandbox summaries.
 
 ### `pause`
 
@@ -76,11 +76,11 @@ pause(sandbox: SandboxRef, http_timeout: float | None = None) -> SandboxT | Sand
 Pause a running sandbox.
 
 Args:
-sandbox: Sandbox ID or object.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-SandboxT | SandboxData | SandboxStatus: Updated sandbox object.
+    SandboxT | SandboxData | SandboxStatus: Updated sandbox object.
 
 ### `get`
 
@@ -91,11 +91,11 @@ get(sandbox: SandboxRef, http_timeout: float | None = None) -> SandboxT | Sandbo
 Get the latest sandbox metadata.
 
 Args:
-sandbox: Sandbox ID or object.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-SandboxT | SandboxData | SandboxStatus: Current sandbox object.
+    SandboxT | SandboxData | SandboxStatus: Current sandbox object.
 
 ### `delete`
 
@@ -106,7 +106,7 @@ delete(sandbox: SandboxRef, http_timeout: float | None = None) -> None
 Terminate and delete a sandbox.
 
 Args:
-sandbox: Sandbox ID or object.
+    sandbox: Sandbox ID or object.
 
 ### `get_user_home_dir`
 
@@ -117,11 +117,11 @@ get_user_home_dir(sandbox: SandboxRef, http_timeout: float | None = None) -> str
 Get the resolved home directory for the sandbox user.
 
 Args:
-sandbox: Sandbox ID or object.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-str: Resolved sandbox user home directory.
+    str: Resolved sandbox user home directory.
 
 ### `get_workdir`
 
@@ -132,11 +132,11 @@ get_workdir(sandbox: SandboxRef, http_timeout: float | None = None) -> str
 Get the configured working directory for the sandbox.
 
 Args:
-sandbox: Sandbox ID or object.
-http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
 
 Returns:
-str: Configured sandbox workdir.
+    str: Configured sandbox workdir.
 
 ### `create_presigned_url`
 
@@ -159,12 +159,12 @@ invoke_url(sandbox: SandboxRef, path: str = '/', *, port: int | None = None) -> 
 Build an HTTPS URL that routes directly to the sandbox.
 
 Args:
-sandbox: Sandbox ID or object.
-path: Path used by this operation.
-port: Port number for the generated URL.
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    port: Port number for the generated URL.
 
 Returns:
-object: Result returned by this operation.
+    object: Result returned by this operation.
 
 ### `websocket_url`
 
@@ -175,9 +175,9 @@ websocket_url(sandbox: SandboxRef, path: str = '/', *, port: int | None = None) 
 Build a WSS URL that routes directly to the sandbox.
 
 Args:
-sandbox: Sandbox ID or object.
-path: Path used by this operation.
-port: Port number for the generated URL.
+    sandbox: Sandbox ID or object.
+    path: Path used by this operation.
+    port: Port number for the generated URL.
 
 Returns:
-object: Result returned by this operation.
+    object: Result returned by this operation.

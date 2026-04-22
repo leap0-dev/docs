@@ -17,10 +17,10 @@ Every SDK exception carries optional HTTP context so callers can
 inspect the original response without parsing strings.
 
 Attributes:
-message: Human-readable error description.
-status_code: HTTP status code, if the error originated from an API response.
-headers: Response headers from the API, if available.
-error_message: Parsed `message` field from a JSON response body, if present.
+    message: Human-readable error description.
+    status_code: HTTP status code, if the error originated from an API response.
+    headers: Response headers from the API, if available.
+    error_message: Parsed ``message`` field from a JSON response body, if present.
 
 ### `Leap0NotFoundError`
 
@@ -46,7 +46,7 @@ Extends `Leap0Error`.
 
 The operation conflicts with the current resource state (HTTP 409).
 
-Raised when a resource already exists (e.g. `mkdir` on an existing
+Raised when a resource already exists (e.g. ``mkdir`` on an existing
 directory), or when there are too many active sessions.
 
 ### `Leap0RateLimitError`
@@ -56,7 +56,7 @@ Extends `Leap0Error`.
 Rate limit exceeded (HTTP 429).
 
 Callers should back off and retry after the interval indicated
-by the `Retry-After` header, if present.
+by the ``Retry-After`` header, if present.
 
 ### `Leap0TimeoutError`
 

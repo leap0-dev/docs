@@ -71,7 +71,7 @@ export const referenceTabs: LayoutTab[] = [
 export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
-      title: <BrandTitle />,
+      title: BrandTitle,
     },
     githubUrl: githubOrgUrl,
   };
