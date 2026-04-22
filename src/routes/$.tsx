@@ -13,7 +13,7 @@ import {
 import { baseOptions } from "@/lib/layout.shared";
 import { TabPreferencesProvider } from "@/components/tab-preferences-provider";
 import { parseTabPreferences } from "@/lib/tab-preferences";
-import { filterSidebarTree, getSidebarSection } from "@/lib/sidebar-tree";
+import { filterSidebarTree, getSidebarScope, getSidebarSection } from "@/lib/sidebar-tree";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { Suspense, type ReactNode } from "react";
 import { useMDXComponents } from "@/components/mdx";
@@ -26,6 +26,8 @@ import {
 import { OpenOptionsButton } from "@/components/page-open-options";
 import { DocsFeedback } from "@/components/docs-feedback";
 import { SidebarReferenceDropdown } from "@/components/sidebar-reference-dropdown";
+import { DocsTopHeader } from "@/components/docs-top-header";
+import { DocsLayoutContainer } from "@/components/docs-layout-container";
 
 const SLUG_SEGMENT_PATTERN = /^[A-Za-z0-9._-]{1,128}$/;
 
@@ -153,10 +155,11 @@ function Page() {
 
   const tree = filterSidebarTree(page.pageTree, page.url);
   const section = getSidebarSection(page.url);
+  const scope = getSidebarScope(page.url);
 
   return (
     <DocsLayout
-      key={section}
+      key={`${section}:${scope}`}
       {...baseOptions()}
       tree={tree}
       containerProps={{
@@ -165,6 +168,10 @@ function Page() {
       sidebar={{
         banner: <SidebarReferenceDropdown />,
         collapsible: false,
+      }}
+      slots={{
+        container: DocsLayoutContainer,
+        header: DocsTopHeader,
       }}
       tabs={false}
     >

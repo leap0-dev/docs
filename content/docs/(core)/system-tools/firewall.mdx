@@ -31,7 +31,7 @@ from leap0 import Leap0Client, NetworkPolicyMode
 client = Leap0Client()
 sandbox = client.sandboxes.create(
     vcpu=2,
-    memory_mib=2048,
+    memory=2048,
     network_policy={"mode": NetworkPolicyMode.ALLOW_ALL},
 )
 
@@ -69,7 +69,7 @@ from leap0 import Leap0Client, NetworkPolicyMode
 client = Leap0Client()
 sandbox = client.sandboxes.create(
     vcpu=2,
-    memory_mib=2048,
+    memory=2048,
     network_policy={"mode": NetworkPolicyMode.DENY_ALL},
 )
 
@@ -107,7 +107,7 @@ from leap0 import Leap0Client, NetworkPolicyMode
 client = Leap0Client()
 sandbox = client.sandboxes.create(
     vcpu=2,
-    memory_mib=2048,
+    memory=2048,
     network_policy={
         "mode": NetworkPolicyMode.CUSTOM,
         "allow_domains": ["api.openai.com", "pypi.org"],
@@ -155,7 +155,7 @@ from leap0 import Leap0Client, NetworkPolicyMode
 client = Leap0Client()
 sandbox = client.sandboxes.create(
     vcpu=2,
-    memory_mib=2048,
+    memory=2048,
     network_policy={
         "mode": NetworkPolicyMode.CUSTOM,
         "allow_domains": ["api.openai.com"],

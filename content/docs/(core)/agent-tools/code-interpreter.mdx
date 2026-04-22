@@ -6,6 +6,15 @@ slug: code-interpreter
 
 import { Tabs, TabItem } from "@/components/mdx-compat";
 
+Execute code inside a running sandbox. The interpreter keeps a persistent REPL process alive so that variables, imports, and working directory survive across calls. Send code, get back stdout, stderr, rich results (text, images, HTML, JSON), and structured errors. For a full endpoint reference, see the Code Interpreter API.
+
+Two runtimes are available:
+
+| Alias | Runtime | Notes |
+| ----- | ------- | ----- |
+| `python`, `py`, `python3` | Python 3.12 | 50+ pre-installed data-science packages. Matplotlib charts auto-captured as PNG and SVG. |
+| `typescript`, `ts`, `javascript`, `js`, `bun`, `node` | Bun v1.3.10 (TypeScript) | Last expression is returned as a result. State accumulates across calls. |
+
 ### Create a context
 
 <Tabs syncKey="language">
@@ -40,8 +49,6 @@ await client.close();
 ```
   </TabItem>
 </Tabs>
-
-`client.sandboxes.create(template_name=...)` requires leap0 Python SDK `v0.2.0+`.
 
 | Field      | Type   | Required | Description                                          |
 | ---------- | ------ | -------- | ---------------------------------------------------- |
@@ -81,8 +88,6 @@ await client.close();
   </TabItem>
 </Tabs>
 
-`client.sandboxes.create(template_name=...)` requires leap0 Python SDK `v0.2.0+`.
-
 ### Get a context
 
 <Tabs syncKey="language">
@@ -114,8 +119,6 @@ await client.close();
   </TabItem>
 </Tabs>
 
-`client.sandboxes.create(template_name=...)` requires leap0 Python SDK `v0.2.0+`.
-
 ### Delete a context
 
 <Tabs syncKey="language">
@@ -144,8 +147,6 @@ await client.close();
 ```
   </TabItem>
 </Tabs>
-
-`client.sandboxes.create(template_name=...)` requires leap0 Python SDK `v0.2.0+`.
 
 ## Execute code
 
@@ -205,8 +206,6 @@ await client.close();
 ```
   </TabItem>
 </Tabs>
-
-`client.sandboxes.create(template_name=...)` requires leap0 Python SDK `v0.2.0+`.
 
 ### Request fields
 
@@ -270,8 +269,6 @@ await client.close();
 ```
   </TabItem>
 </Tabs>
-
-`client.sandboxes.create(template_name=...)` requires leap0 Python SDK `v0.2.0+`.
 
 ### Event types
 
@@ -360,8 +357,6 @@ await client.close();
 ```
   </TabItem>
 </Tabs>
-
-`client.sandboxes.create(template_name=...)` requires leap0 Python SDK `v0.2.0+`.
 
 ## Pre-installed Python packages
 

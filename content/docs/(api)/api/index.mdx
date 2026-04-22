@@ -1,0 +1,32 @@
+---
+title: Leap0 API
+description: Reference and overview for the core Leap0 platform API.
+slug: /api
+---
+
+import { env } from "@/env";
+
+The Leap0 API is the core platform API for creating and managing sandboxes and the services attached to them.
+
+Use it to manage sandbox lifecycle, object storage mounts, filesystems, git, processes, PTY sessions, LSP, SSH, snapshots, templates, and presigned URLs.
+
+## Base URL
+
+<code>{env.LEAP0_API_URL}</code>
+
+## Authentication
+
+Bearer token authentication is required.
+
+## What It's For
+
+- Create and manage sandboxes
+- Work with filesystems, git, PTY, and processes
+- Use LSP, SSH, snapshots, and templates
+- Generate presigned URLs and manage related platform resources
+
+## Related APIs
+
+- [Metadata Service API](/metadata-service/api) for in-guest metadata
+- [Code Interpreter API](/code-interpreter/api) for persistent interpreter execution
+- [Desktop API](/desktop/api) for desktop automation inside a sandbox

@@ -41,7 +41,7 @@ Paused sandboxes automatically resume when they receive any request (invoke, fil
 
 ## Create a sandbox
 
-Set `auto_pause` to `true` if you want Leap0 to pause the sandbox into a snapshot when its timeout is reached.
+Set `auto_pause` to `true` if you want Leap0 to pause the sandbox when its timeout is reached.
 
 <Tabs syncKey="language">
   <TabItem label="Python">
@@ -52,8 +52,8 @@ from leap0 import Leap0Client, NetworkPolicyMode
 client = Leap0Client()
 sandbox = client.sandboxes.create(
     vcpu=2,
-    memory_mib=2048,
-    timeout_min=30,
+    memory=2048,
+    timeout=30,
     auto_pause=True,
     env_vars={
         "NODE_ENV": "production",
@@ -107,7 +107,7 @@ from leap0 import Leap0Client
 
 client = Leap0Client()
 sandbox = client.sandboxes.create()
-print(sandbox.id, sandbox.state, sandbox.vcpu, sandbox.memory_mib)
+print(sandbox.id, sandbox.state, sandbox.vcpu, sandbox.memory)
 ```
 
   </TabItem>

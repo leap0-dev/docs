@@ -110,8 +110,8 @@ API_KEY = os.environ["LEAP0_API_KEY"]
 client = Leap0Client()
 sandbox = client.sandboxes.create(
     vcpu=2,
-    memory_mib=2048,
-    timeout_min=30,
+    memory=2048,
+    timeout=30,
 )
 
 try:

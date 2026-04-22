@@ -18,8 +18,10 @@ import { useMDXComponents } from "@/components/mdx";
 import { baseOptions } from "@/lib/layout.shared";
 import { TabPreferencesProvider } from "@/components/tab-preferences-provider";
 import { parseTabPreferences } from "@/lib/tab-preferences";
-import { filterSidebarTree, getSidebarSection } from "@/lib/sidebar-tree";
+import { filterSidebarTree, getSidebarScope, getSidebarSection } from "@/lib/sidebar-tree";
 import { SidebarReferenceDropdown } from "@/components/sidebar-reference-dropdown";
+import { DocsTopHeader } from "@/components/docs-top-header";
+import { DocsLayoutContainer } from "@/components/docs-layout-container";
 
 export const Route = createFileRoute("/")({
   component: Page,
@@ -49,7 +51,13 @@ const serverLoader = createServerFn({
 const clientLoader = browserCollections.docs.createClientLoader({
   component: function IndexDocsContent(
     { toc, frontmatter, default: MDX },
-    { markdownUrl, path }: { markdownUrl: string; path: string },
+    {
+      markdownUrl,
+      path,
+    }: {
+      markdownUrl: string;
+      path: string;
+    },
   ) {
     const mdxComponents = useMDXComponents();
 
@@ -77,10 +85,11 @@ function Page() {
   const page = useFumadocsLoader(Route.useLoaderData());
   const tree = filterSidebarTree(page.pageTree, page.url);
   const section = getSidebarSection(page.url);
+  const scope = getSidebarScope(page.url);
 
   return (
     <DocsLayout
-      key={section}
+      key={`${section}:${scope}`}
       {...baseOptions()}
       tree={tree}
       containerProps={{
@@ -89,6 +98,10 @@ function Page() {
       sidebar={{
         banner: <SidebarReferenceDropdown />,
         collapsible: false,
+      }}
+      slots={{
+        container: DocsLayoutContainer,
+        header: DocsTopHeader,
       }}
       tabs={false}
     >

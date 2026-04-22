@@ -88,8 +88,8 @@ from leap0 import Leap0Client
 client = Leap0Client()
 sandbox = client.sandboxes.create(
     vcpu=2,
-    memory_mib=2048,
-    timeout_min=30,
+    memory=2048,
+    timeout=30,
     otel_export=True,
 )
 

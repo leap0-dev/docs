@@ -2,6 +2,7 @@ import { BookOpenText, Braces, MonitorSmartphone, SquareCode } from "lucide-reac
 import type { BaseLayoutProps, LayoutTab } from "fumadocs-ui/layouts/shared";
 import { Leap0Brand } from "@/components/leap0-brand";
 import { githubOrgUrl } from "@/env";
+import { getSidebarSection } from "@/lib/sidebar-tree";
 
 function BrandTitle({ href = "/", className }: { href?: string; className?: string }) {
   return (
@@ -48,25 +49,73 @@ export const referenceTabs: LayoutTab[] = [
     ]),
   },
   {
-    title: "Python SDK",
-    description: "Sync and async client reference",
+    title: "SDKs",
+    description: "Python and TypeScript/JavaScript references",
     url: "/reference/python-sdk",
     icon: <SquareCode className="size-4" />,
+    urls: new Set(["/reference/python-sdk", "/reference/javascript-sdk"]),
   },
   {
-    title: "JavaScript SDK",
-    description: "Core and services reference",
-    url: "/reference/javascript-sdk",
-    icon: <Braces className="size-4" />,
-  },
-  {
-    title: "API",
+    title: "APIs",
     description: "Core, metadata service, code interpreter, and desktop OpenAPI reference",
     url: "/api",
     icon: <MonitorSmartphone className="size-4" />,
     urls: new Set(["/api", "/metadata-service/api", "/code-interpreter/api", "/desktop/api"]),
   },
 ];
+
+const sdkTabs: LayoutTab[] = [
+  {
+    title: "Python",
+    description: "Python SDK reference",
+    url: "/reference/python-sdk",
+    icon: <SquareCode className="size-4" />,
+  },
+  {
+    title: "TypeScript / JavaScript",
+    description: "TypeScript and JavaScript SDK reference",
+    url: "/reference/javascript-sdk",
+    icon: <Braces className="size-4" />,
+  },
+];
+
+const apiTabs: LayoutTab[] = [
+  {
+    title: "Leap0 API",
+    description: "Core platform API",
+    url: "/api",
+    icon: <MonitorSmartphone className="size-4" />,
+  },
+  {
+    title: "Metadata Service API",
+    description: "Metadata service endpoints",
+    url: "/metadata-service/api",
+    icon: <MonitorSmartphone className="size-4" />,
+  },
+  {
+    title: "Code Interpreter API",
+    description: "Code interpreter endpoints",
+    url: "/code-interpreter/api",
+    icon: <MonitorSmartphone className="size-4" />,
+  },
+  {
+    title: "Desktop API",
+    description: "Desktop automation endpoints",
+    url: "/desktop/api",
+    icon: <MonitorSmartphone className="size-4" />,
+  },
+];
+
+export function getTopTabs(url: string): LayoutTab[] | false {
+  switch (getSidebarSection(url)) {
+    case "sdks":
+      return sdkTabs;
+    case "apis":
+      return apiTabs;
+    default:
+      return false;
+  }
+}
 
 export function baseOptions(): BaseLayoutProps {
   return {

@@ -1,11 +1,35 @@
 import type * as PageTree from "fumadocs-core/page-tree";
 
-type Section = "core" | "api" | "python-sdk" | "javascript-sdk";
+type Section = "core" | "sdks" | "apis";
+type SidebarScope =
+  | "core"
+  | "python-sdk"
+  | "javascript-sdk"
+  | "api"
+  | "metadata-service-api"
+  | "code-interpreter-api"
+  | "desktop-api";
 
-const SECTION_PREFIXES: Record<Exclude<Section, "core">, string[]> = {
+const SIDEBAR_SCOPE_PREFIXES: Record<Exclude<SidebarScope, "core">, string[]> = {
   "python-sdk": ["/reference/python-sdk"],
   "javascript-sdk": ["/reference/javascript-sdk"],
-  api: ["/api", "/code-interpreter/api", "/desktop/api", "/metadata-service/api"],
+  api: ["/api"],
+  "metadata-service-api": ["/metadata-service/api"],
+  "code-interpreter-api": ["/code-interpreter/api"],
+  "desktop-api": ["/desktop/api"],
+};
+
+const SECTION_PREFIXES: Record<Exclude<Section, "core">, string[]> = {
+  sdks: [
+    ...SIDEBAR_SCOPE_PREFIXES["python-sdk"],
+    ...SIDEBAR_SCOPE_PREFIXES["javascript-sdk"],
+  ],
+  apis: [
+    ...SIDEBAR_SCOPE_PREFIXES.api,
+    ...SIDEBAR_SCOPE_PREFIXES["metadata-service-api"],
+    ...SIDEBAR_SCOPE_PREFIXES["code-interpreter-api"],
+    ...SIDEBAR_SCOPE_PREFIXES["desktop-api"],
+  ],
 };
 
 function matchesPrefix(url: string, prefix: string) {
@@ -24,14 +48,25 @@ export function getSidebarSection(url: string): Section {
   return "core";
 }
 
-function matcherFor(section: Section) {
-  const nonCorePrefixes = Object.values(SECTION_PREFIXES).flat();
+export function getSidebarScope(url: string): SidebarScope {
+  for (const [scope, prefixes] of Object.entries(SIDEBAR_SCOPE_PREFIXES)) {
+    if (matchesAnyPrefix(url, prefixes)) return scope as Exclude<SidebarScope, "core">;
+  }
 
-  switch (section) {
+  return "core";
+}
+
+function matcherFor(scope: SidebarScope) {
+  const nonCorePrefixes = Object.values(SIDEBAR_SCOPE_PREFIXES).flat();
+
+  switch (scope) {
     case "python-sdk":
     case "javascript-sdk":
     case "api":
-      return (url: string) => matchesAnyPrefix(url, SECTION_PREFIXES[section]);
+    case "metadata-service-api":
+    case "code-interpreter-api":
+    case "desktop-api":
+      return (url: string) => matchesAnyPrefix(url, SIDEBAR_SCOPE_PREFIXES[scope]);
     case "core":
       return (url: string) =>
         !matchesAnyPrefix(url, nonCorePrefixes) && !matchesPrefix(url, "/reference");
@@ -91,7 +126,7 @@ function unwrapSingleFolder(nodes: PageTree.Root["children"]): PageTree.Root["ch
 }
 
 export function filterSidebarTree(tree: PageTree.Root, url: string): PageTree.Root {
-  const matches = matcherFor(getSidebarSection(url));
+  const matches = matcherFor(getSidebarScope(url));
   const children = cleanupSeparators(
     tree.children
       .map((child) => filterNode(child, matches))

@@ -130,7 +130,7 @@ paths:
         Pause a running sandbox. The sandbox's VM state, memory, and disk are captured
         and uploaded, the sandbox is marked as paused, and the VM is terminated. The
         sandbox can later be resumed via the invoke route or the resume endpoint, which
-        restores it from the saved state. Unlike `/snapshot/pause`, this does **not**
+        restores it from the saved state. Unlike `POST /snapshot/create` with `kill_sandbox_after`, this does **not**
         create a named snapshot.
       tags: [Sandbox]
       responses:
@@ -339,7 +339,8 @@ paths:
       description: |
         Create a snapshot from a running sandbox. The snapshot captures the sandbox's
         memory image, VM state, writable disk diff, and resource configuration.
-        The source sandbox resumes after the snapshot is stored.
+        The source sandbox resumes after the snapshot is stored unless
+        `kill_sandbox_after` is set.
       tags: [Snapshot]
       requestBody:
         required: true
@@ -367,46 +368,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /v1/sandbox/{sandboxID}/snapshot/pause:
-    parameters:
-      - $ref: "#/components/parameters/sandboxID"
+  /v1/snapshot/restore:
     post:
-      operationId: pauseSnapshot
-      summary: Snapshot and terminate a sandbox
-      description: |
-        Create a named snapshot from a running sandbox, then terminate the source
-        sandbox after the snapshot is stored. The snapshot can later be restored
-        via the resume endpoint.
-      tags: [Snapshot]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SnapshotCreateRequest"
-      responses:
-        "201":
-          description: Snapshot created and sandbox terminated.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SnapshotPauseResponse"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          description: Conflict - sandbox is not running, or the snapshot name already exists or is being created.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-  /v1/snapshot/resume:
-    post:
-      operationId: resumeSnapshot
+      operationId: restoreSnapshot
       summary: Restore a snapshot
       description: |
         Create a new sandbox from a previously saved snapshot. The restored sandbox
@@ -418,7 +382,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SnapshotResumeRequest"
+              $ref: "#/components/schemas/SnapshotRestoreRequest"
       responses:
         "201":
           description: Sandbox restored from snapshot successfully.
@@ -2247,6 +2211,10 @@ components:
           type: string
           description: Optional snapshot name. If omitted, Leap0 generates one.
           example: workspace-warm
+        kill_sandbox_after:
+          type: boolean
+          default: false
+          description: Terminate the source sandbox after the snapshot is stored.
 
     SnapshotCreateResponse:
       type: object
@@ -2298,48 +2266,7 @@ components:
           minimum: 0
           description: Total number of matching snapshots before pagination.
 
-    SnapshotPauseResponse:
-      type: object
-      required: [id, name, template_id, vcpu, memory, disk, state, created_at]
-      properties:
-        id:
-          type: string
-          description: Unique snapshot identifier.
-          example: snap-abc123
-        name:
-          type: string
-          description: Snapshot name.
-          example: workspace-warm
-        template_id:
-          type: string
-          description: Template the snapshot was created from.
-        vcpu:
-          type: integer
-          minimum: 1
-          description: Number of virtual CPUs stored with the snapshot.
-        memory:
-          type: integer
-          format: int64
-          minimum: 1
-          description: Memory stored with the snapshot, in MiB.
-        disk:
-          type: integer
-          format: int64
-          minimum: 1
-          description: Writable disk size stored with the snapshot, in MiB.
-        state:
-          type: string
-          enum: [paused]
-          description: The sandbox state after the snapshot-pause operation completes.
-        network_policy:
-          nullable: true
-          $ref: "#/components/schemas/NetworkPolicy"
-        created_at:
-          type: string
-          format: date-time
-          description: ISO 8601 timestamp of when the snapshot was created.
-
-    SnapshotResumeRequest:
+    SnapshotRestoreRequest:
       type: object
       required: [snapshot_name]
       properties:

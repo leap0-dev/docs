@@ -5,19 +5,14 @@ slug: snapshots
 ---
 
 import { Tabs, TabItem } from "@/components/mdx-compat";
-import snapshotFlowChart from "./snapshot-flow.mmd?raw";
 
 Snapshots let you create a point-in-time capture of a running sandbox, including its in-memory execution state and writable disk state.
 
 You can then restore that snapshot into a brand new sandbox that starts from the same checkpoint.
 
 :::note[Sandbox state]
-Snapshots can only be created from a `running` sandbox. The VM is briefly paused during the capture and then resumed automatically.
+Snapshots can only be created from a `running` sandbox. The VM is briefly paused during the capture and then resumed automatically unless you set `kill_sandbox_after`.
 :::
-
-## Lifecycle
-
-<Mermaid chart={snapshotFlowChart} />
 
 ## Restore behavior
 
@@ -25,7 +20,7 @@ Restoring a snapshot creates a brand new sandbox.
 
 - Compute settings come from the snapshot, not the restore request.
 - The snapshot's template is reattached automatically.
-- `timeout_min` can be overridden when restoring.
+- `timeout` can be overridden when restoring.
 - `auto_pause` can be enabled when restoring if you want the new sandbox to pause itself at timeout.
 - `network_policy` defaults to the snapshot values, but you can override it on restore.
 - Restore requests address snapshots by `snapshot_name`.
@@ -40,7 +35,7 @@ from leap0 import Leap0Client
 
 client = Leap0Client()
 sandbox = client.sandboxes.create()
-snapshot = client.snapshots.create(sandbox, name="workspace-warm")
+snapshot = sandbox.create_snapshot(name="workspace-warm")
 
 print(snapshot.id, snapshot.name)
 ```
@@ -52,7 +47,8 @@ print(snapshot.id, snapshot.name)
 import { Leap0Client } from "leap0";
 
 const client = new Leap0Client();
-const snapshot = await client.snapshots.create("<sandbox_id>", {
+const sandbox = await client.sandboxes.get("<sandbox_id>");
+const snapshot = await sandbox.createSnapshot({
   name: "workspace-warm",
 });
 
@@ -67,8 +63,6 @@ await client.close();
 
 Use this when you want to create a named snapshot and shut the sandbox down immediately after the snapshot is stored.
 
-The response includes the snapshot details and confirms the sandbox state is `paused`.
-
 <Tabs syncKey="language">
   <TabItem label="Python">
 
@@ -77,7 +71,7 @@ from leap0 import Leap0Client
 
 client = Leap0Client()
 sandbox = client.sandboxes.create()
-snapshot = client.snapshots.pause(sandbox, name="workspace-warm")
+snapshot = sandbox.create_snapshot(name="workspace-warm", kill_sandbox_after=True)
 
 print(snapshot.id, snapshot.name)
 ```
@@ -89,8 +83,10 @@ print(snapshot.id, snapshot.name)
 import { Leap0Client } from "leap0";
 
 const client = new Leap0Client();
-const snapshot = await client.snapshots.pause("<sandbox_id>", {
+const sandbox = await client.sandboxes.get("<sandbox_id>");
+const snapshot = await sandbox.createSnapshot({
   name: "workspace-warm",
+  killSandboxAfter: true,
 });
 
 console.log(snapshot.id, snapshot.name);
@@ -109,10 +105,10 @@ await client.close();
 from leap0 import Leap0Client, NetworkPolicyMode
 
 client = Leap0Client()
-sandbox = client.snapshots.resume(
+sandbox = client.snapshots.restore(
     snapshot_name="workspace-warm",
     auto_pause=True,
-    timeout_min=30,
+    timeout=30,
     network_policy={
         "mode": NetworkPolicyMode.CUSTOM,
         "allow_cidrs": ["1.2.3.4/32"],
@@ -129,7 +125,7 @@ print(sandbox.id, sandbox.state)
 import { Leap0Client, NetworkPolicyMode } from "leap0";
 
 const client = new Leap0Client();
-const sandbox = await client.snapshots.resume({
+const sandbox = await client.snapshots.restore({
   snapshotName: "workspace-warm",
   autoPause: true,
   timeout: 30,

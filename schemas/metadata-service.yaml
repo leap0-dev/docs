@@ -80,6 +80,130 @@ paths:
         "404":
           description: Metadata path not found.
 
+  /latest/meta-data/leap0/sandbox:
+    get:
+      operationId: getLeap0SandboxMetadata
+      summary: Read sandbox metadata
+      description: |
+        Returns sandbox identity metadata for the current sandbox. Send
+        `Accept: application/json` to receive JSON. Without that header,
+        the metadata service responds in IMDS format.
+      tags: [Metadata Service]
+      parameters:
+        - $ref: "#/components/parameters/MetadataToken"
+        - $ref: "#/components/parameters/AcceptHeader"
+      responses:
+        "200":
+          description: Sandbox metadata retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetadataServiceSandbox"
+            text/plain:
+              schema:
+                type: string
+                description: IMDS-formatted metadata response.
+                example: |
+                  id
+        "401":
+          description: Missing, expired, or invalid IMDSv2 token.
+        "404":
+          description: Metadata path not found.
+
+  /latest/meta-data/leap0/exec:
+    get:
+      operationId: getLeap0ExecMetadata
+      summary: Read exec metadata
+      description: |
+        Returns execution metadata configured for the current sandbox. Send
+        `Accept: application/json` to receive JSON. Without that header,
+        the metadata service responds in IMDS format.
+      tags: [Metadata Service]
+      parameters:
+        - $ref: "#/components/parameters/MetadataToken"
+        - $ref: "#/components/parameters/AcceptHeader"
+      responses:
+        "200":
+          description: Exec metadata retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetadataServiceExec"
+            text/plain:
+              schema:
+                type: string
+                description: IMDS-formatted metadata response.
+                example: |
+                  command
+                  env/
+                  user
+                  workdir
+        "401":
+          description: Missing, expired, or invalid IMDSv2 token.
+        "404":
+          description: Metadata path not found.
+
+  /latest/meta-data/leap0/network:
+    get:
+      operationId: getLeap0NetworkMetadata
+      summary: Read network metadata
+      description: |
+        Returns guest-visible network metadata for the current sandbox. Send
+        `Accept: application/json` to receive JSON. Without that header,
+        the metadata service responds in IMDS format.
+      tags: [Metadata Service]
+      parameters:
+        - $ref: "#/components/parameters/MetadataToken"
+        - $ref: "#/components/parameters/AcceptHeader"
+      responses:
+        "200":
+          description: Network metadata retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetadataServiceNetwork"
+            text/plain:
+              schema:
+                type: string
+                description: IMDS-formatted metadata response.
+                example: |
+                  ca_cert_pem
+                  dns_resolvers/
+        "401":
+          description: Missing, expired, or invalid IMDSv2 token.
+        "404":
+          description: Metadata path not found.
+
+  /latest/meta-data/leap0/telemetry:
+    get:
+      operationId: getLeap0TelemetryMetadata
+      summary: Read telemetry metadata
+      description: |
+        Returns guest-visible telemetry metadata for the current sandbox. Send
+        `Accept: application/json` to receive JSON. Without that header,
+        the metadata service responds in IMDS format.
+      tags: [Metadata Service]
+      parameters:
+        - $ref: "#/components/parameters/MetadataToken"
+        - $ref: "#/components/parameters/AcceptHeader"
+      responses:
+        "200":
+          description: Telemetry metadata retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetadataServiceTelemetry"
+            text/plain:
+              schema:
+                type: string
+                description: IMDS-formatted metadata response.
+                example: |
+                  otel_endpoint
+        "401":
+          description: Missing, expired, or invalid IMDSv2 token.
+        "404":
+          description: Metadata path not found.
+
   /latest/meta-data/leap0/mounts:
     get:
       operationId: getLeap0MountMetadata
@@ -231,9 +355,9 @@ components:
           items:
             type: string
           example: ["1.1.1.1", "8.8.8.8"]
-        custom_ca_pem:
+        ca_cert_pem:
           type: string
-          description: Custom CA bundle exposed to the guest, when configured.
+          description: CA bundle exposed to the guest, when configured.
           example: "-----BEGIN CERTIFICATE-----..."
 
     MetadataServiceTelemetry:

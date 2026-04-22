@@ -4,7 +4,6 @@
   "description": "Core, metadata service, code interpreter, and desktop OpenAPI reference",
   "icon": "MonitorSmartphone",
   "pages": [
-    "index",
     "---API---",
     "...api",
     "---Metadata Service---",

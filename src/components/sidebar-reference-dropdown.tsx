@@ -8,8 +8,11 @@ export function SidebarReferenceDropdown() {
   const section = getSidebarSection(pathname);
 
   const options = referenceTabs.map((tab) => {
-    if (tab.url === "/api" && section === "api") return { ...tab, urls: new Set([pathname]) };
+    if (tab.url === "/api" && section === "apis") return { ...tab, urls: new Set([pathname]) };
     if (tab.url === "/" && section === "core") return { ...tab, urls: new Set([pathname]) };
+    if (tab.url === "/reference/python-sdk" && section === "sdks") {
+      return { ...tab, urls: new Set([pathname]) };
+    }
 
     return tab;
   });
