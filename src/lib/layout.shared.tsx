@@ -2,12 +2,13 @@ import { BookOpenText, Braces, MonitorSmartphone, SquareCode } from "lucide-reac
 import type { BaseLayoutProps, LayoutTab } from "fumadocs-ui/layouts/shared";
 import { Leap0Brand } from "@/components/leap0-brand";
 import { githubOrgUrl } from "@/env";
+import { withBase } from "@/lib/base-path";
 import { getSidebarSection } from "@/lib/sidebar-tree";
 
 function BrandTitle({ href = "/", className }: { href?: string; className?: string }) {
   return (
     <a
-      href={href}
+      href={withBase(href)}
       className={["flex w-full justify-center", className?.replace("me-auto", "")]
         .filter(Boolean)
         .join(" ")}
@@ -17,8 +18,13 @@ function BrandTitle({ href = "/", className }: { href?: string; className?: stri
   );
 }
 
-export const referenceTabs: LayoutTab[] = [
+export type ReferenceTab = LayoutTab & {
+  id: "core" | "sdks" | "apis";
+};
+
+export const referenceTabs: ReferenceTab[] = [
   {
+    id: "core",
     title: "Core",
     description: "Guides and product documentation",
     url: "/",
@@ -49,6 +55,7 @@ export const referenceTabs: LayoutTab[] = [
     ]),
   },
   {
+    id: "sdks",
     title: "SDKs",
     description: "Python and TypeScript/JavaScript references",
     url: "/reference/python-sdk",
@@ -56,6 +63,7 @@ export const referenceTabs: LayoutTab[] = [
     urls: new Set(["/reference/python-sdk", "/reference/javascript-sdk"]),
   },
   {
+    id: "apis",
     title: "APIs",
     description: "Core, metadata service, code interpreter, and desktop OpenAPI reference",
     url: "/api",

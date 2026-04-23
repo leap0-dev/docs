@@ -1,27 +1,27 @@
-import { useEffect, useState, type CSSProperties, type HTMLAttributes } from "react";
+import { type CSSProperties, type HTMLAttributes } from "react";
 import { useDocsLayout } from "fumadocs-ui/layouts/docs";
 
-type Props = HTMLAttributes<HTMLDivElement>;
+type Props = HTMLAttributes<HTMLDivElement> & {
+  "data-openapi-layout"?: string;
+};
 
 export function DocsLayoutContainer(props: Props) {
   const { slots } = useDocsLayout();
   const { collapsed } = slots.sidebar.useSidebar();
-  const [previousCollapsed, setPreviousCollapsed] = useState(collapsed);
-  const isCollapseChanged = previousCollapsed !== collapsed;
-
-  useEffect(() => {
-    if (isCollapseChanged) setPreviousCollapsed(collapsed);
-  }, [collapsed, isCollapseChanged]);
+  const isOpenApiLayout = props["data-openapi-layout"] === "true";
 
   return (
     <div
       id="nd-docs-layout"
       data-sidebar-collapsed={collapsed}
-      data-column-changed={isCollapseChanged}
       {...props}
       style={
         {
-          gridTemplate: `"sidebar sidebar header header header"
+          gridTemplate: isOpenApiLayout
+            ? `"sidebar sidebar header header"
+"sidebar sidebar toc-popover toc"
+"sidebar sidebar main main" 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width))) minmax(min-content, 1fr)`
+            : `"sidebar sidebar header header header"
 "sidebar sidebar toc-popover toc toc"
 "sidebar sidebar main toc toc" 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, calc(var(--fd-layout-width,97rem) - var(--fd-sidebar-width) - var(--fd-toc-width))) var(--fd-toc-width) minmax(min-content, 1fr)`,
           "--fd-docs-row-1": "var(--fd-banner-height, 0px)",
@@ -32,7 +32,7 @@ export function DocsLayoutContainer(props: Props) {
         } as CSSProperties
       }
       className={[
-        "grid overflow-x-clip min-h-(--fd-docs-height) [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px] data-[column-changed=true]:transition-[grid-template-columns]",
+        "grid overflow-x-clip min-h-(--fd-docs-height) [--fd-docs-height:100dvh] [--fd-header-height:0px] [--fd-toc-popover-height:0px] [--fd-sidebar-width:0px] [--fd-toc-width:0px]",
         props.className,
       ]
         .filter(Boolean)

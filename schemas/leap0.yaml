@@ -13,24 +13,34 @@ security:
 
 tags:
   - name: Sandbox
+    x-displayName: Sandbox
     description: Create, inspect, and delete sandboxes.
   - name: Snapshot
+    x-displayName: Snapshot
     description: Save running sandboxes and restore new sandboxes from saved state.
   - name: Template
+    x-displayName: Template
     description: Upload and manage container image templates.
   - name: Filesystem
+    x-displayName: Filesystem
     description: Perform filesystem operations inside a sandbox.
   - name: Git
+    x-displayName: Git
     description: Perform git operations inside a sandbox.
   - name: Process
+    x-displayName: Process
     description: Execute commands and manage shell sessions inside a sandbox.
   - name: PTY
+    x-displayName: PTY
     description: Create and manage interactive terminal sessions inside a sandbox.
   - name: LSP
+    x-displayName: LSP
     description: Start and interact with language servers (Python, TypeScript) inside a sandbox.
   - name: SSH
+    x-displayName: SSH
     description: Manage SSH access to sandboxes.
   - name: Presigned URL
+    x-displayName: Presigned URL
     description: Create temporary public URLs that route to a specific sandbox port.
 paths:
   # ──────────────────────────────────────────────

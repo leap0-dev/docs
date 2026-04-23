@@ -1,33 +1,29 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { getCookies } from "@tanstack/react-start/server";
-import browserCollections from "@/lib/browser-collections";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-  MarkdownCopyButton,
-} from "fumadocs-ui/layouts/docs/page";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { Suspense } from "react";
-import { DocsFeedback } from "@/components/docs-feedback";
-import { OpenOptionsButton } from "@/components/page-open-options";
-import { useMDXComponents } from "@/components/mdx";
 import { baseOptions } from "@/lib/layout.shared";
 import { TabPreferencesProvider } from "@/components/tab-preferences-provider";
 import { parseTabPreferences } from "@/lib/tab-preferences";
 import { filterSidebarTree, getSidebarScope, getSidebarSection } from "@/lib/sidebar-tree";
-import { SidebarReferenceDropdown } from "@/components/sidebar-reference-dropdown";
+import { SidebarDropdown } from "@/components/sidebar-dropdown";
 import { DocsTopHeader } from "@/components/docs-top-header";
 import { DocsLayoutContainer } from "@/components/docs-layout-container";
+import { docsClientLoader } from "@/lib/docs-client-loader";
 
 export const Route = createFileRoute("/")({
+  head: ({ loaderData }) =>
+    loaderData
+      ? {
+          meta: [{ name: "leap0-doc-path", content: loaderData.path }],
+        }
+      : {},
   component: Page,
   loader: async () => {
     const data = await serverLoader();
-    await clientLoader.preload(data.path);
+    await docsClientLoader.preload(data.path);
     return data;
   },
 });
@@ -48,41 +44,12 @@ const serverLoader = createServerFn({
   };
 });
 
-const clientLoader = browserCollections.docs.createClientLoader({
-  component: function IndexDocsContent(
-    { toc, frontmatter, default: MDX },
-    {
-      markdownUrl,
-      path,
-    }: {
-      markdownUrl: string;
-      path: string;
-    },
-  ) {
-    const mdxComponents = useMDXComponents();
-
-    return (
-      <DocsPage toc={toc} className="max-w-none">
-        <DocsTitle>{frontmatter.title}</DocsTitle>
-        <DocsDescription>{frontmatter.description}</DocsDescription>
-        <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
-          <MarkdownCopyButton markdownUrl={markdownUrl} />
-          <OpenOptionsButton
-            markdownUrl={markdownUrl}
-            githubUrl={`https://github.com/leap0-dev/docs/blob/main/content/docs/${path}`}
-          />
-        </div>
-        <DocsBody>
-          <MDX components={mdxComponents} />
-          <DocsFeedback pageTitle={frontmatter.title} pageUrl="/" />
-        </DocsBody>
-      </DocsPage>
-    );
-  },
-});
-
 function Page() {
   const page = useFumadocsLoader(Route.useLoaderData());
+  if (!page) {
+    throw notFound();
+  }
+
   const tree = filterSidebarTree(page.pageTree, page.url);
   const section = getSidebarSection(page.url);
   const scope = getSidebarScope(page.url);
@@ -95,10 +62,10 @@ function Page() {
       containerProps={{
         className: "[--fd-layout-width:100vw]",
       }}
-      sidebar={{
-        banner: <SidebarReferenceDropdown />,
-        collapsible: false,
-      }}
+          sidebar={{
+            banner: <SidebarDropdown currentPath={page.url} />,
+            collapsible: false,
+          }}
       slots={{
         container: DocsLayoutContainer,
         header: DocsTopHeader,
@@ -107,9 +74,10 @@ function Page() {
     >
       <TabPreferencesProvider initialPreferences={page.initialTabPreferences}>
         <Suspense>
-          {clientLoader.useContent(page.path, {
+          {docsClientLoader.useContent(page.path, {
             markdownUrl: page.markdownUrl,
             path: page.path,
+            url: page.url,
           })}
         </Suspense>
       </TabPreferencesProvider>

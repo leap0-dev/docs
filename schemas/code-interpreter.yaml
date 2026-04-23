@@ -19,10 +19,13 @@ security:
 
 tags:
   - name: Execution
+    x-displayName: Execution
     description: Execute code synchronously or as a stream.
   - name: Context
+    x-displayName: Context
     description: Manage persistent execution contexts (sessions).
   - name: Health
+    x-displayName: Health
     description: Liveness probe.
 
 paths:

@@ -2,32 +2,47 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { createServerFn } from "@tanstack/react-start";
 import { getCookies } from "@tanstack/react-start/server";
-import browserCollections from "@/lib/browser-collections";
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-  MarkdownCopyButton,
-} from "fumadocs-ui/layouts/docs/page";
+import type { Root } from "fumadocs-core/page-tree";
+import type { ClientApiPageProps } from "fumadocs-openapi/ui/create-client";
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
 import { baseOptions } from "@/lib/layout.shared";
 import { TabPreferencesProvider } from "@/components/tab-preferences-provider";
 import { parseTabPreferences } from "@/lib/tab-preferences";
 import { filterSidebarTree, getSidebarScope, getSidebarSection } from "@/lib/sidebar-tree";
 import { useFumadocsLoader } from "fumadocs-core/source/client";
 import { Suspense, type ReactNode } from "react";
-import { useMDXComponents } from "@/components/mdx";
 import {
   CodeInterpreterAPIPage,
   CoreAPIPage,
   DesktopAPIPage,
   MetadataServiceAPIPage,
 } from "@/components/api-page";
-import { OpenOptionsButton } from "@/components/page-open-options";
-import { DocsFeedback } from "@/components/docs-feedback";
-import { SidebarReferenceDropdown } from "@/components/sidebar-reference-dropdown";
+import { SidebarDropdown } from "@/components/sidebar-dropdown";
 import { DocsTopHeader } from "@/components/docs-top-header";
 import { DocsLayoutContainer } from "@/components/docs-layout-container";
+import type { HTMLAttributes } from "react";
+import { docsClientLoader } from "@/lib/docs-client-loader";
+
+type OpenApiPageData = {
+  type: "openapi";
+  title: string;
+  description: string;
+  url: string;
+  initialTabPreferences: ReturnType<typeof parseTabPreferences>;
+  pageTree: Root;
+  props: ClientApiPageProps;
+};
+
+type DocsPageData = {
+  type: "docs";
+  path: string;
+  url: string;
+  markdownUrl: string;
+  initialTabPreferences: ReturnType<typeof parseTabPreferences>;
+  pageTree: OpenApiPageData["pageTree"];
+};
+
+type RoutePageData = DocsPageData | OpenApiPageData;
 
 const SLUG_SEGMENT_PATTERN = /^[A-Za-z0-9._-]{1,128}$/;
 
@@ -40,6 +55,14 @@ function sanitizeSlugs(slugs: string[]): string[] | null {
 }
 
 export const Route = createFileRoute("/$")({
+  head: ({ loaderData }) => {
+    const data = loaderData as RoutePageData | undefined;
+    return data?.type === "docs"
+      ? {
+          meta: [{ name: "leap0-doc-path", content: data.path }],
+        }
+      : {};
+  },
   component: Page,
   loader: async ({ params }) => {
     const slugs = sanitizeSlugs(params._splat?.split("/").filter(Boolean) ?? []);
@@ -47,7 +70,7 @@ export const Route = createFileRoute("/$")({
 
     const data = await serverLoader({ data: slugs });
     if (data.type === "docs") {
-      await clientLoader.preload(data.path);
+      await docsClientLoader.preload(data.path);
     }
     return data;
   },
@@ -88,46 +111,15 @@ const serverLoader = createServerFn({
     };
   });
 
-const clientLoader = browserCollections.docs.createClientLoader({
-  component: function DocsContent(
-    { toc, frontmatter, default: MDX },
-    {
-      markdownUrl,
-      path,
-      url,
-    }: {
-      markdownUrl: string;
-      path: string;
-      url: string;
-    },
-  ) {
-    const mdxComponents = useMDXComponents();
-
-    return (
-      <DocsPage toc={toc} className="max-w-none">
-        <DocsTitle>{frontmatter.title}</DocsTitle>
-        <DocsDescription>{frontmatter.description}</DocsDescription>
-        <div className="flex flex-row gap-2 items-center border-b -mt-4 pb-6">
-          <MarkdownCopyButton markdownUrl={markdownUrl} />
-          <OpenOptionsButton
-            markdownUrl={markdownUrl}
-            githubUrl={`https://github.com/leap0-dev/docs/blob/main/content/docs/${path}`}
-          />
-        </div>
-        <DocsBody>
-          <MDX components={mdxComponents} />
-          <DocsFeedback pageTitle={frontmatter.title} pageUrl={url} />
-        </DocsBody>
-      </DocsPage>
-    );
-  },
-});
-
 function Page() {
-  const page = useFumadocsLoader(Route.useLoaderData());
+  const page = useFumadocsLoader(Route.useLoaderData()) as RoutePageData | undefined;
+  if (!page) {
+    throw notFound();
+  }
+
   let content: ReactNode;
 
-  if (page.type === "openapi") {
+  if ("type" in page && page.type === "openapi") {
     const APIPageComponent = page.url.startsWith("/code-interpreter/api")
       ? CodeInterpreterAPIPage
       : page.url.startsWith("/metadata-service/api")
@@ -146,7 +138,7 @@ function Page() {
       </DocsPage>
     );
   } else {
-    content = clientLoader.useContent(page.path, {
+    content = docsClientLoader.useContent(page.path, {
       markdownUrl: page.markdownUrl,
       path: page.path,
       url: page.url,
@@ -156,19 +148,21 @@ function Page() {
   const tree = filterSidebarTree(page.pageTree, page.url);
   const section = getSidebarSection(page.url);
   const scope = getSidebarScope(page.url);
+  const containerProps = {
+    className: "[--fd-layout-width:100vw]",
+    "data-openapi-layout": page.type === "openapi" ? "true" : undefined,
+  } as HTMLAttributes<HTMLDivElement> & { "data-openapi-layout"?: string };
 
   return (
-    <DocsLayout
-      key={`${section}:${scope}`}
-      {...baseOptions()}
-      tree={tree}
-      containerProps={{
-        className: "[--fd-layout-width:100vw]",
-      }}
-      sidebar={{
-        banner: <SidebarReferenceDropdown />,
-        collapsible: false,
-      }}
+      <DocsLayout
+        key={`${section}:${scope}`}
+        {...baseOptions()}
+        tree={tree}
+        containerProps={containerProps}
+        sidebar={{
+          banner: <SidebarDropdown currentPath={page.url} />,
+          collapsible: false,
+        }}
       slots={{
         container: DocsLayoutContainer,
         header: DocsTopHeader,

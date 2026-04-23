@@ -15,6 +15,7 @@ import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LlmsDotmdxSplatRouteImport } from './routes/llms[.]mdx.$'
+import { Route as ApiSearchRouteImport } from './routes/api/search'
 import { Route as ApiProxyRouteImport } from './routes/api/proxy'
 
 const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
@@ -47,6 +48,11 @@ const LlmsDotmdxSplatRoute = LlmsDotmdxSplatRouteImport.update({
   path: '/$',
   getParentRoute: () => LlmsDotmdxRoute,
 } as any)
+const ApiSearchRoute = ApiSearchRouteImport.update({
+  id: '/api/search',
+  path: '/api/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProxyRoute = ApiProxyRouteImport.update({
   id: '/api/proxy',
   path: '/api/proxy',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/llms.mdx': typeof LlmsDotmdxRouteWithChildren
   '/llms.txt': typeof LlmsDottxtRoute
   '/api/proxy': typeof ApiProxyRoute
+  '/api/search': typeof ApiSearchRoute
   '/llms.mdx/$': typeof LlmsDotmdxSplatRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/llms.mdx': typeof LlmsDotmdxRouteWithChildren
   '/llms.txt': typeof LlmsDottxtRoute
   '/api/proxy': typeof ApiProxyRoute
+  '/api/search': typeof ApiSearchRoute
   '/llms.mdx/$': typeof LlmsDotmdxSplatRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/llms.mdx': typeof LlmsDotmdxRouteWithChildren
   '/llms.txt': typeof LlmsDottxtRoute
   '/api/proxy': typeof ApiProxyRoute
+  '/api/search': typeof ApiSearchRoute
   '/llms.mdx/$': typeof LlmsDotmdxSplatRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/llms.mdx'
     | '/llms.txt'
     | '/api/proxy'
+    | '/api/search'
     | '/llms.mdx/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/llms.mdx'
     | '/llms.txt'
     | '/api/proxy'
+    | '/api/search'
     | '/llms.mdx/$'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/llms.mdx'
     | '/llms.txt'
     | '/api/proxy'
+    | '/api/search'
     | '/llms.mdx/$'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   LlmsDotmdxRoute: typeof LlmsDotmdxRouteWithChildren
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   ApiProxyRoute: typeof ApiProxyRoute
+  ApiSearchRoute: typeof ApiSearchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -164,6 +177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LlmsDotmdxSplatRouteImport
       parentRoute: typeof LlmsDotmdxRoute
     }
+    '/api/search': {
+      id: '/api/search'
+      path: '/api/search'
+      fullPath: '/api/search'
+      preLoaderRoute: typeof ApiSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/proxy': {
       id: '/api/proxy'
       path: '/api/proxy'
@@ -193,6 +213,7 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDotmdxRoute: LlmsDotmdxRouteWithChildren,
   LlmsDottxtRoute: LlmsDottxtRoute,
   ApiProxyRoute: ApiProxyRoute,
+  ApiSearchRoute: ApiSearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

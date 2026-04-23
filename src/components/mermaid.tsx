@@ -1,24 +1,52 @@
-import { renderMermaidSVG } from "beautiful-mermaid";
+import { useEffect, useState } from "react";
 
-export async function Mermaid({ chart }: { chart: string }) {
-  try {
-    const svg = softenMermaidSvg(
-      renderMermaidSVG(chart, {
-        bg: "var(--color-fd-background)",
-        fg: "var(--color-fd-foreground)",
-        interactive: true,
-        transparent: true,
-      }),
-    );
+export function Mermaid({ chart }: { chart: string }) {
+  const [svg, setSvg] = useState<string | false | null>(null);
 
-    return <div dangerouslySetInnerHTML={{ __html: svg }} />;
-  } catch {
+  useEffect(() => {
+    let cancelled = false;
+
+    setSvg(null);
+
+    import("beautiful-mermaid")
+      .then(({ renderMermaidSVG }) => {
+        if (cancelled) return;
+
+        const nextSvg = softenMermaidSvg(
+          renderMermaidSVG(chart, {
+            bg: "var(--color-fd-background)",
+            fg: "var(--color-fd-foreground)",
+            interactive: true,
+            transparent: true,
+          }),
+        );
+
+        setSvg(nextSvg);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSvg(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [chart]);
+
+  if (svg === false) {
     return (
       <pre>
         <code>{chart}</code>
       </pre>
     );
   }
+
+  if (!svg) {
+    return <div className="min-h-40 w-full animate-pulse rounded-xl border border-fd-border bg-fd-card/40" />;
+  }
+
+  return <div dangerouslySetInnerHTML={{ __html: svg }} />;
 }
 
 function softenMermaidSvg(svg: string) {

@@ -1,9 +1,12 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import * as React from "react";
 import appCss from "../styles/app.css?url";
+import faviconIcoUrl from "/favicon.ico";
+import faviconSvgUrl from "/favicon.svg";
 import { DefaultNotFound } from "fumadocs-ui/layouts/home/not-found";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 import { PostHogInit } from "@/components/posthog-init";
+import { withBase } from "@/lib/base-path";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -21,8 +24,8 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", sizes: "any" },
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", href: faviconIcoUrl, sizes: "any" },
+      { rel: "icon", type: "image/svg+xml", href: faviconSvgUrl },
     ],
   }),
   notFoundComponent: DefaultNotFound,
@@ -39,7 +42,7 @@ function RootComponent() {
         <RootProvider
           search={{
             options: {
-              api: "/api/search",
+              api: withBase("/api/search"),
             },
           }}
         >

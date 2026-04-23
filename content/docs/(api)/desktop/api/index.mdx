@@ -10,9 +10,17 @@ The Desktop API runs inside a sandbox and is exposed at <code>{`https://<sandbox
 
 Use it to control a Linux desktop programmatically, including screenshots, mouse and keyboard input, screen recording, and desktop processes.
 
+Create the sandbox using the `system/desktop:v0.1.0` template.
+
 ## Base URL
 
 <code>{`https://<sandbox_id>.${env.LEAP0_SANDBOX_DOMAIN}`}</code>
+
+## Authentication
+
+No additional authentication is required for the Desktop API itself because it runs inside the sandbox.
+
+You only need your Leap0 API key to create and access the sandbox through the main Leap0 API.
 
 ## What It's For
 
@@ -20,9 +28,3 @@ Use it to control a Linux desktop programmatically, including screenshots, mouse
 - Send mouse and keyboard input
 - Record the screen
 - Launch and manage desktop-side processes
-
-## Related APIs
-
-- [Leap0 API](/api) for core platform operations
-- [Metadata Service API](/metadata-service/api) for in-guest metadata
-- [Code Interpreter API](/code-interpreter/api) for interpreter execution

@@ -26,10 +26,12 @@ export function DocsTopHeader() {
       data-transparent={isNavTransparent}
       className={[
         "[grid-area:header] sticky top-(--fd-docs-row-1) z-30 border-b transition-colors backdrop-blur-sm data-[transparent=false]:bg-fd-background/90",
-        hasTabs ? "layout:[--fd-header-height:--spacing(14)] lg:layout:[--fd-header-height:3.25rem]" : "layout:[--fd-header-height:--spacing(14)] lg:layout:[--fd-header-height:0px] lg:border-b-0",
+        hasTabs
+          ? "layout:[--fd-header-height:6.5rem] lg:layout:[--fd-header-height:3.25rem]"
+          : "layout:[--fd-header-height:--spacing(14)] lg:layout:[--fd-header-height:0px] lg:border-b-0",
       ].join(" ")}
     >
-      <div className="flex h-(--fd-header-height) items-center ps-4 pe-2.5 md:hidden">
+      <div className="flex h-14 items-center ps-4 pe-2.5 md:hidden">
         {slots.navTitle && <slots.navTitle className="inline-flex items-center gap-2.5 font-semibold" />}
         <div className="flex-1">{nav?.children}</div>
         {slots.searchTrigger && (
@@ -47,6 +49,31 @@ export function DocsTopHeader() {
           </slots.sidebar.trigger>
         )}
       </div>
+
+      {hasTabs && (
+        <div className="border-t px-4 lg:hidden">
+          <nav className="flex h-12 w-full items-center gap-5 overflow-x-auto">
+            {tabs.map((tab) => {
+              const active = isActive(pathname, tab);
+
+              return (
+                <Link
+                  key={tab.url}
+                  href={tab.url}
+                  className={[
+                    "inline-flex h-12 shrink-0 items-center border-b-2 px-0 text-sm font-medium whitespace-nowrap transition-colors",
+                    active
+                      ? "border-fd-primary text-fd-foreground"
+                      : "border-transparent text-fd-muted-foreground hover:text-fd-foreground",
+                  ].join(" ")}
+                >
+                  {tab.title}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
 
       {hasTabs && (
         <div className="hidden h-[3.25rem] items-end border-b px-6 lg:flex xl:px-8">

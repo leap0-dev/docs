@@ -20,16 +20,22 @@ security:
 
 tags:
   - name: Display
+    x-displayName: Display
     description: Display info, screen resolution, and window listing.
   - name: Screenshot
+    x-displayName: Screenshot
     description: Capture the screen or a region.
   - name: Input
+    x-displayName: Input
     description: Mouse and keyboard input.
   - name: Recording
+    x-displayName: Recording
     description: Screen recording management.
   - name: Process
+    x-displayName: Process
     description: Desktop process status, restart, and logs.
   - name: Health
+    x-displayName: Health
     description: Liveness probe.
 
 paths:

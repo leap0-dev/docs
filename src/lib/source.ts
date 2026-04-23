@@ -13,19 +13,23 @@ import {
 const [coreAPI, codeInterpreterAPI, desktopAPI, metadataServiceAPI] = await Promise.all([
   openapiSource(coreOpenAPI, {
     baseDir: "(api)/api",
-    meta: true,
+    groupBy: "tag",
+    meta: { folderStyle: "separator" },
   }),
   openapiSource(codeInterpreterOpenAPI, {
     baseDir: "(api)/code-interpreter/api",
-    meta: true,
+    groupBy: "tag",
+    meta: { folderStyle: "separator" },
   }),
   openapiSource(desktopOpenAPI, {
     baseDir: "(api)/desktop/api",
-    meta: true,
+    groupBy: "tag",
+    meta: { folderStyle: "separator" },
   }),
   openapiSource(metadataServiceOpenAPI, {
     baseDir: "(api)/metadata-service/api",
-    meta: true,
+    groupBy: "tag",
+    meta: { folderStyle: "separator" },
   }),
 ]);
 

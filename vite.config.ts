@@ -7,6 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 import mdx from "fumadocs-mdx/vite";
 
 export default defineConfig({
+  base: process.env.LEAP0_BASE_PATH ?? "/",
   envPrefix: ["VITE_", "LEAP0_"],
   server: {
     port: 3000,
