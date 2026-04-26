@@ -27,17 +27,18 @@ See <a href="/firewall">Firewall</a> for egress configuration details.
 
 ## Lifecycle
 
-A sandbox can move through seven states:
+A sandbox can have several different states. Each state reflects the current status of your sandbox.
+
+- `starting`: The sandbox is booting and preparing its runtime environment before it can accept requests.
+- `running`: The sandbox is active and ready to handle HTTP, WebSocket, filesystem, process, and other tool requests.
+- `paused`: The sandbox's memory and disk state have been saved, and compute is no longer running. It resumes automatically when it receives a request.
+- `unpausing`: The sandbox is being restored from its paused state so it can return to `running`.
+- `stopping`: The sandbox is shutting down while preserving disk changes, but not in-memory execution state.
+- `stopped`: The sandbox is fully off, but its disk changes are preserved. Call `start` to boot it again.
+- `deleting`: The sandbox is being cleaned up and permanently removed.
+- `deleted`: The sandbox has been permanently removed and is no longer available.
 
 <Mermaid chart={sandboxLifecycleChart} />
-
-- `snapshotting` means the sandbox VM state and memory are being captured for a snapshot.
-- `paused` means the sandbox has been checkpointed and its compute is no longer running.
-- `unpausing` means Leap0 is restoring a paused sandbox back to `running`.
-
-:::note[Auto-resume]
-Paused sandboxes automatically resume when they receive any request (invoke, filesystem, git, etc.). The caller does not need to explicitly resume the sandbox. Leap0 handles it transparently.
-:::
 
 ## Create a sandbox
 
@@ -352,7 +353,37 @@ await client.close();
   </TabItem>
 </Tabs>
 
+## Stop a sandbox
+
+Stop a running sandbox when you want to shut compute down but keep filesystem changes for later. Unlike `pause`, this does not preserve in-memory execution state.
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer <api-key>" \
+  "https://api.leap0.dev/v1/sandbox/<sandbox_id>/stop"
+```
+
+The sandbox moves through `stopping` and then `stopped`.
+
+## Start a stopped sandbox
+
+Start a sandbox that is currently `stopped`. Leap0 boots a fresh VM from the original template and reapplies the persisted writable disk state.
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer <api-key>" \
+  "https://api.leap0.dev/v1/sandbox/<sandbox_id>/start"
+```
+
+The response now includes the full updated sandbox metadata, so SDKs do not need to issue a follow-up `get` after `start`.
+
+The sandbox returns to `running` when the request completes.
+
+`start` is for `stopped` sandboxes only. You do not need to call it for `paused` sandboxes.
+
 ## Delete a sandbox
+
+Running, paused, and stopped sandboxes can all be deleted.
 
 <Tabs syncKey="language">
   <TabItem label="Python">

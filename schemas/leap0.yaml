@@ -14,7 +14,7 @@ security:
 tags:
   - name: Sandbox
     x-displayName: Sandbox
-    description: Create, inspect, and delete sandboxes.
+    description: Create, inspect, pause, stop, start, and delete sandboxes.
   - name: Snapshot
     x-displayName: Snapshot
     description: Save running sandboxes and restore new sandboxes from saved state.
@@ -113,8 +113,9 @@ paths:
       operationId: deleteSandbox
       summary: Delete a sandbox
       description: |
-        Delete a sandbox. Running sandboxes are terminated first. Paused sandboxes are
-        deleted directly. Requests fail while the sandbox is in a transition state.
+        Delete a sandbox. Running sandboxes are terminated first. Paused and stopped
+        sandboxes are deleted directly. Requests fail while the sandbox is in a
+        transition state.
       tags: [Sandbox]
       responses:
         "204":
@@ -156,6 +157,76 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           description: Conflict - sandbox is not running.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/sandbox/{sandboxID}/stop:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: stopSandbox
+      summary: Stop a sandbox
+      description: |
+        Stop a running sandbox while preserving its writable disk changes. The sandbox
+        transitions through `stopping` to `stopped`. Unlike pause, stop does not
+        preserve in-memory execution state.
+      tags: [Sandbox]
+      responses:
+        "200":
+          description: Sandbox stopped successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxCreateResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - sandbox is not running.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /v1/sandbox/{sandboxID}/start:
+    parameters:
+      - $ref: "#/components/parameters/sandboxID"
+    post:
+      operationId: startSandbox
+      summary: Start a stopped sandbox
+      description: |
+        Start a sandbox that is currently `stopped`. Leap0 boots a fresh VM from the
+        original template and reapplies the persisted writable disk diff before the
+        sandbox returns to `running`.
+      tags: [Sandbox]
+      responses:
+        "200":
+          description: Sandbox started successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxCreateResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Conflict - sandbox is not stopped.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Sandbox limit reached.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: No runner capacity is currently available.
           content:
             application/json:
               schema:
@@ -458,7 +529,7 @@ paths:
           description: Filter results by sandbox state.
           schema:
             type: string
-            enum: [starting, snapshotting, running, paused, unpausing, deleting]
+            enum: [starting, stopping, snapshotting, running, paused, unpausing, stopped, deleting]
         - name: sort
           in: query
           required: false
@@ -2152,7 +2223,7 @@ components:
           description: Sandbox timeout in seconds.
         state:
           type: string
-          enum: [starting, running, snapshotting, paused, unpausing, deleting, deleted]
+          enum: [starting, stopping, running, snapshotting, paused, unpausing, stopped, deleting, deleted]
           description: Current state of the sandbox.
         auto_pause:
           type: boolean
@@ -2181,7 +2252,7 @@ components:
           description: Runner pod handling the sandbox. Empty when not yet assigned.
         state:
           type: string
-          enum: [starting, snapshotting, running, paused, unpausing, deleting]
+          enum: [starting, stopping, snapshotting, running, paused, unpausing, stopped, deleting]
           description: Current state of the sandbox.
         launch_time:
           type: string
@@ -2336,7 +2407,7 @@ components:
           description: Sandbox timeout in seconds.
         state:
           type: string
-          enum: [starting, running, snapshotting, paused, unpausing, deleting, deleted]
+          enum: [starting, stopping, running, snapshotting, paused, unpausing, stopped, deleting, deleted]
           description: Current state of the sandbox.
         auto_pause:
           type: boolean

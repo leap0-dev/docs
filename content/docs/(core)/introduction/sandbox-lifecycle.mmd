@@ -1,11 +1,16 @@
-stateDiagram-v2
-  direction TB
+flowchart TD
+  Starting ~~~ Unpausing
+  Stopping ~~~ Paused
+  Stopped ~~~ Deleting
 
-  Starting --> Running: booted
-  Running --> Snapshotting: snapshot requested
-  Snapshotting --> Paused: complete
-  Running --> Paused: pause or auto-pause
-  Paused --> Unpausing: resume
-  Unpausing --> Running: restored
-  Running --> Deleting: delete requested
-  Deleting --> Deleted: cleanup complete
+  Starting -->|booted| Running
+  Running -->|pause or auto-pause| Paused
+  Paused -->|resume| Unpausing
+  Unpausing -->|restored| Running
+  Running -->|stop requested| Stopping
+  Stopping -->|complete| Stopped
+  Stopped -->|start| Starting
+  Running -->|delete requested| Deleting
+  Paused -->|delete requested| Deleting
+  Stopped -->|delete requested| Deleting
+  Deleting -->|cleanup complete| Deleted

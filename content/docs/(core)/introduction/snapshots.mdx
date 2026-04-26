@@ -10,6 +10,8 @@ Snapshots let you create a point-in-time capture of a running sandbox, including
 
 You can then restore that snapshot into a brand new sandbox that starts from the same checkpoint.
 
+If you only need to shut compute down and later boot the same sandbox with its writable disk changes, use sandbox `stop`/`start` instead. Snapshots are named, reusable checkpoints. Stopped sandboxes are not.
+
 :::note[Sandbox state]
 Snapshots can only be created from a `running` sandbox. The VM is briefly paused during the capture and then resumed automatically unless you set `kill_sandbox_after`.
 :::
