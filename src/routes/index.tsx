@@ -14,12 +14,23 @@ import { DocsLayoutContainer } from "@/components/docs-layout-container";
 import { docsClientLoader } from "@/lib/docs-client-loader";
 
 export const Route = createFileRoute("/")({
-  head: ({ loaderData }) =>
-    loaderData
-      ? {
-          meta: [{ name: "leap0-doc-path", content: loaderData.path }],
-        }
-      : {},
+  head: ({ loaderData }) => {
+    if (!loaderData) return {};
+
+    const title = loaderData.title ? `${loaderData.title} - Leap0 Docs` : "Leap0 Docs";
+    const description = loaderData.description || "";
+
+    return {
+      meta: [
+        { title },
+        { name: "leap0-doc-path", content: loaderData.path },
+        { property: "og:title", content: title },
+        ...(description ? [{ property: "og:description", content: description }] : []),
+        { name: "twitter:title", content: title },
+        ...(description ? [{ name: "twitter:description", content: description }] : []),
+      ],
+    };
+  },
   component: Page,
   loader: async () => {
     const data = await serverLoader();
@@ -36,6 +47,8 @@ const serverLoader = createServerFn({
   if (!page || page.data.type !== "docs") throw notFound();
 
   return {
+    title: page.data.title,
+    description: page.data.description ?? "",
     path: page.path,
     url: page.url,
     markdownUrl: getPageMarkdownUrl(page).url,

@@ -22,6 +22,7 @@ import { DocsTopHeader } from "@/components/docs-top-header";
 import { DocsLayoutContainer } from "@/components/docs-layout-container";
 import type { HTMLAttributes } from "react";
 import { docsClientLoader } from "@/lib/docs-client-loader";
+import { siteUrl } from "@/env";
 
 type OpenApiPageData = {
   type: "openapi";
@@ -35,6 +36,8 @@ type OpenApiPageData = {
 
 type DocsPageData = {
   type: "docs";
+  title: string;
+  description: string;
   path: string;
   url: string;
   markdownUrl: string;
@@ -57,11 +60,22 @@ function sanitizeSlugs(slugs: string[]): string[] | null {
 export const Route = createFileRoute("/$")({
   head: ({ loaderData }) => {
     const data = loaderData as RoutePageData | undefined;
-    return data?.type === "docs"
-      ? {
-          meta: [{ name: "leap0-doc-path", content: data.path }],
-        }
-      : {};
+    if (!data) return {};
+
+    const title = data.title ? `${data.title} - Leap0 Docs` : "Leap0 Docs";
+    const description = data.description || "";
+
+    return {
+      meta: [
+        { title },
+        ...(data.type === "docs" ? [{ name: "leap0-doc-path", content: data.path }] : []),
+        { property: "og:title", content: title },
+        { property: "og:url", content: `${siteUrl}${data.url}` },
+        ...(description ? [{ property: "og:description", content: description }] : []),
+        { name: "twitter:title", content: title },
+        ...(description ? [{ name: "twitter:description", content: description }] : []),
+      ],
+    };
   },
   component: Page,
   loader: async ({ params }) => {
@@ -103,6 +117,8 @@ const serverLoader = createServerFn({
 
     return {
       type: "docs" as const,
+      title: page.data.title,
+      description: page.data.description ?? "",
       path: page.path,
       url: page.url,
       markdownUrl: getPageMarkdownUrl(page).url,

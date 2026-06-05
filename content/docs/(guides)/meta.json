@@ -1,0 +1,7 @@
+{
+  "root": true,
+  "title": "Guides",
+  "description": "Step-by-step setup and template guides",
+  "icon": "Map",
+  "pages": ["claude-code", "codex", "opencode", "docker", "docker-systemd", "k3s", "kubernetes"]
+}

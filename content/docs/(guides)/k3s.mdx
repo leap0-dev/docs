@@ -1,0 +1,198 @@
+---
+title: k3s
+description: Build a reusable k3s template for your own sandboxes.
+slug: guides/k3s
+---
+
+A k3s template lets you start sandboxes with k3s (lightweight Kubernetes) already installed and bootstrapped. k3s is a minimal, production-grade Kubernetes distribution ideal for resource-constrained environments, development, and testing.
+
+## Dockerfile
+
+Create a Dockerfile to set up k3s in your sandbox:
+
+```dockerfile
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV container=docker
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    systemd systemd-sysv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and install k3s binary
+RUN mkdir -p /usr/local/bin && \
+    curl -sfL https://github.com/k3s-io/k3s/releases/download/v1.35.5%2Bk3s1/k3s -o /usr/local/bin/k3s && \
+    chmod +x /usr/local/bin/k3s && \
+    ln -sf /usr/local/bin/k3s /usr/local/bin/kubectl && \
+    mkdir -p /var/lib/rancher/k3s
+
+# Copy k3s service file
+COPY files/k3s.service /etc/systemd/system/k3s.service
+
+# Copy bootstrap script
+COPY files/init-k3s.sh /usr/local/share/k3s/init-k3s.sh
+RUN chmod +x /usr/local/share/k3s/init-k3s.sh
+
+# Copy bootstrap service
+COPY files/init-k3s.service /etc/systemd/system/init-k3s.service
+
+# Enable services by creating symlinks
+RUN mkdir -p /etc/systemd/system/multi-user.target.wants && \
+    ln -sf /etc/systemd/system/k3s.service /etc/systemd/system/multi-user.target.wants/k3s.service && \
+    ln -sf /etc/systemd/system/init-k3s.service /etc/systemd/system/multi-user.target.wants/init-k3s.service
+
+STOPSIGNAL SIGRTMIN+3
+
+CMD ["/sbin/init"]
+```
+
+## Bootstrap script
+
+Create `files/init-k3s.sh` to ensure k3s is properly initialized:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+fail() {
+  printf '%s\n' "$1"
+  shift
+  "$@" || true
+  exit 1
+}
+
+wait_for() {
+  local attempts="$1"
+  local delay="$2"
+  shift 2
+
+  for _ in $(seq 1 "$attempts"); do
+    if "$@" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep "$delay"
+  done
+  return 1
+}
+
+# Wait for k3s to be ready
+if ! wait_for 60 2 test -f /etc/rancher/k3s/k3s.yaml; then
+  fail "k3s kubeconfig did not appear" journalctl -u k3s --no-pager
+fi
+
+# Copy kubeconfig to root home for easy access
+mkdir -p /root/.kube
+cp /etc/rancher/k3s/k3s.yaml /root/.kube/config
+chmod 600 /root/.kube/config
+
+# Wait for nodes to be ready
+if ! wait_for 60 2 kubectl --kubeconfig /root/.kube/config get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | grep -q .; then
+  fail "k3s node did not become ready" journalctl -u k3s --no-pager
+fi
+```
+
+## k3s service file
+
+Create `files/k3s.service` for k3s systemd integration:
+
+```ini
+[Unit]
+Description=Lightweight Kubernetes
+Documentation=https://k3s.io
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=notify
+EnvironmentFile=-/etc/systemd/system/k3s.service.env
+EnvironmentFile=-/etc/sysconfig/k3s
+ExecStartPre=/bin/sh -c 'mkdir -p /var/lib/rancher/k3s/agent/containerd'
+ExecStart=/usr/local/bin/k3s server
+KillMode=process
+Delegate=yes
+LimitNOFILE=1048576
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## Bootstrap service
+
+Create `files/init-k3s.service` to run the bootstrap script:
+
+```ini
+[Unit]
+Description=Bootstrap k3s
+After=k3s.service
+Wants=k3s.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/share/k3s/init-k3s.sh
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## Build and publish the image
+
+Build the k3s template and push it to a registry that Leap0 can pull from:
+
+```bash
+docker build -t registry.example.com/my-org/k3s-template:v1 ./k3s
+docker push registry.example.com/my-org/k3s-template:v1
+```
+
+## Create the Leap0 template
+
+Create a Leap0 template that points to the k3s image:
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+
+const template = await client.templates.create({
+  name: "k3s",
+  uri: "registry.example.com/my-org/k3s-template:v1",
+});
+
+console.log(template.id);
+await client.close();
+```
+
+## Start a sandbox with k3s
+
+Create a sandbox from the k3s template:
+
+```js
+const sandbox = await client.sandboxes.create({
+  template_name: "k3s",
+});
+```
+
+After the sandbox is ready, k3s will be running with kubectl available:
+
+```bash
+# Get nodes
+kubectl get nodes
+
+# Get pods in all namespaces
+kubectl get pods -A
+
+# Deploy a test pod
+kubectl run test-pod --image=alpine --restart=Never -- sleep 1000
+```
+

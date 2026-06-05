@@ -1,0 +1,586 @@
+---
+title: Kubernetes
+description: Build a reusable Kubernetes template for your own sandboxes.
+slug: guides/kubernetes
+---
+
+A Kubernetes template lets you start sandboxes with Kubernetes already installed and bootstrapped. Use this guide as a starting point when you want a reusable cluster for development, tests, or agent workflows.
+
+## Dockerfile
+
+Use the Dockerfile to install Kubernetes, copy the bootstrap files, and enable the systemd service.
+
+```dockerfile
+FROM ubuntu:22.04
+
+ARG K8S_SERIES=v1.33
+ARG K8S_DEB_VERSION=1.33.11-1.1
+ARG FLANNEL_VERSION=v0.28.4
+ARG FLANNEL_CNI_PLUGIN_VERSION=v1.9.1-flannel1
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV container=docker
+
+RUN apt-get update && apt-get install -y \
+    containerd \
+    systemd systemd-sysv \
+    curl ca-certificates gnupg lsb-release \
+    iproute2 iptables ethtool socat conntrack \
+    ebtables ipset containernetworking-plugins \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL "https://pkgs.k8s.io/core:/stable:/${K8S_SERIES}/deb/Release.key" | gpg --dearmor -o /etc/apt/keyrings/kubernetes.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/kubernetes.gpg] https://pkgs.k8s.io/core:/stable:/${K8S_SERIES}/deb/ /" \
+    > /etc/apt/sources.list.d/kubernetes.list
+
+RUN apt-get update && apt-get install -y \
+    kubelet="$K8S_DEB_VERSION" kubeadm="$K8S_DEB_VERSION" kubectl="$K8S_DEB_VERSION" \
+    && apt-mark hold kubelet kubeadm kubectl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY files/init-k8s.sh /usr/local/share/k8/init-k8s.sh
+COPY files/init-k8s.service /etc/systemd/system/init-k8s.service
+COPY files/kube-flannel.yml.tmpl /usr/local/share/k8/kube-flannel.yml.tmpl
+
+RUN sed -i "s|__K8S_VERSION__|v${K8S_DEB_VERSION%%-*}|g" /usr/local/share/k8/init-k8s.sh && \
+    sed -i "s|__FLANNEL_IMAGE__|ghcr.io/flannel-io/flannel:${FLANNEL_VERSION}|g" /usr/local/share/k8/init-k8s.sh && \
+    sed -i "s|__FLANNEL_CNI_PLUGIN_IMAGE__|ghcr.io/flannel-io/flannel-cni-plugin:${FLANNEL_CNI_PLUGIN_VERSION}|g" /usr/local/share/k8/init-k8s.sh && \
+    sed -i "s|__FLANNEL_IMAGE__|ghcr.io/flannel-io/flannel:${FLANNEL_VERSION}|g" /usr/local/share/k8/kube-flannel.yml.tmpl && \
+    sed -i "s|__FLANNEL_CNI_PLUGIN_IMAGE__|ghcr.io/flannel-io/flannel-cni-plugin:${FLANNEL_CNI_PLUGIN_VERSION}|g" /usr/local/share/k8/kube-flannel.yml.tmpl && \
+    install -m 0755 /usr/local/share/k8/init-k8s.sh /init-k8s.sh && \
+    ln -sf /lib/systemd/system/containerd.service /etc/systemd/system/multi-user.target.wants/containerd.service && \
+    ln -sf /etc/systemd/system/init-k8s.service /etc/systemd/system/multi-user.target.wants/init-k8s.service
+
+STOPSIGNAL SIGRTMIN+3
+
+CMD ["/sbin/init"]
+```
+
+## Bootstrap service
+
+Create `files/init-k8s.service` to run your bootstrap script when the sandbox starts.
+
+```ini
+[Unit]
+Description=Bootstrap Kubernetes
+After=network-online.target containerd.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+TimeoutStartSec=1800
+ExecStart=/init-k8s.sh
+RemainAfterExit=yes
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## Bootstrap script
+
+Create `files/init-k8s.sh` to configure containerd, initialize Kubernetes with `kubeadm`, install Flannel, and copy the kubeconfig to `/root/.kube/config`.
+
+```bash
+#!/bin/bash
+set -euo pipefail
+
+PAUSE_IMAGE="registry.k8s.io/pause:3.10.2"
+FLANNEL_IMAGE="__FLANNEL_IMAGE__"
+FLANNEL_CNI_PLUGIN_IMAGE="__FLANNEL_CNI_PLUGIN_IMAGE__"
+CRI_SOCKET="unix:///run/containerd/containerd.sock"
+K8S_VERSION="__K8S_VERSION__"
+KUBEADM_CONFIG="/etc/kubeadm-config.yaml"
+FLANNEL_MANIFEST="/etc/kube-flannel.yml"
+FLANNEL_MANIFEST_TEMPLATE="/usr/local/share/k8/kube-flannel.yml.tmpl"
+K8S_NODE_NAME="${K8S_NODE_NAME:-leap0}"
+BOOTSTRAP_COMPLETE_FILE="/var/lib/kube-bootstrap/finished"
+
+log() {
+  printf '%s\n' "$1"
+}
+
+sync_root_kubeconfig() {
+  if [ -f /etc/kubernetes/admin.conf ]; then
+    mkdir -p /root/.kube
+    cp /etc/kubernetes/admin.conf /root/.kube/config
+  fi
+}
+
+fail() {
+  log "$1"
+  shift
+  "$@" || true
+  exit 1
+}
+
+retry() {
+  local attempts="$1"
+  local delay="$2"
+  shift 2
+
+  for _ in $(seq 1 "$attempts"); do
+    if "$@"; then
+      return 0
+    fi
+    sleep "$delay"
+  done
+  return 1
+}
+
+normalize_kubelet_flags() {
+  if [ -f /var/lib/kubelet/kubeadm-flags.env ]; then
+    sed -i -E 's/ --pod-infra-container-image=[^" ]+//g' /var/lib/kubelet/kubeadm-flags.env
+  fi
+}
+
+write_flannel_manifest() {
+  cp "$FLANNEL_MANIFEST_TEMPLATE" "$FLANNEL_MANIFEST"
+}
+
+start_kubelet() {
+  normalize_kubelet_flags
+
+  if systemctl is-active --quiet kubelet; then
+    return 0
+  fi
+
+  systemctl start kubelet
+}
+
+wait_for_api() {
+  wait_for 120 2 curl -sk https://127.0.0.1:6443/readyz
+}
+
+wait_for() {
+  local attempts="$1"
+  local delay="$2"
+  shift 2
+
+  for _ in $(seq 1 "$attempts"); do
+    if "$@" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep "$delay"
+  done
+  return 1
+}
+
+start_containerd() {
+  mkdir -p /etc/containerd
+  containerd config default >/etc/containerd/config.toml
+  sed -i 's#sandbox_image = ".*"#sandbox_image = "'"$PAUSE_IMAGE"'"#' /etc/containerd/config.toml
+  sed -i "s#sandbox = '.*'#sandbox = '$PAUSE_IMAGE'#" /etc/containerd/config.toml
+  sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+  sed -i 's/snapshotter = "overlayfs"/snapshotter = "native"/' /etc/containerd/config.toml
+
+  systemctl restart containerd
+
+  if ! wait_for 30 1 test -S /run/containerd/containerd.sock; then
+    fail "containerd socket did not appear" journalctl -u containerd --no-pager
+  fi
+}
+
+pull_images() {
+  local arch image
+  arch="$(dpkg --print-architecture)"
+
+  if ! ctr -n k8s.io images pull --local --snapshotter native --platform "linux/$arch" "$PAUSE_IMAGE"; then
+    fail "failed to preload image $PAUSE_IMAGE" journalctl -u containerd --no-pager
+  fi
+
+  while IFS= read -r image; do
+    if ! ctr -n k8s.io images pull --local --snapshotter native --platform "linux/$arch" "$image"; then
+      fail "failed to preload image $image" journalctl -u containerd --no-pager
+    fi
+  done <<EOF_IMAGES
+$(kubeadm config images list --kubernetes-version "$K8S_VERSION")
+EOF_IMAGES
+
+  for image in "$FLANNEL_CNI_PLUGIN_IMAGE" "$FLANNEL_IMAGE"; do
+    if ! ctr -n k8s.io images pull --local --snapshotter native --platform "linux/$arch" "$image"; then
+      fail "failed to preload image $image" journalctl -u containerd --no-pager
+    fi
+  done
+}
+
+run_bootstrap() {
+  if [ ! -f /etc/kubernetes/admin.conf ]; then
+    run_phase certs all || fail "kubeadm cert phase failed" true
+    run_phase kubeconfig all || fail "kubeadm kubeconfig phase failed" true
+    run_phase kubelet-start || fail "kubeadm kubelet-start phase failed" true
+  fi
+
+  start_kubelet
+  run_phase etcd local || fail "kubeadm etcd phase failed" true
+  run_phase control-plane all || fail "kubeadm control-plane phase failed" true
+
+  if ! wait_for_api; then
+    log "control plane did not become ready"
+    journalctl -u kubelet --no-pager || true
+    ctr -n k8s.io containers list || true
+    exit 1
+  fi
+
+  sync_root_kubeconfig
+
+  run_phase upload-config all || fail "kubeadm upload-config phase failed" true
+  run_phase bootstrap-token || fail "kubeadm bootstrap-token phase failed" true
+  run_phase addon all || fail "kubeadm addon phase failed" true
+}
+
+run_phase() {
+  kubeadm init phase "$@" --config "$KUBEADM_CONFIG"
+}
+
+swapoff -a || true
+mkdir -p /var/run /var/lib/containerd /var/lib/kube-bootstrap /var/log /root/.kube
+
+if [ ! -e /dev/kmsg ]; then
+  ln -sf /dev/console /dev/kmsg
+fi
+
+start_containerd
+
+if [ ! -f "$BOOTSTRAP_COMPLETE_FILE" ]; then
+  NODE_IP=$(hostname -I | awk '{print $1}')
+
+  cat <<EOF_KUBEADM > "$KUBEADM_CONFIG"
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: InitConfiguration
+nodeRegistration:
+  name: "$K8S_NODE_NAME"
+  criSocket: $CRI_SOCKET
+  kubeletExtraArgs:
+    - name: node-ip
+      value: "$NODE_IP"
+    - name: hostname-override
+      value: "$K8S_NODE_NAME"
+---
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: ClusterConfiguration
+kubernetesVersion: $K8S_VERSION
+networking:
+  podSubnet: 10.244.0.0/16
+apiServer:
+  certSANs:
+    - leap0
+    - "$K8S_NODE_NAME"
+    - "$NODE_IP"
+    - "127.0.0.1"
+    - "$(hostname -f 2>/dev/null || hostname)"
+proxy: {}
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: systemd
+failSwapOn: false
+containerRuntimeEndpoint: $CRI_SOCKET
+staticPodPath: /etc/kubernetes/manifests
+EOF_KUBEADM
+
+  if [ ! -f /etc/kubernetes/admin.conf ]; then
+    pull_images
+  fi
+
+  run_bootstrap
+
+  sync_root_kubeconfig
+  write_flannel_manifest
+  if kubectl --kubeconfig /etc/kubernetes/admin.conf get node "$K8S_NODE_NAME" -o jsonpath='{range .spec.taints[*]}{.key}{"\n"}{end}' 2>/dev/null | grep -qx 'node-role.kubernetes.io/control-plane'; then
+    kubectl --kubeconfig /etc/kubernetes/admin.conf taint node "$K8S_NODE_NAME" node-role.kubernetes.io/control-plane-
+  fi
+  retry 5 5 kubectl --kubeconfig /etc/kubernetes/admin.conf apply -f "$FLANNEL_MANIFEST" || fail "failed to apply flannel manifest" true
+  kubectl --kubeconfig /root/.kube/config -n kube-flannel rollout status ds/kube-flannel-ds --timeout=180s
+  wait_for 90 2 test -f /run/flannel/subnet.env || fail "flannel subnet.env did not appear" journalctl -u kubelet --no-pager
+  kubectl --kubeconfig /root/.kube/config -n kube-system rollout status deployment/coredns --timeout=180s
+  kubectl --kubeconfig /root/.kube/config wait --for=condition=Ready "node/$K8S_NODE_NAME" --timeout=180s
+  touch "$BOOTSTRAP_COMPLETE_FILE"
+fi
+
+if [ -f /etc/kubernetes/admin.conf ]; then
+  sync_root_kubeconfig
+  start_kubelet
+fi
+```
+
+## Flannel manifest
+
+Create `files/kube-flannel.yml.tmpl` from the upstream Flannel Kubernetes manifest, then pin the image versions you want to use. The manifest should create the `kube-flannel` namespace, RBAC resources, config map, and `kube-flannel-ds` daemon set.
+
+Use the same pod subnet in the Flannel config that you used in `kubeadm`:
+
+```yaml
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: kube-flannel
+  labels:
+    k8s-app: flannel
+    pod-security.kubernetes.io/enforce: privileged
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    k8s-app: flannel
+  name: flannel
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes/status
+  verbs:
+  - patch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    k8s-app: flannel
+  name: flannel
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: flannel
+subjects:
+- kind: ServiceAccount
+  name: flannel
+  namespace: kube-flannel
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: flannel
+  name: flannel
+  namespace: kube-flannel
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: kube-flannel-cfg
+  namespace: kube-flannel
+  labels:
+    tier: node
+    k8s-app: flannel
+    app: flannel
+data:
+  cni-conf.json: |
+    {
+      "name": "cbr0",
+      "cniVersion": "0.3.1",
+      "plugins": [
+        {
+          "type": "flannel",
+          "delegate": {
+            "hairpinMode": true,
+            "isDefaultGateway": true
+          }
+        },
+        {
+          "type": "portmap",
+          "capabilities": {
+            "portMappings": true
+          }
+        }
+      ]
+    }
+  net-conf.json: |
+    {
+      "Network": "10.244.0.0/16",
+      "EnableNFTables": false,
+      "Backend": {
+        "Type": "vxlan"
+      }
+    }
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-flannel-ds
+  namespace: kube-flannel
+  labels:
+    tier: node
+    app: flannel
+    k8s-app: flannel
+spec:
+  selector:
+    matchLabels:
+      app: flannel
+  template:
+    metadata:
+      labels:
+        tier: node
+        app: flannel
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
+      hostNetwork: true
+      priorityClassName: system-node-critical
+      tolerations:
+      - operator: Exists
+        effect: NoSchedule
+      serviceAccountName: flannel
+      initContainers:
+      - name: install-cni-plugin
+        image: __FLANNEL_CNI_PLUGIN_IMAGE__
+        command:
+        - cp
+        args:
+        - -f
+        - /flannel
+        - /opt/cni/bin/flannel
+        volumeMounts:
+        - name: cni-plugin
+          mountPath: /opt/cni/bin
+      - name: install-cni
+        image: __FLANNEL_IMAGE__
+        command:
+        - cp
+        args:
+        - -f
+        - /etc/kube-flannel/cni-conf.json
+        - /etc/cni/net.d/10-flannel.conflist
+        volumeMounts:
+        - name: cni
+          mountPath: /etc/cni/net.d
+        - name: flannel-cfg
+          mountPath: /etc/kube-flannel/
+      containers:
+      - name: kube-flannel
+        image: __FLANNEL_IMAGE__
+        command:
+        - /opt/bin/flanneld
+        args:
+        - --ip-masq
+        - --kube-subnet-mgr
+        - --kube-api-url=https://127.0.0.1:6443
+        - --kubeconfig-file=/etc/kube-flannel-kubeconfig/admin.conf
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "50Mi"
+        securityContext:
+          privileged: false
+          capabilities:
+            add: ["NET_ADMIN", "NET_RAW"]
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: EVENT_QUEUE_DEPTH
+          value: "5000"
+        - name: CONT_WHEN_CACHE_NOT_READY
+          value: "false"
+        volumeMounts:
+        - name: run
+          mountPath: /run/flannel
+        - name: flannel-cfg
+          mountPath: /etc/kube-flannel/
+        - name: kubeconfig
+          mountPath: /etc/kube-flannel-kubeconfig/admin.conf
+          subPath: admin.conf
+          readOnly: true
+        - name: xtables-lock
+          mountPath: /run/xtables.lock
+      volumes:
+      - name: run
+        hostPath:
+          path: /run/flannel
+          type: DirectoryOrCreate
+      - name: cni-plugin
+        hostPath:
+          path: /opt/cni/bin
+          type: DirectoryOrCreate
+      - name: cni
+        hostPath:
+          path: /etc/cni/net.d
+          type: DirectoryOrCreate
+      - name: flannel-cfg
+        configMap:
+          name: kube-flannel-cfg
+      - name: kubeconfig
+        hostPath:
+          path: /etc/kubernetes
+          type: Directory
+      - name: xtables-lock
+        hostPath:
+          path: /run/xtables.lock
+          type: FileOrCreate
+```
+
+## Build and publish the image
+
+Build the image and push it to a registry that Leap0 can pull from.
+
+```bash
+docker build -t registry.example.com/my-org/k8-template:v1 ./k8
+docker push registry.example.com/my-org/k8-template:v1
+```
+
+## Create the Leap0 template
+
+Create a Leap0 template that points to the image.
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+
+const template = await client.templates.create({
+  name: "kubernetes",
+  uri: "registry.example.com/my-org/k8-template:v1",
+});
+
+console.log(template.id);
+await client.close();
+```
+
+## Start a sandbox
+
+Create a sandbox from the template and wait for Kubernetes to finish bootstrapping.
+
+```js
+const sandbox = await client.sandboxes.create({
+  template_name: "kubernetes",
+});
+```
+
+After the sandbox is ready, SSH or run a process in the sandbox and verify the node:
+
+```bash
+kubectl get nodes
+kubectl get pods -A
+```

@@ -57,6 +57,46 @@ Pauses the sandbox and updates local state.
 
 - `Leap0Error`: If pausing the sandbox fails.
 
+### `stop`
+
+```ts
+async stop(options?: { timeout?: number }): Promise<this>
+```
+
+Stops the sandbox and updates local state.
+
+#### Parameters
+
+- `options`: Optional request settings.
+
+#### Returns
+
+- The stopped sandbox handle.
+
+#### Throws
+
+- `Leap0Error`: If stopping the sandbox fails.
+
+### `start`
+
+```ts
+async start(options?: { timeout?: number }): Promise<this>
+```
+
+Starts a previously stopped sandbox and updates local state.
+
+#### Parameters
+
+- `options`: Optional request settings.
+
+#### Returns
+
+- The started sandbox handle.
+
+#### Throws
+
+- `Leap0Error`: If starting the sandbox fails.
+
 ### `createSnapshot`
 
 ```ts

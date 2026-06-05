@@ -8,7 +8,7 @@ import mdx from "fumadocs-mdx/vite";
 
 export default defineConfig({
   base: process.env.LEAP0_BASE_PATH ?? "/",
-  envPrefix: ["VITE_", "LEAP0_"],
+  envPrefix: ["VITE_", "LEAP0_", "SITE_"],
   server: {
     port: 3000,
   },

@@ -1,0 +1,115 @@
+---
+title: OpenCode
+description: Run OpenCode inside Leap0 sandboxes.
+slug: guides/opencode
+---
+
+Run OpenCode, the open source AI coding agent, inside Leap0 sandboxes. You can either bake it into a template or install it at runtime using `process.execute`.
+
+## Install at runtime
+
+Install OpenCode directly in a running sandbox using the process API:
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+// Install OpenCode
+await sandbox.process.execute({
+  command: "curl -fsSL https://opencode.ai/install | bash",
+  timeout: 120,
+});
+
+// Verify installation
+const result = await sandbox.process.execute({
+  command: "opencode --version",
+});
+
+console.log(result.stdout);
+await client.close();
+```
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+
+# Install OpenCode
+sandbox.process.execute(
+    command="curl -fsSL https://opencode.ai/install | bash",
+    timeout=120,
+)
+
+# Verify installation
+result = sandbox.process.execute(command="opencode --version")
+print(result.stdout)
+```
+
+## Template Dockerfile
+
+To avoid installing on every boot, bake OpenCode into a template:
+
+```dockerfile
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 18+
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install OpenCode
+RUN npm install -g opencode-ai
+
+CMD ["bash"]
+```
+
+## Build and publish the image
+
+```bash
+docker build -t registry.example.com/my-org/opencode-template:v1 ./opencode
+docker push registry.example.com/my-org/opencode-template:v1
+```
+
+## Create the Leap0 template
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+
+const template = await client.templates.create({
+  name: "opencode",
+  uri: "registry.example.com/my-org/opencode-template:v1",
+});
+
+console.log(template.id);
+await client.close();
+```
+
+## Start a sandbox
+
+```js
+const sandbox = await client.sandboxes.create({
+  template_name: "opencode",
+});
+
+// Run OpenCode with your API key
+await sandbox.process.execute({
+  command: "opencode 'refactor the database module'",
+  env: { ANTHROPIC_API_KEY: "sk-ant-..." },
+  cwd: "/home/user/project",
+  timeout: 300,
+});
+```
