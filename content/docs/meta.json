@@ -1,3 +1,3 @@
 {
-  "pages": ["(core)", "(python-sdk)", "(javascript-sdk)", "(api)"]
+  "pages": ["(core)", "(guides)", "(python-sdk)", "(javascript-sdk)", "(api)"]
 }

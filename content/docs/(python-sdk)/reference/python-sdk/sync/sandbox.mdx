@@ -56,6 +56,34 @@ Args:
 Returns:
     Sandbox: This sandbox object with updated metadata.
 
+### `stop`
+
+```python
+stop(http_timeout: float | None = None) -> Sandbox
+```
+
+Stop the sandbox and update this handle with the latest metadata.
+
+Args:
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    Sandbox: This sandbox object with updated metadata.
+
+### `start`
+
+```python
+start(http_timeout: float | None = None) -> Sandbox
+```
+
+Start a previously stopped sandbox and refresh this handle.
+
+Args:
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    Sandbox: This sandbox object with updated metadata.
+
 ### `create_snapshot`
 
 ```python

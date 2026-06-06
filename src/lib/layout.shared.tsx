@@ -1,4 +1,4 @@
-import { BookOpenText, Braces, MonitorSmartphone, SquareCode } from "lucide-react";
+import { BookOpenText, Braces, Map, MonitorSmartphone, SquareCode } from "lucide-react";
 import type { BaseLayoutProps, LayoutTab } from "fumadocs-ui/layouts/shared";
 import { Leap0Brand } from "@/components/leap0-brand";
 import { githubOrgUrl } from "@/env";
@@ -19,7 +19,7 @@ function BrandTitle({ href = "/", className }: { href?: string; className?: stri
 }
 
 export type ReferenceTab = LayoutTab & {
-  id: "core" | "sdks" | "apis";
+  id: "core" | "guides" | "sdks" | "apis";
 };
 
 export const referenceTabs: ReferenceTab[] = [
@@ -53,6 +53,14 @@ export const referenceTabs: ReferenceTab[] = [
       "/public-preview",
       "/roadmap",
     ]),
+  },
+  {
+    id: "guides",
+    title: "Guides",
+    description: "Step-by-step setup and template guides",
+    url: "/guides/claude-code",
+    icon: <Map className="size-4" />,
+    urls: new Set(["/guides", "/guides/claude-code", "/guides/codex", "/guides/opencode", "/guides/docker", "/guides/docker-systemd", "/guides/k3s", "/guides/kubernetes"]),
   },
   {
     id: "sdks",

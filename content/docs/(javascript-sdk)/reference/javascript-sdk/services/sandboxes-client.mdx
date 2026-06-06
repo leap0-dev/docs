@@ -13,7 +13,7 @@ SandboxesClient(transport: Leap0Transport)
 
 ## Overview
 
-Creates, fetches, pauses, and deletes sandboxes.
+Creates, fetches, pauses, stops, starts, and deletes sandboxes.
 
 #### Throws
 
@@ -84,6 +84,40 @@ Pauses a running sandbox.
 #### Returns
 
 - The updated sandbox resource.
+
+### `stop`
+
+```ts
+async stop(sandbox: SandboxRef, options: RequestOptions = {}): Promise<T>
+```
+
+Stops a running sandbox while preserving writable disk changes.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The updated sandbox resource.
+
+### `start`
+
+```ts
+async start(sandbox: SandboxRef, options: RequestOptions = {}): Promise<T>
+```
+
+Starts a previously stopped sandbox.
+
+#### Parameters
+
+- `sandbox`: Sandbox ID or sandbox-like object.
+- `options`: Optional request settings such as timeout and query params.
+
+#### Returns
+
+- The current sandbox resource after start completes.
 
 ### `createSnapshot`
 

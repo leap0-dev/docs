@@ -1,0 +1,96 @@
+---
+title: Docker
+description: Build a reusable Docker template for running Docker inside Leap0 sandboxes.
+slug: guides/docker
+---
+
+A Docker template lets you start sandboxes with Docker already installed and configured. This is useful for development, testing containerized applications, or running Docker-based workflows inside Leap0 sandboxes.
+
+## Basic Dockerfile
+
+Create a minimal Dockerfile to set up Docker in your sandbox:
+
+```dockerfile
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Docker GPG key and repository
+RUN install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
+    && chmod a+r /etc/apt/keyrings/docker.asc \
+    && . /etc/os-release \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable" \
+       > /etc/apt/sources.list.d/docker.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+       docker-ce \
+       docker-ce-cli \
+       containerd.io \
+       docker-buildx-plugin \
+       docker-compose-plugin \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["bash"]
+```
+
+## Docker entrypoint script
+
+Create `entrypoint.sh` to start the Docker daemon when the sandbox boots:
+
+```bash
+#!/bin/bash
+set -e
+
+command -v dockerd > /dev/null 2>&1 && ! pgrep -x dockerd > /dev/null 2>&1 && dockerd &>/var/log/dockerd.log &
+
+exec "$@"
+```
+
+## Build and publish the image
+
+Build the Docker template and push it to a registry that Leap0 can pull from:
+
+```bash
+docker build -t registry.example.com/my-org/docker-template:v1 ./docker
+docker push registry.example.com/my-org/docker-template:v1
+```
+
+## Create the Leap0 template
+
+Create a Leap0 template that points to the Docker image:
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+
+const template = await client.templates.create({
+  name: "docker",
+  uri: "registry.example.com/my-org/docker-template:v1",
+});
+
+console.log(template.id);
+await client.close();
+```
+
+## Start a sandbox with Docker
+
+Create a sandbox from the Docker template:
+
+```js
+const sandbox = await client.sandboxes.create({
+  template_name: "docker",
+});
+```
+

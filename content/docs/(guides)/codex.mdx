@@ -1,0 +1,127 @@
+---
+title: Codex
+description: Run OpenAI Codex inside Leap0 sandboxes.
+slug: guides/codex
+---
+
+Run OpenAI Codex, an agentic coding tool powered by ChatGPT, inside Leap0 sandboxes. You can either bake it into a template or install it at runtime using `process.execute`.
+
+## Install at runtime
+
+Install Codex directly in a running sandbox using the process API:
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+const sandbox = await client.sandboxes.create();
+
+// Install Node.js if not available
+await sandbox.process.execute({
+  command: "curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs",
+  timeout: 120,
+});
+
+// Install Codex
+await sandbox.process.execute({
+  command: "npm install -g @openai/codex",
+  timeout: 60,
+});
+
+// Verify installation
+const result = await sandbox.process.execute({
+  command: "codex --version",
+});
+
+console.log(result.stdout);
+await client.close();
+```
+
+```python
+from leap0 import Leap0Client
+
+client = Leap0Client()
+sandbox = client.sandboxes.create()
+
+# Install Node.js if not available
+sandbox.process.execute(
+    command="curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs",
+    timeout=120,
+)
+
+# Install Codex
+sandbox.process.execute(
+    command="npm install -g @openai/codex",
+    timeout=60,
+)
+
+# Verify installation
+result = sandbox.process.execute(command="codex --version")
+print(result.stdout)
+```
+
+## Template Dockerfile
+
+To avoid installing on every boot, bake Codex into a template:
+
+```dockerfile
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    git \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 18+
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Codex
+RUN npm install -g @openai/codex
+
+CMD ["bash"]
+```
+
+## Build and publish the image
+
+```bash
+docker build -t registry.example.com/my-org/codex-template:v1 ./codex
+docker push registry.example.com/my-org/codex-template:v1
+```
+
+## Create the Leap0 template
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+
+const template = await client.templates.create({
+  name: "codex",
+  uri: "registry.example.com/my-org/codex-template:v1",
+});
+
+console.log(template.id);
+await client.close();
+```
+
+## Start a sandbox
+
+```js
+const sandbox = await client.sandboxes.create({
+  template_name: "codex",
+});
+
+// Run Codex with your API key
+await sandbox.process.execute({
+  command: "codex 'add error handling to the API routes'",
+  env: { OPENAI_API_KEY: "sk-..." },
+  cwd: "/home/user/project",
+  timeout: 300,
+});
+```

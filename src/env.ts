@@ -27,3 +27,6 @@ export const env = createEnv({
   },
   emptyStringAsUndefined: true,
 });
+
+export const siteUrl = import.meta.env.SITE_URL;
+export const siteOrigin = siteUrl ? new URL(siteUrl).origin : "";

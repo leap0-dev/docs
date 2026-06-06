@@ -13,7 +13,7 @@ SandboxesClient(transport: Transport, *, sandbox_domain: str | None = None, sand
 
 ## Overview
 
-Create, inspect, pause, and delete sandboxes.
+Create, inspect, pause, stop, start, and delete sandboxes.
 
 Sandboxes are isolated execution environments with their own compute,
 filesystem, and network boundary.
@@ -73,6 +73,36 @@ pause(sandbox: SandboxRef, http_timeout: float | None = None) -> SandboxT | Sand
 ```
 
 Pause a running sandbox.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    SandboxT | SandboxData | SandboxStatus: Updated sandbox object.
+
+### `stop`
+
+```python
+stop(sandbox: SandboxRef, http_timeout: float | None = None) -> SandboxT | SandboxData | SandboxStatus
+```
+
+Stop a running sandbox while preserving writable disk changes.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    SandboxT | SandboxData | SandboxStatus: Updated sandbox object.
+
+### `start`
+
+```python
+start(sandbox: SandboxRef, http_timeout: float | None = None) -> SandboxT | SandboxData | SandboxStatus
+```
+
+Start a previously stopped sandbox.
 
 Args:
     sandbox: Sandbox ID or object.

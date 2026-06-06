@@ -1,0 +1,85 @@
+---
+title: Docker with systemd
+description: Build a Docker template with systemd service management for Leap0 sandboxes.
+slug: guides/docker-systemd
+---
+
+A Docker template with systemd lets you manage the Docker daemon as a service. This approach is useful when you need better control over Docker lifecycle and integration with other systemd services inside Leap0 sandboxes.
+
+## Dockerfile
+
+Create a Dockerfile to set up Docker with systemd:
+
+```dockerfile
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV container=docker
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gnupg \
+    systemd systemd-sysv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Docker GPG key and repository
+RUN install -m 0755 -d /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
+    && chmod a+r /etc/apt/keyrings/docker.asc \
+    && . /etc/os-release \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu ${VERSION_CODENAME} stable" \
+       > /etc/apt/sources.list.d/docker.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+       docker-ce \
+       docker-ce-cli \
+       containerd.io \
+       docker-buildx-plugin \
+       docker-compose-plugin \
+    && rm -rf /var/lib/apt/lists/*
+
+# Enable Docker service on boot
+RUN systemctl enable docker
+
+STOPSIGNAL SIGRTMIN+3
+
+CMD ["/sbin/init"]
+```
+
+## Build and publish the image
+
+Build the Docker template and push it to a registry that Leap0 can pull from:
+
+```bash
+docker build -t registry.example.com/my-org/docker-systemd-template:v1 ./docker-systemd
+docker push registry.example.com/my-org/docker-systemd-template:v1
+```
+
+## Create the Leap0 template
+
+Create a Leap0 template that points to the Docker systemd image:
+
+```js
+import { Leap0Client } from "leap0";
+
+const client = new Leap0Client();
+
+const template = await client.templates.create({
+  name: "docker-systemd",
+  uri: "registry.example.com/my-org/docker-systemd-template:v1",
+});
+
+console.log(template.id);
+await client.close();
+```
+
+## Start a sandbox with Docker
+
+Create a sandbox from the Docker systemd template:
+
+```js
+const sandbox = await client.sandboxes.create({
+  template_name: "docker-systemd",
+});
+```

@@ -1,8 +1,9 @@
 import type * as PageTree from "fumadocs-core/page-tree";
 
-type Section = "core" | "sdks" | "apis";
+type Section = "core" | "guides" | "sdks" | "apis";
 type SidebarScope =
   | "core"
+  | "guides"
   | "python-sdk"
   | "javascript-sdk"
   | "api"
@@ -11,6 +12,7 @@ type SidebarScope =
   | "desktop-api";
 
 const SIDEBAR_SCOPE_PREFIXES: Record<Exclude<SidebarScope, "core">, string[]> = {
+  guides: ["/guides"],
   "python-sdk": ["/reference/python-sdk"],
   "javascript-sdk": ["/reference/javascript-sdk"],
   api: ["/api"],
@@ -20,6 +22,7 @@ const SIDEBAR_SCOPE_PREFIXES: Record<Exclude<SidebarScope, "core">, string[]> = 
 };
 
 const SECTION_PREFIXES: Record<Exclude<Section, "core">, string[]> = {
+  guides: SIDEBAR_SCOPE_PREFIXES.guides,
   sdks: [
     ...SIDEBAR_SCOPE_PREFIXES["python-sdk"],
     ...SIDEBAR_SCOPE_PREFIXES["javascript-sdk"],
@@ -66,6 +69,7 @@ function matcherFor(scope: SidebarScope) {
     case "metadata-service-api":
     case "code-interpreter-api":
     case "desktop-api":
+    case "guides":
       return (url: string) => matchesAnyPrefix(url, SIDEBAR_SCOPE_PREFIXES[scope]);
     case "core":
       return (url: string) =>

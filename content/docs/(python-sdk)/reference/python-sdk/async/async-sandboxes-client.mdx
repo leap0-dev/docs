@@ -13,7 +13,7 @@ AsyncSandboxesClient(transport: AsyncTransport, *, sandbox_domain: str | None = 
 
 ## Overview
 
-Create, inspect, pause, and delete sandboxes asynchronously.
+Create, inspect, pause, stop, start, and delete sandboxes asynchronously.
 
 Attributes:
     None.
@@ -69,6 +69,36 @@ async pause(sandbox: SandboxRef, http_timeout: float | None = None) -> AsyncSand
 ```
 
 Pause the sandbox and return updated metadata.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    AsyncSandboxT | SandboxData | SandboxStatus: Updated sandbox object.
+
+### `stop`
+
+```python
+async stop(sandbox: SandboxRef, http_timeout: float | None = None) -> AsyncSandboxT | SandboxData | SandboxStatus
+```
+
+Stop a running sandbox while preserving writable disk changes.
+
+Args:
+    sandbox: Sandbox ID or object.
+    http_timeout: Optional HTTP request timeout in seconds for this SDK call.
+
+Returns:
+    AsyncSandboxT | SandboxData | SandboxStatus: Updated sandbox object.
+
+### `start`
+
+```python
+async start(sandbox: SandboxRef, http_timeout: float | None = None) -> AsyncSandboxT | SandboxData | SandboxStatus
+```
+
+Start a previously stopped sandbox.
 
 Args:
     sandbox: Sandbox ID or object.
