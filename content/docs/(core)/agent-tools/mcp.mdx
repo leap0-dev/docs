@@ -1,0 +1,110 @@
+---
+title: MCP Server
+description: Connect Cursor, Claude Desktop, and other MCP clients to Leap0 sandboxes via @leap0/mcp.
+slug: mcp
+---
+
+import { Tabs, TabItem } from "@/components/mdx-compat";
+
+[`@leap0/mcp`](https://www.npmjs.com/package/@leap0/mcp) is a [Model Context Protocol](https://modelcontextprotocol.io) server for Leap0. It exposes sandbox lifecycle, filesystem, and process tools over **stdio** so coding agents can create and manage Leap0 sandboxes from their host environment.
+
+## Install
+
+<Tabs syncKey="packageManager">
+  <TabItem label="npm">
+
+```bash
+npm install -g @leap0/mcp
+```
+
+  </TabItem>
+  <TabItem label="pnpm">
+
+```bash
+pnpm add -g @leap0/mcp
+```
+
+  </TabItem>
+  <TabItem label="yarn">
+
+```bash
+yarn global add @leap0/mcp
+```
+
+  </TabItem>
+  <TabItem label="bun">
+
+```bash
+bun add -g @leap0/mcp
+```
+
+  </TabItem>
+</Tabs>
+
+Or run without a global install:
+
+<Tabs syncKey="packageManager">
+  <TabItem label="npm">
+
+```bash
+npx @leap0/mcp --help
+```
+
+  </TabItem>
+  <TabItem label="pnpm">
+
+```bash
+pnpm dlx @leap0/mcp --help
+```
+
+  </TabItem>
+  <TabItem label="yarn">
+
+```bash
+yarn dlx @leap0/mcp --help
+```
+
+  </TabItem>
+  <TabItem label="bun">
+
+```bash
+bunx @leap0/mcp --help
+```
+
+  </TabItem>
+</Tabs>
+
+## Agent configuration
+
+Generate a JSON snippet you can merge into your client's MCP settings:
+
+```bash
+leap0-mcp --print-config
+```
+
+This prints a `mcpServers` block using your current `node` binary and the resolved path to the package's `cli.js`. Placeholders use `${VAR}` so you can rely on the shell or replace them with real values.
+
+1. Copy the JSON into your app's MCP config (e.g. Cursor **Settings → MCP**).
+2. Ensure `LEAP0_API_KEY` is set in the server `env` (or remove the placeholder and set it in your user environment before starting the agent).
+3. Remove or set optional entries (`LEAP0_BASE_URL`, `LEAP0_SANDBOX_DOMAIN`) if you use non-default endpoints.
+4. Restart the editor or MCP host.
+
+On **Windows**, the printed config includes `APPDATA` in `env` so tools resolve user paths correctly.
+
+## CLI
+
+| Flag | Meaning |
+| --- | --- |
+| *(none)* | Start the MCP server on stdio (JSON-RPC on stdout only) |
+| `--print-config` | Print MCP JSON config to stdout |
+| `--version` / `-V` | Print package version |
+| `--help` / `-h` | Print usage |
+
+Diagnostics and errors go to **stderr**; MCP traffic uses **stdout**.
+
+## Troubleshooting
+
+- **`Failed to create Leap0 client` / API key errors** — Set `LEAP0_API_KEY` in the MCP `env` or in the process environment before launching `leap0-mcp`.
+- **401 / 403 from tools** — Key invalid or missing; confirm the key in the Leap0 dashboard and that the same env is visible to the MCP process.
+- **Connection / timeout errors** — Check `LEAP0_BASE_URL`, firewall, and that the machine running MCP can reach the API.
+- **Empty or wrong PATH in `--print-config`** — The printed `PATH` is taken from the shell that ran the command; adjust in the MCP config if `node` or other binaries are not found when the editor spawns the server.
