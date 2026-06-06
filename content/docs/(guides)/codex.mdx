@@ -120,7 +120,7 @@ const sandbox = await client.sandboxes.create({
 // Run Codex with your API key
 await sandbox.process.execute({
   command: "codex 'add error handling to the API routes'",
-  env: { OPENAI_API_KEY: "sk-..." },
+e  env: { OPENAI_API_KEY: process.env.OPENAI_API_KEY },
   cwd: "/home/user/project",
   timeout: 300,
 });

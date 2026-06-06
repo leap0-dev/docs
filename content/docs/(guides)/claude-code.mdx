@@ -108,7 +108,7 @@ const sandbox = await client.sandboxes.create({
 // Run Claude Code with your API key
 await sandbox.process.execute({
   command: "claude 'explain the main function in this project'",
-  env: { ANTHROPIC_API_KEY: "sk-ant-..." },
+  env: { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY },
   cwd: "/home/user/project",
   timeout: 300,
 });

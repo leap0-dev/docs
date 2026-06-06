@@ -4,7 +4,7 @@ description: Run OpenCode inside Leap0 sandboxes.
 slug: guides/opencode
 ---
 
-Run OpenCode, the open source AI coding agent, inside Leap0 sandboxes. You can either bake it into a template or install it at runtime using `process.execute`.
+Run OpenCode, a open-source AI coding agent, inside Leap0 sandboxes. You can either bake it into a template or install it at runtime using `process.execute`.
 
 ## Install at runtime
 
@@ -108,7 +108,7 @@ const sandbox = await client.sandboxes.create({
 // Run OpenCode with your API key
 await sandbox.process.execute({
   command: "opencode 'refactor the database module'",
-  env: { ANTHROPIC_API_KEY: "sk-ant-..." },
+  env: { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY },
   cwd: "/home/user/project",
   timeout: 300,
 });
